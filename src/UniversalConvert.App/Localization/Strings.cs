@@ -80,6 +80,20 @@ namespace UniversalConvert.App.Localization
         public static string DownloadFailed => Get("DownloadFailed");
         public static string Settings => Get("Settings");
         public static string Save => Get("Save");
+        public static string PluginManagerTitle => Get("PluginManagerTitle");
+        public static string PluginNameColumn => Get("PluginNameColumn");
+        public static string VersionColumn => Get("VersionColumn");
+        public static string StatusCompatible => Get("StatusCompatible");
+        public static string StatusAppTooOld => Get("StatusAppTooOld");
+        public static string StatusUnverified => Get("StatusUnverified");
+        public static string ReleaseNotesTitle => Get("ReleaseNotesTitle");
+        public static string ReleaseNotesEmpty => Get("ReleaseNotesEmpty");
+        public static string Plugins => Get("Plugins");
+        public static string About => Get("About");
+        public static string VersionFormat => Get("VersionFormat");
+        public static string AboutDescription => Get("AboutDescription");
+        public static string OpenProject => Get("OpenProject");
+        public static string ThirdPartyText => Get("ThirdPartyText");
 
         private static string Get(string key)
         {

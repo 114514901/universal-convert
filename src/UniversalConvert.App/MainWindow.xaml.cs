@@ -56,6 +56,18 @@ namespace UniversalConvert.App
             }
         }
 
+        private void OnOpenPlugins(object sender, RoutedEventArgs e)
+        {
+            var window = new PluginManagerWindow(_host) { Owner = this };
+            window.ShowDialog();
+        }
+
+        private void OnOpenAbout(object sender, RoutedEventArgs e)
+        {
+            var window = new AboutWindow { Owner = this };
+            window.ShowDialog();
+        }
+
         private void OnOpenSettings(object sender, RoutedEventArgs e)
         {
             var window = new SettingsWindow(_settingsManager) { Owner = this };
@@ -64,15 +76,9 @@ namespace UniversalConvert.App
 
         private void OnViewReleaseNotes(object sender, RoutedEventArgs e)
         {
-            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.Url)) return;
-            try
-            {
-                Process.Start(_updateInfo.Url);
-            }
-            catch
-            {
-                // 忽略打开失败
-            }
+            if (_updateInfo == null) return;
+            var window = new ReleaseNotesWindow(_updateInfo.Version, _updateInfo.Body) { Owner = this };
+            window.ShowDialog();
         }
 
         private async void OnDownloadUpdate(object sender, RoutedEventArgs e)

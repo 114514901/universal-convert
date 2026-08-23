@@ -21,6 +21,15 @@ namespace UniversalConvert.Core.Process
         public abstract string Name { get; }
         public abstract string Description { get; }
 
+        /// <summary>插件版本。派生类实现。</summary>
+        public abstract string Version { get; }
+
+        /// <summary>最低可运行应用版本；默认无限制。</summary>
+        public virtual string MinAppVersion => null;
+
+        /// <summary>最高已知可用应用版本；默认无上限。</summary>
+        public virtual string MaxAppVersion => null;
+
         /// <summary>外部工具名（用于 FindTool），如 "ffmpeg"。</summary>
         protected abstract string ToolName { get; }
 

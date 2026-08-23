@@ -64,6 +64,9 @@ namespace UniversalConvert.Plugin.Kgm
         public string Id => "com.universalconvert.kgm";
         public string Name => "KGM 解密";
         public string Description => "酷狗音乐 .kgm/.kgma 解密（可选转码为其它音频格式）";
+        public string Version => "1.0.0";
+        public string MinAppVersion => null;
+        public string MaxAppVersion => null;
 
         public void Initialize(IPluginContext context)
         {

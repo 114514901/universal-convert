@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -13,6 +12,7 @@ namespace UniversalConvert.App
         public string Version { get; set; }
         public string Url { get; set; }
         public string DownloadUrl { get; set; }
+        public string Body { get; set; }
         public bool IsPrerelease { get; set; }
     }
 
@@ -30,7 +30,7 @@ namespace UniversalConvert.App
         {
             try
             {
-                var current = CurrentVersion();
+                var current = AppVersion.Current;
                 if (current == null) return null;
 
                 bool isDev = channel == "dev" || (channel == "auto" && current.IsPrerelease);
@@ -57,6 +57,7 @@ namespace UniversalConvert.App
                         Version = tag,
                         Url = htmlUrl,
                         DownloadUrl = FindDownloadUrl(obj),
+                        Body = (string)obj["body"],
                         IsPrerelease = obj["prerelease"] != null && (bool)obj["prerelease"]
                     };
                 }
@@ -108,13 +109,6 @@ namespace UniversalConvert.App
                 }
             }
             return null;
-        }
-
-        private static SemVersion CurrentVersion()
-        {
-            var attr = Assembly.GetExecutingAssembly()
-                .GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return SemVersion.Parse(attr?.InformationalVersion);
         }
     }
 }

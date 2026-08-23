@@ -26,6 +26,15 @@ namespace UniversalConvert.Core.Plugins
         /// <summary>插件描述。</summary>
         string Description { get; }
 
+        /// <summary>插件自身版本，如 "1.0.0"。</summary>
+        string Version { get; }
+
+        /// <summary>插件可运行的最低应用版本（SemVer，如 "1.4.0"）；null 表示无限制。</summary>
+        string MinAppVersion { get; }
+
+        /// <summary>插件已知可用的最高应用版本（SemVer）；null 表示无已知上限。</summary>
+        string MaxAppVersion { get; }
+
         /// <summary>
         /// 插件加载后立即调用一次，用于注入宿主环境（工具定位、日志、数据目录等）。
         /// </summary>

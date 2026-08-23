@@ -79,10 +79,14 @@ jobs:
           name: UniversalConvert-Setup
           path: output/*.exe
 
+      - name: Extract changelog
+        shell: pwsh
+        run: python scripts/extract_changelog.py $env:VERSION
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: output/*.exe
-          generate_release_notes: true
+          body_path: changelog_entry.md
           prerelease: ${{ contains(github.ref_name, '-') }}

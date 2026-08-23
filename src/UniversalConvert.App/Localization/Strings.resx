@@ -216,4 +216,46 @@
   <data name="Save" xml:space="preserve">
     <value>保存</value>
   </data>
+  <data name="PluginManagerTitle" xml:space="preserve">
+    <value>扩展管理器</value>
+  </data>
+  <data name="PluginNameColumn" xml:space="preserve">
+    <value>扩展</value>
+  </data>
+  <data name="VersionColumn" xml:space="preserve">
+    <value>版本</value>
+  </data>
+  <data name="StatusCompatible" xml:space="preserve">
+    <value>正常</value>
+  </data>
+  <data name="StatusAppTooOld" xml:space="preserve">
+    <value>应用版本过低（需要 ≥ {0}）</value>
+  </data>
+  <data name="StatusUnverified" xml:space="preserve">
+    <value>未验证（已知最高支持 {0}）</value>
+  </data>
+  <data name="ReleaseNotesTitle" xml:space="preserve">
+    <value>更新内容</value>
+  </data>
+  <data name="ReleaseNotesEmpty" xml:space="preserve">
+    <value>（暂无更新说明）</value>
+  </data>
+  <data name="Plugins" xml:space="preserve">
+    <value>插件</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>关于</value>
+  </data>
+  <data name="VersionFormat" xml:space="preserve">
+    <value>版本 {0}</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>通用格式转换器：支持音视频、图片等格式互转，集成右键菜单与批量转换。</value>
+  </data>
+  <data name="OpenProject" xml:space="preserve">
+    <value>项目主页</value>
+  </data>
+  <data name="ThirdPartyText" xml:space="preserve">
+    <value>包含第三方组件：FFmpeg（GPL）、NCM 解密（MIT）、KGM 解密（反 996 许可证）。</value>
+  </data>
 </root>

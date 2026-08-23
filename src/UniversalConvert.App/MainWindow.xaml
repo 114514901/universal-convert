@@ -41,6 +41,10 @@
         <DockPanel Grid.Row="1" Margin="0,0,0,4">
             <Button Content="{x:Static loc:Strings.Settings}" DockPanel.Dock="Right"
                     Padding="10,3" Click="OnOpenSettings"/>
+            <Button Content="{x:Static loc:Strings.Plugins}" DockPanel.Dock="Right"
+                    Padding="10,3" Margin="0,0,6,0" Click="OnOpenPlugins"/>
+            <Button Content="{x:Static loc:Strings.About}" DockPanel.Dock="Right"
+                    Padding="10,3" Margin="0,0,6,0" Click="OnOpenAbout"/>
             <TextBlock FontSize="20" FontWeight="SemiBold" Text="UniversalConvert" VerticalAlignment="Center"/>
         </DockPanel>
 

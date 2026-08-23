@@ -2,6 +2,17 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.0] - 2026-08-23
+
+### 新增
+- 扩展管理器：展示插件及其版本，按插件声明的 Min/Max 应用版本显示兼容性警告，并展示加载错误
+- 插件版本元数据：IConverterPlugin 增加 Version / MinAppVersion / MaxAppVersion
+- 关于页面（版本、第三方组件声明、项目主页）
+- 更新内容改为应用内弹窗显示
+
+### 变更
+- GitHub Release 正文改用 CHANGELOG 对应版本内容（不再用自动生成的 commit 摘要）
+
 ## [1.4.0] - 2026-08-23
 
 ### 新增
@@ -77,6 +88,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.0]: https://github.com/114514901/universal-convert/releases/tag/v1.5.0
 [1.4.0]: https://github.com/114514901/universal-convert/releases/tag/v1.4.0
 [1.3.1]: https://github.com/114514901/universal-convert/releases/tag/v1.3.1
 [1.3.0]: https://github.com/114514901/universal-convert/releases/tag/v1.3.0

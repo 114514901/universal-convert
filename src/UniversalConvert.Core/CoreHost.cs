@@ -12,10 +12,15 @@ namespace UniversalConvert.Core
     /// </summary>
     public sealed class CoreHost
     {
+        private readonly List<PluginLoadError> _loadErrors = new List<PluginLoadError>();
+
         public AppConfig Config { get; }
         public IList<IConverterPlugin> Plugins { get; }
         public FormatRegistry Registry { get; }
         public ConversionEngine Engine { get; }
+
+        /// <summary>插件加载/初始化过程中的错误（供扩展管理器展示）。</summary>
+        public IReadOnlyList<PluginLoadError> LoadErrors => _loadErrors;
 
         public CoreHost(AppConfig config, string pluginsDirectory, Action<string> log = null)
         {
@@ -24,6 +29,7 @@ namespace UniversalConvert.Core
 
             var loader = new PluginLoader(log);
             Plugins = loader.Load(pluginsDirectory);
+            _loadErrors.AddRange(loader.Errors);
 
             var context = new PluginContext(Config, log);
             foreach (var plugin in Plugins)
@@ -35,6 +41,7 @@ namespace UniversalConvert.Core
                 catch (Exception ex)
                 {
                     log($"Failed to initialize plugin '{plugin.Id}': {ex.Message}");
+                    _loadErrors.Add(new PluginLoadError { File = plugin.Id, Message = ex.Message });
                 }
             }
 

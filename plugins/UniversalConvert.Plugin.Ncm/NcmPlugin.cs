@@ -33,6 +33,9 @@ namespace UniversalConvert.Plugin.Ncm
         public string Id => "com.universalconvert.ncm";
         public string Name => "NCM 解密";
         public string Description => "网易云音乐 .ncm 解密（可选转码为其它音频格式）";
+        public string Version => "1.0.0";
+        public string MinAppVersion => null;
+        public string MaxAppVersion => null;
 
         public void Initialize(IPluginContext context)
         {

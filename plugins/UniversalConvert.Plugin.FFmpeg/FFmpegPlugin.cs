@@ -18,6 +18,7 @@ namespace UniversalConvert.Plugin.FFmpeg
         public override string Id => "com.universalconvert.ffmpeg";
         public override string Name => "FFmpeg";
         public override string Description => "音视频/图片转换，基于 FFmpeg";
+        public override string Version => "1.0.0";
         protected override string ToolName => "ffmpeg";
 
         private static readonly string[] VideoInputs =

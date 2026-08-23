@@ -216,4 +216,46 @@
   <data name="Save" xml:space="preserve">
     <value>Save</value>
   </data>
+  <data name="PluginManagerTitle" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="PluginNameColumn" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="VersionColumn" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="StatusCompatible" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="StatusAppTooOld" xml:space="preserve">
+    <value>App too old (requires ≥ {0})</value>
+  </data>
+  <data name="StatusUnverified" xml:space="preserve">
+    <value>Unverified (known up to {0})</value>
+  </data>
+  <data name="ReleaseNotesTitle" xml:space="preserve">
+    <value>Release notes</value>
+  </data>
+  <data name="ReleaseNotesEmpty" xml:space="preserve">
+    <value>(No release notes available)</value>
+  </data>
+  <data name="Plugins" xml:space="preserve">
+    <value>Extensions</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="VersionFormat" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="AboutDescription" xml:space="preserve">
+    <value>A universal format converter for audio, video and images, with context-menu integration and batch conversion.</value>
+  </data>
+  <data name="OpenProject" xml:space="preserve">
+    <value>Project home</value>
+  </data>
+  <data name="ThirdPartyText" xml:space="preserve">
+    <value>Includes third-party components: FFmpeg (GPL), NCM decrypt (MIT), KGM decrypt (Anti-996).</value>
+  </data>
 </root>
