@@ -5,8 +5,11 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Diagnostics;
@@ -20,16 +23,26 @@ namespace UniversalConvert.App
         private readonly CoreHost _host;
         private readonly string[] _files;
         private readonly string _targetExt;
+        private readonly int _workerThreads;
         private readonly ObservableCollection<BatchItem> _items = new ObservableCollection<BatchItem>();
         private readonly List<string> _outputPaths = new List<string>();
+        private readonly StringBuilder _errorLog = new StringBuilder();
+        private readonly Dispatcher _dispatcher;
+        private readonly object _outputLock = new object();
 
-        public BatchConvertWindow(CoreHost host, string[] files, string targetExt)
+        private double[] _progressByIndex;
+        private int _doneCount;
+        private int _failedCount;
+
+        public BatchConvertWindow(CoreHost host, string[] files, string targetExt, int workerThreads)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
             _host = host;
             _files = files;
             _targetExt = targetExt;
+            _workerThreads = Math.Max(1, workerThreads);
+            _dispatcher = Dispatcher.CurrentDispatcher;
 
             TitleText.Text = Strings.BatchTitle + "  →  ." + targetExt;
 
@@ -45,22 +58,51 @@ namespace UniversalConvert.App
             await RunAsync();
         }
 
-        private async System.Threading.Tasks.Task RunAsync()
+        private async Task RunAsync()
         {
-            int done = 0, failed = 0;
+            _progressByIndex = new double[_files.Length];
+            _doneCount = 0;
+            _failedCount = 0;
 
+            var semaphore = new SemaphoreSlim(_workerThreads);
+            var tasks = new List<Task>();
             for (int i = 0; i < _files.Length; i++)
             {
-                var file = _files[i];
-                var item = _items[i];
-                item.Status = Strings.StatusConverting;
+                int index = i;
+                tasks.Add(ProcessOneAsync(index, semaphore));
+            }
 
-                var entry = _host.Registry.GetEntry(Path.GetExtension(file), _targetExt);
-                if (entry == null)
-                {
-                    item.Status = Strings.StatusSkipped;
-                    continue;
-                }
+            await Task.WhenAll(tasks);
+
+            OverallProgress.Value = 100;
+            SummaryText.Text = string.Format(Strings.BatchSummary, _doneCount, _files.Length, _failedCount);
+            CloseButton.IsEnabled = true;
+
+            if (_outputPaths.Count > 0) OpenFolderButton.Visibility = Visibility.Visible;
+            if (_failedCount > 0)
+            {
+                ErrorLogBox.Text = _errorLog.ToString();
+                ErrorExpander.Visibility = Visibility.Visible;
+                CopyErrorButton.Visibility = Visibility.Visible;
+            }
+        }
+
+        private async Task ProcessOneAsync(int index, SemaphoreSlim semaphore)
+        {
+            var file = _files[index];
+            var item = _items[index];
+
+            var entry = _host.Registry.GetEntry(Path.GetExtension(file), _targetExt);
+            if (entry == null)
+            {
+                RunOnUi(() => item.Status = Strings.StatusSkipped);
+                return;
+            }
+
+            await semaphore.WaitAsync();
+            try
+            {
+                RunOnUi(() => item.Status = Strings.StatusConverting);
 
                 var options = PresetMerger.Merge(entry.Options, entry.Presets, null, null);
                 var request = new ConversionRequest
@@ -72,11 +114,13 @@ namespace UniversalConvert.App
                     Options = options
                 };
 
-                int index = i;
                 var progress = new Progress<ConversionProgress>(p =>
                 {
-                    var frac = (index + (p.Percentage >= 0 ? p.Percentage / 100.0 : 0)) / _files.Length;
-                    OverallProgress.Value = Math.Min(100, frac * 100);
+                    if (p.Percentage >= 0)
+                    {
+                        _progressByIndex[index] = p.Percentage;
+                        UpdateOverallProgress();
+                    }
                     if (!string.IsNullOrEmpty(p.Message))
                     {
                         SummaryText.Text = Path.GetFileName(file) + ": " + p.Message;
@@ -87,39 +131,54 @@ namespace UniversalConvert.App
 
                 if (result.Success)
                 {
-                    item.Status = Strings.StatusDone;
-                    done++;
-                    if (!string.IsNullOrEmpty(result.OutputPath)) _outputPaths.Add(result.OutputPath);
+                    _progressByIndex[index] = 100;
+                    Interlocked.Increment(ref _doneCount);
+                    if (!string.IsNullOrEmpty(result.OutputPath))
+                    {
+                        lock (_outputLock) _outputPaths.Add(result.OutputPath);
+                    }
+                    RunOnUi(() =>
+                    {
+                        item.Status = Strings.StatusDone;
+                        UpdateOverallProgress();
+                    });
                 }
                 else
                 {
                     var raw = result.FullError ?? result.ErrorMessage;
                     var analysis = ErrorParser.Parse(raw);
-                    item.Status = Strings.StatusFailed + ": " + ErrorMessages.GetMessage(analysis.Kind);
-                    failed++;
-                    AppendError(file, analysis, raw);
+                    var message = ErrorMessages.GetMessage(analysis.Kind);
+                    var suggestion = ErrorMessages.GetSuggestion(analysis.Kind);
+
+                    Interlocked.Increment(ref _failedCount);
+                    lock (_outputLock)
+                    {
+                        _errorLog.AppendLine("[" + Path.GetFileName(file) + "] " + message + " — " + suggestion);
+                        _errorLog.AppendLine(raw ?? string.Empty);
+                        _errorLog.AppendLine();
+                    }
+
+                    var statusText = Strings.StatusFailed + ": " + message;
+                    RunOnUi(() => item.Status = statusText);
                 }
             }
-
-            OverallProgress.Value = 100;
-            SummaryText.Text = string.Format(Strings.BatchSummary, done, _files.Length, failed);
-            CloseButton.IsEnabled = true;
-
-            if (_outputPaths.Count > 0) OpenFolderButton.Visibility = Visibility.Visible;
-            if (failed > 0)
+            finally
             {
-                ErrorExpander.Visibility = Visibility.Visible;
-                CopyErrorButton.Visibility = Visibility.Visible;
+                semaphore.Release();
             }
         }
 
-        private void AppendError(string file, ErrorAnalysis analysis, string raw)
+        private void RunOnUi(Action action)
         {
-            ErrorLogBox.AppendText(
-                "[" + Path.GetFileName(file) + "] "
-                + ErrorMessages.GetMessage(analysis.Kind) + " — "
-                + ErrorMessages.GetSuggestion(analysis.Kind)
-                + Environment.NewLine + (raw ?? string.Empty) + Environment.NewLine + Environment.NewLine);
+            if (_dispatcher.CheckAccess()) action();
+            else _dispatcher.Invoke(action);
+        }
+
+        private void UpdateOverallProgress()
+        {
+            double sum = 0;
+            foreach (var p in _progressByIndex) sum += p;
+            OverallProgress.Value = Math.Min(100, _files.Length == 0 ? 0 : sum / _files.Length);
         }
 
         private void OnCopyError(object sender, RoutedEventArgs e)

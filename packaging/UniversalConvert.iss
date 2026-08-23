@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.5.4，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.5.5，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.4"
+#define MyAppVersion "1.5.5"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -61,6 +61,8 @@ english.RestartExplorer=Restart Explorer to apply changes (recommended)
 [Files]
 Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+; 语言卫星程序集（en\...\resources.dll）
+Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
 
