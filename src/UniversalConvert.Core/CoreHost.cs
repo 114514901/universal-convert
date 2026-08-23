@@ -28,8 +28,15 @@ namespace UniversalConvert.Core
             log = log ?? (_ => { });
 
             var loader = new PluginLoader(log);
-            Plugins = loader.Load(pluginsDirectory);
+
+            var builtinPlugins = loader.Load(pluginsDirectory);
             _loadErrors.AddRange(loader.Errors);
+
+            var userPlugins = loader.Load(ConfigStore.UserPluginsDirectory);
+            _loadErrors.AddRange(loader.Errors);
+
+            // 用户目录优先：同 Id 时用户安装的插件覆盖内置插件
+            Plugins = MergePlugins(userPlugins, builtinPlugins);
 
             var context = new PluginContext(Config, log);
             foreach (var plugin in Plugins)
@@ -47,6 +54,26 @@ namespace UniversalConvert.Core
 
             Registry = new FormatRegistry(Plugins);
             Engine = new ConversionEngine(Plugins);
+        }
+
+        private static IList<IConverterPlugin> MergePlugins(
+            IList<IConverterPlugin> first, IList<IConverterPlugin> second)
+        {
+            var result = new List<IConverterPlugin>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var plugin in first)
+            {
+                if (!string.IsNullOrEmpty(plugin.Id) && seen.Add(plugin.Id))
+                    result.Add(plugin);
+            }
+            foreach (var plugin in second)
+            {
+                if (!string.IsNullOrEmpty(plugin.Id) && seen.Add(plugin.Id))
+                    result.Add(plugin);
+            }
+
+            return result;
         }
     }
 }

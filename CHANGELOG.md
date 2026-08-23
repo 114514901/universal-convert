@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.0] - 2026-08-23
+
+### 新增
+- 插件包格式（manifest.json + zip）与用户级插件目录（`%AppData%\UniversalConvert\plugins`，与内置目录合并加载、同 Id 用户优先），为扩展仓库与在线安装打地基
+
 ## [1.6.0] - 2026-08-23
 
 ### 新增
@@ -152,6 +157,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.0]: https://github.com/114514901/universal-convert/releases/tag/v1.7.0
 [1.6.0]: https://github.com/114514901/universal-convert/releases/tag/v1.6.0
 [1.5.10]: https://github.com/114514901/universal-convert/releases/tag/v1.5.10
 [1.5.9]: https://github.com/114514901/universal-convert/releases/tag/v1.5.9

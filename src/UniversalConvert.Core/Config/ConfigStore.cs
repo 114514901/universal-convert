@@ -24,6 +24,9 @@ namespace UniversalConvert.Core.Config
 
         public static string ConfigPath => Path.Combine(ConfigDirectory, ConfigFileName);
 
+        /// <summary>用户级插件目录：%AppData%\UniversalConvert\plugins（在线安装的插件放这里，免管理员）。</summary>
+        public static string UserPluginsDirectory => Path.Combine(ConfigDirectory, "plugins");
+
         public AppConfig Load()
         {
             try
