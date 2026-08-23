@@ -42,6 +42,19 @@ ArchitecturesInstallIn64BitMode=x64
 ; 注册右键菜单需写 HKLM，安装包必须提权
 PrivilegesRequired=admin
 
+[Languages]
+; 中文在前 = 默认语言；语言选择对话框在有多个语言时自动显示
+Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[CustomMessages]
+chinesesimplified.CreateDesktopIcon=创建桌面快捷方式
+chinesesimplified.AdditionalTasks=附加任务：
+chinesesimplified.RegisteringContextMenu=正在注册右键菜单...
+english.CreateDesktopIcon=Create a desktop icon
+english.AdditionalTasks=Additional tasks:
+english.RegisteringContextMenu=Registering context menu...
+
 [Files]
 Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -49,7 +62,7 @@ Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion r
 Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Tasks]
-Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加任务："; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -58,7 +71,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 ; 文件复制完后，调用我们的注册器写 HKLM 右键菜单（继承安装包的管理员权限）
 Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "install"; \
-    Flags: runhidden; StatusMsg: "正在注册右键菜单..."
+    Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"
 
 [UninstallRun]
 ; 卸载时先反注册，再删文件（Inno 会先执行本段再删除文件）

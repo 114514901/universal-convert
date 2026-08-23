@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DropHint" xml:space="preserve">
+    <value>将文件拖到此处，或点击选择</value>
+  </data>
+  <data name="NoFileSelected" xml:space="preserve">
+    <value>未选择文件</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>选择文件...</value>
+  </data>
+  <data name="OutputFormats" xml:space="preserve">
+    <value>可转换的目标格式</value>
+  </data>
+  <data name="Customize" xml:space="preserve">
+    <value>自定义...</value>
+  </data>
+  <data name="Convert" xml:space="preserve">
+    <value>转换</value>
+  </data>
+  <data name="SelectFileDialogTitle" xml:space="preserve">
+    <value>选择要转换的文件</value>
+  </data>
+  <data name="AllFilesFilter" xml:space="preserve">
+    <value>所有文件|*.*</value>
+  </data>
+  <data name="PleaseSelectFormat" xml:space="preserve">
+    <value>请先选择目标格式。</value>
+  </data>
+  <data name="NoParamsMessage" xml:space="preserve">
+    <value>该格式没有可自定义的参数，直接点击“转换”即可。</value>
+  </data>
+  <data name="Preparing" xml:space="preserve">
+    <value>准备中...</value>
+  </data>
+  <data name="ConvertingTitle" xml:space="preserve">
+    <value>转换中</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="OpenOutputFolder" xml:space="preserve">
+    <value>打开输出文件夹</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="ConvertingFormat" xml:space="preserve">
+    <value>正在转换：{0}  →  .{1}</value>
+  </data>
+  <data name="ConvertSucceeded" xml:space="preserve">
+    <value>转换完成（用时 {0:F1} 秒）</value>
+  </data>
+  <data name="ConvertFailedPrefix" xml:space="preserve">
+    <value>转换失败：</value>
+  </data>
+  <data name="CustomizeTitle" xml:space="preserve">
+    <value>自定义转换</value>
+  </data>
+  <data name="Preset" xml:space="preserve">
+    <value>预设：</value>
+  </data>
+  <data name="StartConvert" xml:space="preserve">
+    <value>开始转换</value>
+  </data>
+  <data name="DefaultRecommended" xml:space="preserve">
+    <value>默认（推荐）</value>
+  </data>
+  <data name="TargetFormat" xml:space="preserve">
+    <value>目标格式：{0}  (.{1})</value>
+  </data>
+  <data name="InputFileMissing" xml:space="preserve">
+    <value>输入文件不存在：</value>
+  </data>
+  <data name="UnsupportedConversion" xml:space="preserve">
+    <value>不支持将 {0} 转换为 .{1}</value>
+  </data>
+  <data name="ToolNotInstalled" xml:space="preserve">
+    <value>  [工具未安装]</value>
+  </data>
+</root>

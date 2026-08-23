@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using UniversalConvert.App.Localization;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
 using UniversalConvert.Core.Plugins;
@@ -31,7 +32,7 @@ namespace UniversalConvert.App
             _entry = entry;
 
             FileText.Text = Path.GetFileName(inputPath);
-            FormatText.Text = $"目标格式：{entry.OutputDisplayName}  (.{entry.OutputExtension})";
+            FormatText.Text = string.Format(Strings.TargetFormat, entry.OutputDisplayName, entry.OutputExtension);
 
             BuildPresetCombo();
             BuildOptionControls();
@@ -40,7 +41,7 @@ namespace UniversalConvert.App
 
         private void BuildPresetCombo()
         {
-            PresetCombo.Items.Add("默认（推荐）");
+            PresetCombo.Items.Add(Strings.DefaultRecommended);
             foreach (var preset in _entry.Presets)
             {
                 PresetCombo.Items.Add(preset.Name);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
@@ -31,8 +32,8 @@ namespace UniversalConvert.App
         {
             var dialog = new OpenFileDialog
             {
-                Title = "选择要转换的文件",
-                Filter = "所有文件|*.*"
+                Title = Strings.SelectFileDialogTitle,
+                Filter = Strings.AllFilesFilter
             };
             if (dialog.ShowDialog() == true)
             {
@@ -69,7 +70,7 @@ namespace UniversalConvert.App
             OutputList.ItemsSource = _availableConversions.Select(c =>
                 $"{c.OutputDisplayName}  (.{c.OutputExtension})" +
                 (c.HasCustomizableOptions ? "  ▸" : "") +
-                (c.IsAvailable ? "" : "  [工具未安装]")).ToList();
+                (c.IsAvailable ? "" : Strings.ToolNotInstalled)).ToList();
 
             OutputList.SelectedIndex = -1;
             CustomizeButton.IsEnabled = false;
@@ -86,14 +87,14 @@ namespace UniversalConvert.App
         {
             if (OutputList.SelectedIndex < 0 || _selectedFile == null)
             {
-                MessageBox.Show("请先选择目标格式。", "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Strings.PleaseSelectFormat, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             var entry = _availableConversions[OutputList.SelectedIndex];
             if (!entry.HasCustomizableOptions)
             {
-                MessageBox.Show("该格式没有可自定义的参数，直接点击“转换”即可。",
+                MessageBox.Show(Strings.NoParamsMessage,
                     "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
@@ -106,7 +107,7 @@ namespace UniversalConvert.App
         {
             if (OutputList.SelectedIndex < 0 || _selectedFile == null)
             {
-                MessageBox.Show("请先选择目标格式。", "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Strings.PleaseSelectFormat, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 

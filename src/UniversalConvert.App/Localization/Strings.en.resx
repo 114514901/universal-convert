@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DropHint" xml:space="preserve">
+    <value>Drop a file here, or click to select</value>
+  </data>
+  <data name="NoFileSelected" xml:space="preserve">
+    <value>No file selected</value>
+  </data>
+  <data name="SelectFile" xml:space="preserve">
+    <value>Select file...</value>
+  </data>
+  <data name="OutputFormats" xml:space="preserve">
+    <value>Available output formats</value>
+  </data>
+  <data name="Customize" xml:space="preserve">
+    <value>Customize...</value>
+  </data>
+  <data name="Convert" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="SelectFileDialogTitle" xml:space="preserve">
+    <value>Select a file to convert</value>
+  </data>
+  <data name="AllFilesFilter" xml:space="preserve">
+    <value>All files|*.*</value>
+  </data>
+  <data name="PleaseSelectFormat" xml:space="preserve">
+    <value>Please select a target format first.</value>
+  </data>
+  <data name="NoParamsMessage" xml:space="preserve">
+    <value>This format has no customizable options; just click Convert.</value>
+  </data>
+  <data name="Preparing" xml:space="preserve">
+    <value>Preparing...</value>
+  </data>
+  <data name="ConvertingTitle" xml:space="preserve">
+    <value>Converting</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="OpenOutputFolder" xml:space="preserve">
+    <value>Open output folder</value>
+  </data>
+  <data name="Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ConvertingFormat" xml:space="preserve">
+    <value>Converting: {0}  →  .{1}</value>
+  </data>
+  <data name="ConvertSucceeded" xml:space="preserve">
+    <value>Converted (took {0:F1} s)</value>
+  </data>
+  <data name="ConvertFailedPrefix" xml:space="preserve">
+    <value>Conversion failed: </value>
+  </data>
+  <data name="CustomizeTitle" xml:space="preserve">
+    <value>Customize conversion</value>
+  </data>
+  <data name="Preset" xml:space="preserve">
+    <value>Preset:</value>
+  </data>
+  <data name="StartConvert" xml:space="preserve">
+    <value>Start conversion</value>
+  </data>
+  <data name="DefaultRecommended" xml:space="preserve">
+    <value>Default (recommended)</value>
+  </data>
+  <data name="TargetFormat" xml:space="preserve">
+    <value>Target format: {0}  (.{1})</value>
+  </data>
+  <data name="InputFileMissing" xml:space="preserve">
+    <value>Input file does not exist: </value>
+  </data>
+  <data name="UnsupportedConversion" xml:space="preserve">
+    <value>Cannot convert {0} to .{1}</value>
+  </data>
+  <data name="ToolNotInstalled" xml:space="preserve">
+    <value>  [tool not installed]</value>
+  </data>
+</root>

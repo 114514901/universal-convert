@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows;
+using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Config;
 using UniversalConvert.Core.Engine;
@@ -43,7 +44,7 @@ namespace UniversalConvert.App
             var inputPath = parsed.InputPath;
             if (!File.Exists(inputPath))
             {
-                MessageBox.Show("输入文件不存在：" + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Strings.InputFileMissing + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(1);
                 return;
             }
@@ -53,7 +54,7 @@ namespace UniversalConvert.App
             if (entry == null)
             {
                 MessageBox.Show(
-                    $"不支持将 {inputExt} 转换为 .{parsed.OutputExtension}",
+                    string.Format(Strings.UnsupportedConversion, inputExt, parsed.OutputExtension),
                     "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
                 Shutdown(1);
                 return;
@@ -81,7 +82,7 @@ namespace UniversalConvert.App
             var inputPath = parsed.InputPath;
             if (!File.Exists(inputPath))
             {
-                MessageBox.Show("输入文件不存在：" + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Strings.InputFileMissing + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(1);
                 return;
             }
@@ -91,7 +92,7 @@ namespace UniversalConvert.App
             if (entry == null)
             {
                 MessageBox.Show(
-                    $"不支持将 {inputExt} 转换为 .{parsed.OutputExtension}",
+                    string.Format(Strings.UnsupportedConversion, inputExt, parsed.OutputExtension),
                     "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
                 Shutdown(1);
                 return;

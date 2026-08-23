@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows;
+using UniversalConvert.App.Localization;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
 
@@ -22,7 +23,7 @@ namespace UniversalConvert.App
             _request = request;
 
             var fileName = Path.GetFileName(request.InputPath);
-            TitleText.Text = $"正在转换：{fileName}  →  .{request.OutputExtension.TrimStart('.')}";
+            TitleText.Text = string.Format(Strings.ConvertingFormat, fileName, request.OutputExtension.TrimStart('.'));
         }
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -55,13 +56,13 @@ namespace UniversalConvert.App
             {
                 ProgressBar.IsIndeterminate = false;
                 ProgressBar.Value = 100;
-                StatusText.Text = $"转换完成（用时 {_result.Duration.TotalSeconds:F1} 秒）";
+                StatusText.Text = string.Format(Strings.ConvertSucceeded, _result.Duration.TotalSeconds);
                 OpenFolderButton.Visibility = Visibility.Visible;
-                CloseButton.Content = "完成";
+                CloseButton.Content = Strings.Done;
             }
             else
             {
-                StatusText.Text = "转换失败：" + _result.ErrorMessage;
+                StatusText.Text = Strings.ConvertFailedPrefix + _result.ErrorMessage;
                 OpenFolderButton.Visibility = Visibility.Collapsed;
             }
         }

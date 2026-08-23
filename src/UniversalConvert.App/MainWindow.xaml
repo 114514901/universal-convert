@@ -1,6 +1,7 @@
 <Window x:Class="UniversalConvert.App.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="UniversalConvert" Height="520" Width="560"
         WindowStartupLocation="CenterScreen"
         AllowDrop="True" Drop="OnDrop" DragOver="OnDragOver">
@@ -18,15 +19,15 @@
         <Border Grid.Row="1" BorderBrush="#BBBBBB" BorderThickness="1" CornerRadius="6"
                 Background="#F7F7F7" Padding="16">
             <StackPanel>
-                <TextBlock Text="将文件拖到此处，或点击选择" Foreground="#666666" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="SelectedFileText" Text="未选择文件" FontWeight="SemiBold"
+                <TextBlock Text="{x:Static loc:Strings.DropHint}" Foreground="#666666" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="SelectedFileText" Text="{x:Static loc:Strings.NoFileSelected}" FontWeight="SemiBold"
                            HorizontalAlignment="Center" Margin="0,8,0,0" TextWrapping="Wrap"/>
-                <Button Content="选择文件..." HorizontalAlignment="Center" Margin="0,12,0,0"
+                <Button Content="{x:Static loc:Strings.SelectFile}" HorizontalAlignment="Center" Margin="0,12,0,0"
                         Padding="16,6" Click="OnSelectFile"/>
             </StackPanel>
         </Border>
 
-        <GroupBox Grid.Row="2" Header="可转换的目标格式" Margin="0,12,0,0">
+        <GroupBox Grid.Row="2" Header="{x:Static loc:Strings.OutputFormats}" Margin="0,12,0,0">
             <ListBox x:Name="OutputList" SelectionMode="Single"
                      HorizontalContentAlignment="Stretch"
                      SelectionChanged="OnOutputSelectionChanged"/>
@@ -34,9 +35,9 @@
 
         <Grid Grid.Row="3" Margin="0,12,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="CustomizeButton" Content="自定义..." Height="36" FontSize="14"
+                <Button x:Name="CustomizeButton" Content="{x:Static loc:Strings.Customize}" Height="36" FontSize="14"
                         Width="110" Margin="0,0,8,0" IsEnabled="False" Click="OnCustomize"/>
-                <Button x:Name="ConvertButton" Content="转换" Height="36" FontSize="14"
+                <Button x:Name="ConvertButton" Content="{x:Static loc:Strings.Convert}" Height="36" FontSize="14"
                         Width="120" IsEnabled="False" Click="OnConvert"/>
             </StackPanel>
         </Grid>
