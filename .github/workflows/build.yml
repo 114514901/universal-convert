@@ -47,6 +47,7 @@ jobs:
           Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\SharpShell.dll" "dist\" -Force
           Copy-Item "src\UniversalConvert.Installer\bin\Release\net48\UniversalConvert.Installer.exe" "dist\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.FFmpeg\bin\Release\net48\UniversalConvert.Plugin.FFmpeg.dll" "dist\plugins\" -Force
+          Copy-Item "plugins\UniversalConvert.Plugin.Ncm\bin\Release\net48\UniversalConvert.Plugin.Ncm.dll" "dist\plugins\" -Force
 
       - name: Install Inno Setup
         shell: pwsh

@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -16,6 +18,7 @@ namespace UniversalConvert.App
         private readonly CoreHost _host;
         private string _selectedFile;
         private ConversionEntry[] _availableConversions = new ConversionEntry[0];
+        private UpdateInfo _updateInfo;
 
         public MainWindow(CoreHost host, string[] initialFiles = null)
         {
@@ -25,6 +28,47 @@ namespace UniversalConvert.App
             if (initialFiles != null && initialFiles.Length > 0 && File.Exists(initialFiles[0]))
             {
                 SelectFile(initialFiles[0]);
+            }
+        }
+
+        private async void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            if (IsAdministrator())
+            {
+                AdminBanner.Visibility = Visibility.Visible;
+            }
+
+            _updateInfo = await UpdateChecker.CheckAsync();
+            if (_updateInfo != null)
+            {
+                UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, _updateInfo.Version);
+                UpdateBanner.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void OnDownloadUpdate(object sender, RoutedEventArgs e)
+        {
+            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.Url)) return;
+            try
+            {
+                Process.Start(_updateInfo.Url);
+            }
+            catch
+            {
+                // 忽略打开失败
+            }
+        }
+
+        private static bool IsAdministrator()
+        {
+            try
+            {
+                var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch
+            {
+                return false;
             }
         }
 

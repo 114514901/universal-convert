@@ -39,6 +39,26 @@ namespace UniversalConvert.App.Localization
         public static string InputFileMissing => Get("InputFileMissing");
         public static string UnsupportedConversion => Get("UnsupportedConversion");
         public static string ToolNotInstalled => Get("ToolNotInstalled");
+        public static string AdminWarning => Get("AdminWarning");
+        public static string Retry => Get("Retry");
+        public static string CopyError => Get("CopyError");
+        public static string ErrorDetail => Get("ErrorDetail");
+        public static string ErrorUnknown => Get("ErrorUnknown");
+        public static string ErrorUnknownSuggestion => Get("ErrorUnknownSuggestion");
+        public static string ErrorToolNotFound => Get("ErrorToolNotFound");
+        public static string ErrorToolNotFoundSuggestion => Get("ErrorToolNotFoundSuggestion");
+        public static string ErrorInputFileMissing => Get("ErrorInputFileMissing");
+        public static string ErrorInputFileMissingSuggestion => Get("ErrorInputFileMissingSuggestion");
+        public static string ErrorPermissionDenied => Get("ErrorPermissionDenied");
+        public static string ErrorPermissionDeniedSuggestion => Get("ErrorPermissionDeniedSuggestion");
+        public static string ErrorUnknownEncoder => Get("ErrorUnknownEncoder");
+        public static string ErrorUnknownEncoderSuggestion => Get("ErrorUnknownEncoderSuggestion");
+        public static string ErrorInvalidInput => Get("ErrorInvalidInput");
+        public static string ErrorInvalidInputSuggestion => Get("ErrorInvalidInputSuggestion");
+        public static string ErrorNoSpaceLeft => Get("ErrorNoSpaceLeft");
+        public static string ErrorNoSpaceLeftSuggestion => Get("ErrorNoSpaceLeftSuggestion");
+        public static string UpdateAvailable => Get("UpdateAvailable");
+        public static string DownloadUpdate => Get("DownloadUpdate");
 
         private static string Get(string key)
         {

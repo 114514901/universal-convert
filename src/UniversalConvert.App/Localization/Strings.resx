@@ -93,4 +93,64 @@
   <data name="ToolNotInstalled" xml:space="preserve">
     <value>  [工具未安装]</value>
   </data>
+  <data name="AdminWarning" xml:space="preserve">
+    <value>当前以管理员身份运行：Windows 会禁用从资源管理器拖放文件，建议以普通权限运行。</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>重试</value>
+  </data>
+  <data name="CopyError" xml:space="preserve">
+    <value>复制报错</value>
+  </data>
+  <data name="ErrorDetail" xml:space="preserve">
+    <value>详细信息</value>
+  </data>
+  <data name="ErrorUnknown" xml:space="preserve">
+    <value>转换失败</value>
+  </data>
+  <data name="ErrorUnknownSuggestion" xml:space="preserve">
+    <value>请查看下方详细信息。</value>
+  </data>
+  <data name="ErrorToolNotFound" xml:space="preserve">
+    <value>未找到所需工具</value>
+  </data>
+  <data name="ErrorToolNotFoundSuggestion" xml:space="preserve">
+    <value>请安装对应工具，或在设置中配置其路径。</value>
+  </data>
+  <data name="ErrorInputFileMissing" xml:space="preserve">
+    <value>找不到输入文件</value>
+  </data>
+  <data name="ErrorInputFileMissingSuggestion" xml:space="preserve">
+    <value>请检查文件路径是否正确，文件是否被移动或删除。</value>
+  </data>
+  <data name="ErrorPermissionDenied" xml:space="preserve">
+    <value>没有写入权限</value>
+  </data>
+  <data name="ErrorPermissionDeniedSuggestion" xml:space="preserve">
+    <value>请检查输出目录是否有写入权限，或尝试以普通权限运行。</value>
+  </data>
+  <data name="ErrorUnknownEncoder" xml:space="preserve">
+    <value>编码器不可用</value>
+  </data>
+  <data name="ErrorUnknownEncoderSuggestion" xml:space="preserve">
+    <value>缺少所需编码器（如 libx264）。请安装完整版 FFmpeg（GPL 构建），或更换其他编码器。</value>
+  </data>
+  <data name="ErrorInvalidInput" xml:space="preserve">
+    <value>输入文件无效或已损坏</value>
+  </data>
+  <data name="ErrorInvalidInputSuggestion" xml:space="preserve">
+    <value>请确认文件完整、格式正确且未被加密。</value>
+  </data>
+  <data name="ErrorNoSpaceLeft" xml:space="preserve">
+    <value>磁盘空间不足</value>
+  </data>
+  <data name="ErrorNoSpaceLeftSuggestion" xml:space="preserve">
+    <value>请清理磁盘空间后重试。</value>
+  </data>
+  <data name="UpdateAvailable" xml:space="preserve">
+    <value>发现新版本 {0}，点击下载更新。</value>
+  </data>
+  <data name="DownloadUpdate" xml:space="preserve">
+    <value>下载更新</value>
+  </data>
 </root>

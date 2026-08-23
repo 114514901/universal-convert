@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using UniversalConvert.App.Localization;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
 
@@ -15,6 +16,7 @@ namespace UniversalConvert.App
         private readonly ConversionRequest _request;
         private CancellationTokenSource _cts;
         private ConversionResult _result;
+        private string _fullErrorText;
 
         public ConvertWindow(ConversionEngine engine, ConversionRequest request)
         {
@@ -28,7 +30,20 @@ namespace UniversalConvert.App
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            await RunAsync();
+        }
+
+        private async void OnRetry(object sender, RoutedEventArgs e)
+        {
+            await RunAsync();
+        }
+
+        private async System.Threading.Tasks.Task RunAsync()
+        {
+            ResetUiForRun();
+
             _cts = new CancellationTokenSource();
+            var token = _cts.Token;
 
             var progress = new Progress<ConversionProgress>(p =>
             {
@@ -43,8 +58,23 @@ namespace UniversalConvert.App
                 }
             });
 
-            _result = await _engine.ConvertAsync(_request, progress, _cts.Token);
+            _result = await _engine.ConvertAsync(_request, progress, token);
             ShowResult();
+        }
+
+        private void ResetUiForRun()
+        {
+            StatusText.Text = Strings.Preparing;
+            SuggestionText.Visibility = Visibility.Collapsed;
+            DetailsExpander.Visibility = Visibility.Collapsed;
+            DetailsBox.Text = string.Empty;
+            RetryButton.Visibility = Visibility.Collapsed;
+            CopyErrorButton.Visibility = Visibility.Collapsed;
+            OpenFolderButton.Visibility = Visibility.Collapsed;
+            CancelButton.Visibility = Visibility.Visible;
+            CloseButton.Visibility = Visibility.Collapsed;
+            ProgressBar.IsIndeterminate = true;
+            ProgressBar.Value = 0;
         }
 
         private void ShowResult()
@@ -62,8 +92,40 @@ namespace UniversalConvert.App
             }
             else
             {
-                StatusText.Text = Strings.ConvertFailedPrefix + _result.ErrorMessage;
-                OpenFolderButton.Visibility = Visibility.Collapsed;
+                var raw = _result.FullError ?? _result.ErrorMessage;
+                var analysis = ErrorParser.Parse(raw);
+
+                _fullErrorText = BuildFullErrorText(analysis, raw);
+
+                StatusText.Text = ErrorMessages.GetMessage(analysis.Kind);
+                SuggestionText.Text = ErrorMessages.GetSuggestion(analysis.Kind);
+                SuggestionText.Visibility = Visibility.Visible;
+
+                DetailsBox.Text = raw ?? string.Empty;
+                DetailsExpander.Visibility = Visibility.Visible;
+
+                RetryButton.Visibility = Visibility.Visible;
+                CopyErrorButton.Visibility = Visibility.Visible;
+                CloseButton.Content = Strings.Close;
+            }
+        }
+
+        private string BuildFullErrorText(ErrorAnalysis analysis, string raw)
+        {
+            var friendly = ErrorMessages.GetMessage(analysis.Kind);
+            var suggestion = ErrorMessages.GetSuggestion(analysis.Kind);
+            return friendly + "\n" + suggestion + "\n\n" + (raw ?? string.Empty);
+        }
+
+        private void OnCopyError(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(_fullErrorText ?? string.Empty);
+            }
+            catch
+            {
+                // 剪贴板可能被占用
             }
         }
 

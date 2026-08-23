@@ -79,12 +79,18 @@ namespace UniversalConvert.Core.Process
                     ? runResult.StandardOutput
                     : runResult.StandardError;
                 return ConversionResult.Failed(
-                    $"工具 '{ToolName}' 返回错误码 {runResult.ExitCode}：{Truncate(detail)}", elapsed);
+                    $"工具 '{ToolName}' 返回错误码 {runResult.ExitCode}：{Truncate(detail)}",
+                    elapsed,
+                    detail,
+                    runResult.ExitCode);
             }
 
             if (!File.Exists(outputPath))
             {
-                return ConversionResult.Failed("转换未产生输出文件", elapsed);
+                var detail = string.IsNullOrEmpty(runResult.StandardError)
+                    ? runResult.StandardOutput
+                    : runResult.StandardError;
+                return ConversionResult.Failed("转换未产生输出文件", elapsed, detail, runResult.ExitCode);
             }
 
             return ConversionResult.Succeeded(outputPath, elapsed);
