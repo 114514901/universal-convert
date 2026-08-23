@@ -3,7 +3,11 @@ name: build
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -18,8 +22,7 @@ jobs:
       - name: Build
         run: msbuild UniversalConvert.sln /p:Configuration=Release /restore /m
 
-      # 构建时拉取 ffmpeg 并打入安装包（注意：此处用 GPL 版以支持默认的 libx264 编码；
-      # 若对外分发需遵守 GPL，或改用 gyan.dev 的 "essentials"(LGPL) 版并调整默认编码器）
+      # 构建时拉取 ffmpeg 并打入安装包（GPL 版以支持默认 libx264；对外分发需遵守 GPL）
       - name: Download FFmpeg
         shell: pwsh
         run: |
@@ -50,12 +53,24 @@ jobs:
         run: choco install innosetup -y --no-progress
 
       - name: Compile installer
-        shell: cmd
+        shell: pwsh
         working-directory: packaging
-        run: "\"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe\" UniversalConvert.iss"
+        run: |
+          $ver = "1.0.0"
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $ver = $env:GITHUB_REF_NAME.TrimStart("v")
+          }
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DMyAppVersion=$ver" "UniversalConvert.iss"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: UniversalConvert-Setup
           path: output/*.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: output/*.exe
+          generate_release_notes: true
