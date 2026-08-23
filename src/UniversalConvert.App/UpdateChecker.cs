@@ -50,7 +50,7 @@ namespace UniversalConvert.App
                     if (string.IsNullOrEmpty(tag)) return null;
 
                     var latest = SemVersion.Parse(tag);
-                    if (latest == null || latest <= current) return null;
+                    if (latest == null || latest.CompareTo(current) <= 0) return null;
 
                     return new UpdateInfo
                     {
