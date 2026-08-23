@@ -21,34 +21,43 @@ namespace UniversalConvert.App
     /// <summary>根据插件的版本约束（Min/MaxAppVersion）判断与当前应用的兼容性。</summary>
     public static class PluginManager
     {
-        public static IList<PluginInfo> Inspect(CoreHost host)
+        /// <summary>根据 min/max 应用版本判断与当前应用的兼容性（供已加载插件与扩展中心共用）。</summary>
+        public static PluginCompatibility CheckCompatibility(string minAppVersion, string maxAppVersion)
         {
             var app = AppVersion.Current;
+
+            if (!string.IsNullOrEmpty(minAppVersion))
+            {
+                var min = SemVersion.Parse(minAppVersion);
+                if (min != null && app != null && app.CompareTo(min) < 0)
+                {
+                    return PluginCompatibility.AppTooOld;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(maxAppVersion))
+            {
+                var max = SemVersion.Parse(maxAppVersion);
+                if (max != null && app != null && app.CompareTo(max) > 0)
+                {
+                    return PluginCompatibility.Unverified;
+                }
+            }
+
+            return PluginCompatibility.Compatible;
+        }
+
+        public static IList<PluginInfo> Inspect(CoreHost host)
+        {
             var result = new List<PluginInfo>();
 
             foreach (var plugin in host.Plugins)
             {
-                var info = new PluginInfo { Plugin = plugin, Compatibility = PluginCompatibility.Compatible };
-
-                if (!string.IsNullOrEmpty(plugin.MinAppVersion))
+                result.Add(new PluginInfo
                 {
-                    var min = SemVersion.Parse(plugin.MinAppVersion);
-                    if (min != null && app != null && app.CompareTo(min) < 0)
-                    {
-                        info.Compatibility = PluginCompatibility.AppTooOld;
-                    }
-                }
-
-                if (info.Compatibility == PluginCompatibility.Compatible && !string.IsNullOrEmpty(plugin.MaxAppVersion))
-                {
-                    var max = SemVersion.Parse(plugin.MaxAppVersion);
-                    if (max != null && app != null && app.CompareTo(max) > 0)
-                    {
-                        info.Compatibility = PluginCompatibility.Unverified;
-                    }
-                }
-
-                result.Add(info);
+                    Plugin = plugin,
+                    Compatibility = CheckCompatibility(plugin.MinAppVersion, plugin.MaxAppVersion)
+                });
             }
 
             return result;

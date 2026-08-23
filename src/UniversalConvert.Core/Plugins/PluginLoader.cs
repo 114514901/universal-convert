@@ -38,7 +38,15 @@ namespace UniversalConvert.Core.Plugins
                 return result;
             }
 
-            foreach (var dll in Directory.GetFiles(pluginsDirectory, "*.dll"))
+            // 顶层 + 一层子目录（用户插件每个一个子目录，如 plugins\Pandoc\PandocPlugin.dll）
+            var dlls = new List<string>();
+            dlls.AddRange(Directory.GetFiles(pluginsDirectory, "*.dll"));
+            foreach (var subdir in Directory.GetDirectories(pluginsDirectory))
+            {
+                dlls.AddRange(Directory.GetFiles(subdir, "*.dll"));
+            }
+
+            foreach (var dll in dlls)
             {
                 try
                 {

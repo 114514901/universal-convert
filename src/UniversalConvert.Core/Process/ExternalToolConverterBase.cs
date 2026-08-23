@@ -33,6 +33,28 @@ namespace UniversalConvert.Core.Process
         /// <summary>外部工具名（用于 FindTool），如 "ffmpeg"。</summary>
         protected abstract string ToolName { get; }
 
+        /// <summary>
+        /// 定位外部工具：优先插件自带（{插件DLL目录}\tools\{工具}.exe），否则走应用上下文。
+        /// </summary>
+        protected string FindTool()
+        {
+            try
+            {
+                var pluginDir = Path.GetDirectoryName(GetType().Assembly.Location);
+                if (!string.IsNullOrEmpty(pluginDir))
+                {
+                    var local = Path.Combine(pluginDir, "tools", ToolName + ".exe");
+                    if (File.Exists(local)) return local;
+                }
+            }
+            catch
+            {
+                // 忽略
+            }
+
+            return Context != null ? Context.FindTool(ToolName) : null;
+        }
+
         public virtual void Initialize(IPluginContext context)
         {
             Context = context;
@@ -42,7 +64,7 @@ namespace UniversalConvert.Core.Process
 
         public virtual bool IsToolAvailable()
         {
-            return Context != null && !string.IsNullOrEmpty(Context.FindTool(ToolName));
+            return !string.IsNullOrEmpty(FindTool());
         }
 
         public virtual async Task<ConversionResult> ConvertAsync(
@@ -52,7 +74,7 @@ namespace UniversalConvert.Core.Process
         {
             var started = DateTime.UtcNow;
 
-            var tool = Context.FindTool(ToolName);
+            var tool = FindTool();
             if (string.IsNullOrEmpty(tool))
             {
                 return ConversionResult.Failed($"未找到工具 '{ToolName}'", DateTime.UtcNow - started);

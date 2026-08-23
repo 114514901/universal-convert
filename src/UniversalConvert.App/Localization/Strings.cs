@@ -106,6 +106,20 @@ namespace UniversalConvert.App.Localization
         public static string Mono => Get("Mono");
         public static string Stereo => Get("Stereo");
         public static string ChannelsFormat => Get("ChannelsFormat");
+        public static string ExtensionsCenter => Get("ExtensionsCenter");
+        public static string Refresh => Get("Refresh");
+        public static string Install => Get("Install");
+        public static string Update => Get("Update");
+        public static string Uninstall => Get("Uninstall");
+        public static string InstalledVersionColumn => Get("InstalledVersionColumn");
+        public static string InstalledVersionFormat => Get("InstalledVersionFormat");
+        public static string NotInstalled => Get("NotInstalled");
+        public static string InstallDone => Get("InstallDone");
+        public static string InstallFailed => Get("InstallFailed");
+        public static string Installing => Get("Installing");
+        public static string UninstallConfirm => Get("UninstallConfirm");
+        public static string LoadingExtensions => Get("LoadingExtensions");
+        public static string LoadExtensionsFailed => Get("LoadExtensionsFailed");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

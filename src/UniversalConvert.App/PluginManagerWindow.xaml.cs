@@ -62,6 +62,12 @@ namespace UniversalConvert.App
         {
             Close();
         }
+
+        private void OnOpenExtensions(object sender, RoutedEventArgs e)
+        {
+            var window = new ExtensionCenterWindow { Owner = this };
+            window.ShowDialog();
+        }
     }
 
     public class PluginRow

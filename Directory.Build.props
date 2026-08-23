@@ -1,8 +1,9 @@
 <Project>
-  <!-- 全局统一版本源：所有程序集共享。发新版本时改这里 + 打对应 tag 即可。 -->
+  <!-- 全局统一版本源。AssemblyVersion 保持稳定（1.0.0.0），保证外部插件二进制兼容；
+       实际版本看 Version（=InformationalVersion）与 FileVersion。 -->
   <PropertyGroup>
-    <Version>1.7.2</Version>
-    <AssemblyVersion>1.7.2.0</AssemblyVersion>
-    <FileVersion>1.7.2.0</FileVersion>
+    <Version>1.7.3</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.7.3.0</FileVersion>
   </PropertyGroup>
 </Project>

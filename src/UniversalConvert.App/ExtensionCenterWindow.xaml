@@ -1,0 +1,47 @@
+<Window x:Class="UniversalConvert.App.ExtensionCenterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
+        Title="{x:Static loc:Strings.ExtensionsCenter}" Height="520" Width="700"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="380" MinWidth="520"
+        Loaded="OnLoaded">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="DescText" Grid.Row="0" TextWrapping="Wrap" Foreground="#666666" Margin="0,0,0,8"/>
+
+        <ListView x:Name="ExtensionList" Grid.Row="1" SelectionChanged="OnSelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="{x:Static loc:Strings.PluginNameColumn}" Width="160"
+                                    DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="{x:Static loc:Strings.VersionColumn}" Width="80"
+                                    DisplayMemberBinding="{Binding Version}"/>
+                    <GridViewColumn Header="{x:Static loc:Strings.InstalledVersionColumn}" Width="110"
+                                    DisplayMemberBinding="{Binding InstalledText}"/>
+                    <GridViewColumn Header="{x:Static loc:Strings.StatusColumn}" Width="260"
+                                    DisplayMemberBinding="{Binding CompatibilityText}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <StackPanel Grid.Row="2" Margin="0,8,0,0">
+            <ProgressBar x:Name="Progress" Height="8" Minimum="0" Maximum="100" Visibility="Collapsed"/>
+            <TextBlock x:Name="StatusText" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="#555555"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="{x:Static loc:Strings.Refresh}" Padding="14,6" Click="OnRefresh" Margin="0,0,8,0"/>
+            <Button x:Name="InstallButton" Content="{x:Static loc:Strings.Install}" Padding="14,6"
+                    IsEnabled="False" Click="OnInstall" Margin="0,0,8,0"/>
+            <Button x:Name="UninstallButton" Content="{x:Static loc:Strings.Uninstall}" Padding="14,6"
+                    IsEnabled="False" Click="OnUninstall" Margin="0,0,8,0"/>
+            <Button Content="{x:Static loc:Strings.Close}" Padding="14,6" Click="OnClose"/>
+        </StackPanel>
+    </Grid>
+</Window>

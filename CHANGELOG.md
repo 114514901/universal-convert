@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.3] - 2026-08-23
+
+### 新增
+- 扩展中心：浏览扩展仓库、在线安装/更新/卸载扩展（含兼容性提示与下载进度）
+- 插件可随包分发工具（`tools\` 目录自动定位）、插件目录支持子目录
+- 新建公开扩展仓库 `universal-convert-extensions`，内置 Pandoc 文档转换插件
+
+### 变更
+- AssemblyVersion 稳定化为 1.0.0.0，保证外部插件二进制兼容
+
 ## [1.7.2] - 2026-08-23
 
 ### 修复
@@ -170,6 +180,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.3]: https://github.com/114514901/universal-convert/releases/tag/v1.7.3
 [1.7.2]: https://github.com/114514901/universal-convert/releases/tag/v1.7.2
 [1.7.1]: https://github.com/114514901/universal-convert/releases/tag/v1.7.1
 [1.7.0]: https://github.com/114514901/universal-convert/releases/tag/v1.7.0

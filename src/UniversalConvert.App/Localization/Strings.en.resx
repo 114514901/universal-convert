@@ -336,4 +336,46 @@
   <data name="ChannelsFormat" xml:space="preserve">
     <value>{0} channels</value>
   </data>
+  <data name="ExtensionsCenter" xml:space="preserve">
+    <value>Extension center</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="InstalledVersionColumn" xml:space="preserve">
+    <value>Installed version</value>
+  </data>
+  <data name="InstalledVersionFormat" xml:space="preserve">
+    <value>Installed {0}</value>
+  </data>
+  <data name="NotInstalled" xml:space="preserve">
+    <value>Not installed</value>
+  </data>
+  <data name="InstallDone" xml:space="preserve">
+    <value>Installed. Restart the app to take effect.</value>
+  </data>
+  <data name="InstallFailed" xml:space="preserve">
+    <value>Install failed: {0}</value>
+  </data>
+  <data name="Installing" xml:space="preserve">
+    <value>Installing...</value>
+  </data>
+  <data name="UninstallConfirm" xml:space="preserve">
+    <value>Uninstall {0}?</value>
+  </data>
+  <data name="LoadingExtensions" xml:space="preserve">
+    <value>Loading extensions...</value>
+  </data>
+  <data name="LoadExtensionsFailed" xml:space="preserve">
+    <value>Failed to load extensions: {0}</value>
+  </data>
 </root>
