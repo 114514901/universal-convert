@@ -327,4 +327,13 @@
   <data name="Volume" xml:space="preserve">
     <value>音量</value>
   </data>
+  <data name="Mono" xml:space="preserve">
+    <value>单声道</value>
+  </data>
+  <data name="Stereo" xml:space="preserve">
+    <value>立体声</value>
+  </data>
+  <data name="ChannelsFormat" xml:space="preserve">
+    <value>{0} 声道</value>
+  </data>
 </root>

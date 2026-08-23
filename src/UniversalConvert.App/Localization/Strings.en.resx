@@ -327,4 +327,13 @@
   <data name="Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="Mono" xml:space="preserve">
+    <value>Mono</value>
+  </data>
+  <data name="Stereo" xml:space="preserve">
+    <value>Stereo</value>
+  </data>
+  <data name="ChannelsFormat" xml:space="preserve">
+    <value>{0} channels</value>
+  </data>
 </root>

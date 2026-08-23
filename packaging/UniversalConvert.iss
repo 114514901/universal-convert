@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.5.10，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.6.0，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.10"
+#define MyAppVersion "1.6.0"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"

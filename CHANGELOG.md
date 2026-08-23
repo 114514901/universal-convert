@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.6.0] - 2026-08-23
+
+### 新增
+- 音频播放器显示采样率、实时码率（VBR 动态变化）、位深、声道（通过随包的 ffprobe 读取）
+
 ## [1.5.10] - 2026-08-23
 
 ### 修复
@@ -147,6 +152,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.6.0]: https://github.com/114514901/universal-convert/releases/tag/v1.6.0
 [1.5.10]: https://github.com/114514901/universal-convert/releases/tag/v1.5.10
 [1.5.9]: https://github.com/114514901/universal-convert/releases/tag/v1.5.9
 [1.5.8]: https://github.com/114514901/universal-convert/releases/tag/v1.5.8
