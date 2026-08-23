@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -70,9 +71,88 @@ namespace UniversalConvert.App
             }
         }
 
+        private const int DownloadThreads = 8;
+
         public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct)
         {
-            var req = (HttpWebRequest)WebRequest.Create(downloadUrl);
+            long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
+
+            if (total <= 0)
+            {
+                // 拿不到文件大小（或服务器不支持），回退单线程
+                await DownloadSequentialAsync(downloadUrl, destPath, progress, ct).ConfigureAwait(false);
+                return;
+            }
+
+            // 预分配文件，各线程写到自己的区间
+            using (var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.Write))
+            {
+                fs.SetLength(total);
+            }
+
+            long chunkSize = (total + DownloadThreads - 1) / DownloadThreads;
+            long done = 0;
+            var doneLock = new object();
+
+            var tasks = new List<Task>();
+            for (int i = 0; i < DownloadThreads; i++)
+            {
+                long start = (long)i * chunkSize;
+                if (start >= total) break;
+                long end = Math.Min(total - 1, start + chunkSize - 1);
+
+                tasks.Add(DownloadRangeAsync(downloadUrl, destPath, start, end, n =>
+                {
+                    lock (doneLock)
+                    {
+                        done += n;
+                        progress?.Report((double)done / total * 100.0);
+                    }
+                }, ct));
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private static async Task<long> GetContentLengthAsync(string url, CancellationToken ct)
+        {
+            var req = (HttpWebRequest)WebRequest.Create(url);
+            req.UserAgent = "UniversalConvert";
+            req.AllowAutoRedirect = true;
+            req.Method = "HEAD";
+
+            using (var resp = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false))
+            {
+                return resp.ContentLength;
+            }
+        }
+
+        private static async Task DownloadRangeAsync(string url, string destPath, long start, long end, Action<int> onBytes, CancellationToken ct)
+        {
+            var req = (HttpWebRequest)WebRequest.Create(url);
+            req.UserAgent = "UniversalConvert";
+            req.AllowAutoRedirect = true;
+            req.AddRange(start, end);
+
+            using (var resp = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false))
+            using (var stream = resp.GetResponseStream())
+            using (var file = new FileStream(destPath, FileMode.Open, FileAccess.Write, FileShare.Write))
+            {
+                file.Seek(start, SeekOrigin.Begin);
+                var buffer = new byte[8192];
+                int n;
+                while ((n = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    await file.WriteAsync(buffer, 0, n).ConfigureAwait(false);
+                    onBytes(n);
+                }
+            }
+        }
+
+        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct)
+        {
+            var req = (HttpWebRequest)WebRequest.Create(url);
             req.UserAgent = "UniversalConvert";
             req.AllowAutoRedirect = true;
 
