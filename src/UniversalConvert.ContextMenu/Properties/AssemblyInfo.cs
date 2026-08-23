@@ -1,9 +1,6 @@
-using System.Reflection;
 using System.Runtime.InteropServices;
 
+// 注意：AssemblyVersion / Title / Product / FileVersion 由 SDK 自动生成，
+// 这里只保留自动生成不含的 ComVisible 与 Guid，避免重复属性。
 [assembly: ComVisible(true)]
 [assembly: Guid("A2000000-0000-0000-0000-000000000001")]
-[assembly: AssemblyTitle("UniversalConvert.ContextMenu")]
-[assembly: AssemblyProduct("UniversalConvert")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]

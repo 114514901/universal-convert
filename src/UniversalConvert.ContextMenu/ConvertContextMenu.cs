@@ -178,16 +178,16 @@ namespace UniversalConvert.ContextMenu
                     config.InstallDirectory = BaseDirectory;
                 }
 
-                return new CoreHost(config, config.ResolvePluginsDirectory(), Log);
+                return new CoreHost(config, config.ResolvePluginsDirectory(), LogMessage);
             }
             catch (Exception ex)
             {
-                Log("ContextMenu host load failed: " + ex.Message);
+                LogMessage("ContextMenu host load failed: " + ex.Message);
                 return null;
             }
         }
 
-        private static void Log(string message)
+        private static void LogMessage(string message)
         {
             Debug.WriteLine("[UniversalConvert.ContextMenu] " + message);
         }
