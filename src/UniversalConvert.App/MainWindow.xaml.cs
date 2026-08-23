@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,8 +17,8 @@ namespace UniversalConvert.App
     public partial class MainWindow : Window
     {
         private readonly CoreHost _host;
-        private string _selectedFile;
-        private ConversionEntry[] _availableConversions = new ConversionEntry[0];
+        private readonly List<string> _files = new List<string>();
+        private ConversionEntry[] _commonTargets = new ConversionEntry[0];
         private UpdateInfo _updateInfo;
 
         public MainWindow(CoreHost host, string[] initialFiles = null)
@@ -25,10 +26,15 @@ namespace UniversalConvert.App
             InitializeComponent();
             _host = host;
 
-            if (initialFiles != null && initialFiles.Length > 0 && File.Exists(initialFiles[0]))
+            if (initialFiles != null)
             {
-                SelectFile(initialFiles[0]);
+                foreach (var f in initialFiles)
+                {
+                    if (File.Exists(f)) _files.Add(f);
+                }
             }
+
+            RefreshFileList();
         }
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -59,29 +65,17 @@ namespace UniversalConvert.App
             }
         }
 
-        private static bool IsAdministrator()
-        {
-            try
-            {
-                var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-                return principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void OnSelectFile(object sender, RoutedEventArgs e)
+        private void OnAddFiles(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog
             {
                 Title = Strings.SelectFileDialogTitle,
-                Filter = Strings.AllFilesFilter
+                Filter = Strings.AllFilesFilter,
+                Multiselect = true
             };
             if (dialog.ShowDialog() == true)
             {
-                SelectFile(dialog.FileName);
+                AddFiles(dialog.FileNames);
             }
         }
 
@@ -99,43 +93,120 @@ namespace UniversalConvert.App
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null && files.Length > 0)
             {
-                SelectFile(files[0]);
+                AddFiles(files);
             }
         }
 
-        private void SelectFile(string path)
+        private void AddFiles(IEnumerable<string> files)
         {
-            _selectedFile = path;
-            SelectedFileText.Text = path;
+            foreach (var f in files)
+            {
+                if (File.Exists(f) && !_files.Contains(f, StringComparer.OrdinalIgnoreCase))
+                {
+                    _files.Add(f);
+                }
+            }
+            RefreshFileList();
+        }
 
-            var ext = Path.GetExtension(path);
-            _availableConversions = _host.Registry.GetConversionsFor(ext).ToArray();
+        private void OnRemoveSelected(object sender, RoutedEventArgs e)
+        {
+            var indices = FileList.SelectedItems.Cast<string>().ToList();
+            foreach (var name in indices)
+            {
+                var idx = FindIndexByName(name);
+                if (idx >= 0) _files.RemoveAt(idx);
+            }
+            RefreshFileList();
+        }
 
-            OutputList.ItemsSource = _availableConversions.Select(c =>
-                $"{c.OutputDisplayName}  (.{c.OutputExtension})" +
-                (c.HasCustomizableOptions ? "  ▸" : "") +
-                (c.IsAvailable ? "" : Strings.ToolNotInstalled)).ToList();
+        private void OnClear(object sender, RoutedEventArgs e)
+        {
+            _files.Clear();
+            RefreshFileList();
+        }
 
-            OutputList.SelectedIndex = -1;
-            CustomizeButton.IsEnabled = false;
-            ConvertButton.IsEnabled = _availableConversions.Length > 0;
+        private int FindIndexByName(string fileName)
+        {
+            for (int i = 0; i < _files.Count; i++)
+            {
+                if (Path.GetFileName(_files[i]) == fileName) return i;
+            }
+            return -1;
+        }
+
+        private void RefreshFileList()
+        {
+            FileList.ItemsSource = _files.Select(Path.GetFileName).ToList();
+            RefreshTargetFormats();
+        }
+
+        private void RefreshTargetFormats()
+        {
+            _commonTargets = ComputeCommonTargets();
+
+            OutputCombo.ItemsSource = _commonTargets.Select(c =>
+                $"{c.OutputDisplayName}  (.{c.OutputExtension})").ToList();
+
+            OutputCombo.SelectedIndex = _commonTargets.Length > 0 ? 0 : -1;
+
+            NoCommonFormatText.Visibility =
+                (_files.Count > 0 && _commonTargets.Length == 0)
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+
+            UpdateButtons();
+        }
+
+        private ConversionEntry[] ComputeCommonTargets()
+        {
+            if (_files.Count == 0) return new ConversionEntry[0];
+
+            var baseEntries = _host.Registry.GetConversionsFor(Path.GetExtension(_files[0])).ToList();
+            var result = new List<ConversionEntry>();
+
+            foreach (var entry in baseEntries)
+            {
+                bool supportedByAll = true;
+                for (int i = 1; i < _files.Count; i++)
+                {
+                    if (_host.Registry.GetEntry(Path.GetExtension(_files[i]), entry.OutputExtension) == null)
+                    {
+                        supportedByAll = false;
+                        break;
+                    }
+                }
+                if (supportedByAll) result.Add(entry);
+            }
+
+            return result.ToArray();
         }
 
         private void OnOutputSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CustomizeButton.IsEnabled = OutputList.SelectedIndex >= 0
-                && _availableConversions[OutputList.SelectedIndex].HasCustomizableOptions;
+            UpdateButtons();
+        }
+
+        private void UpdateButtons()
+        {
+            bool hasSelection = OutputCombo.SelectedIndex >= 0 && _commonTargets.Length > 0;
+            bool singleFile = _files.Count == 1;
+
+            ConvertButton.IsEnabled = hasSelection;
+
+            CustomizeButton.IsEnabled = hasSelection && singleFile
+                && _commonTargets[OutputCombo.SelectedIndex].HasCustomizableOptions;
         }
 
         private void OnCustomize(object sender, RoutedEventArgs e)
         {
-            if (OutputList.SelectedIndex < 0 || _selectedFile == null)
+            if (_files.Count != 1 || OutputCombo.SelectedIndex < 0)
             {
                 MessageBox.Show(Strings.PleaseSelectFormat, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var entry = _availableConversions[OutputList.SelectedIndex];
+            var entry = _commonTargets[OutputCombo.SelectedIndex];
             if (!entry.HasCustomizableOptions)
             {
                 MessageBox.Show(Strings.NoParamsMessage,
@@ -143,32 +214,34 @@ namespace UniversalConvert.App
                 return;
             }
 
-            var window = new CustomizeWindow(_host.Engine, _selectedFile, entry) { Owner = this };
+            var window = new CustomizeWindow(_host.Engine, _files[0], entry) { Owner = this };
             window.ShowDialog();
         }
 
         private void OnConvert(object sender, RoutedEventArgs e)
         {
-            if (OutputList.SelectedIndex < 0 || _selectedFile == null)
+            if (_files.Count == 0 || OutputCombo.SelectedIndex < 0)
             {
                 MessageBox.Show(Strings.PleaseSelectFormat, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var entry = _availableConversions[OutputList.SelectedIndex];
-            var options = PresetMerger.Merge(entry.Options, entry.Presets, null, null);
-
-            var request = new ConversionRequest
-            {
-                PluginId = entry.PluginId,
-                InputPath = _selectedFile,
-                InputExtension = Path.GetExtension(_selectedFile),
-                OutputExtension = "." + entry.OutputExtension,
-                Options = options
-            };
-
-            var window = new ConvertWindow(_host.Engine, request) { Owner = this };
+            var targetExt = _commonTargets[OutputCombo.SelectedIndex].OutputExtension;
+            var window = new BatchConvertWindow(_host, _files.ToArray(), targetExt) { Owner = this };
             window.ShowDialog();
+        }
+
+        private static bool IsAdministrator()
+        {
+            try
+            {
+                var principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

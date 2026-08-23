@@ -153,4 +153,49 @@
   <data name="DownloadUpdate" xml:space="preserve">
     <value>下载更新</value>
   </data>
+  <data name="FilesLabel" xml:space="preserve">
+    <value>待转换文件</value>
+  </data>
+  <data name="AddFiles" xml:space="preserve">
+    <value>添加文件</value>
+  </data>
+  <data name="RemoveSelected" xml:space="preserve">
+    <value>移除选中</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>清空</value>
+  </data>
+  <data name="NoCommonFormat" xml:space="preserve">
+    <value>所选文件没有共同支持的目标格式。</value>
+  </data>
+  <data name="BatchTitle" xml:space="preserve">
+    <value>批量转换</value>
+  </data>
+  <data name="FileColumn" xml:space="preserve">
+    <value>文件</value>
+  </data>
+  <data name="StatusColumn" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="StatusPending" xml:space="preserve">
+    <value>等待</value>
+  </data>
+  <data name="StatusConverting" xml:space="preserve">
+    <value>转换中</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="StatusSkipped" xml:space="preserve">
+    <value>跳过</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="BatchSummary" xml:space="preserve">
+    <value>完成 {0}/{1}，失败 {2}</value>
+  </data>
+  <data name="ErrorsLabel" xml:space="preserve">
+    <value>错误信息</value>
+  </data>
 </root>

@@ -59,6 +59,21 @@ namespace UniversalConvert.App.Localization
         public static string ErrorNoSpaceLeftSuggestion => Get("ErrorNoSpaceLeftSuggestion");
         public static string UpdateAvailable => Get("UpdateAvailable");
         public static string DownloadUpdate => Get("DownloadUpdate");
+        public static string FilesLabel => Get("FilesLabel");
+        public static string AddFiles => Get("AddFiles");
+        public static string RemoveSelected => Get("RemoveSelected");
+        public static string ClearAll => Get("ClearAll");
+        public static string NoCommonFormat => Get("NoCommonFormat");
+        public static string BatchTitle => Get("BatchTitle");
+        public static string FileColumn => Get("FileColumn");
+        public static string StatusColumn => Get("StatusColumn");
+        public static string StatusPending => Get("StatusPending");
+        public static string StatusConverting => Get("StatusConverting");
+        public static string StatusDone => Get("StatusDone");
+        public static string StatusSkipped => Get("StatusSkipped");
+        public static string StatusFailed => Get("StatusFailed");
+        public static string BatchSummary => Get("BatchSummary");
+        public static string ErrorsLabel => Get("ErrorsLabel");
 
         private static string Get(string key)
         {

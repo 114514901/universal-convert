@@ -153,4 +153,49 @@
   <data name="DownloadUpdate" xml:space="preserve">
     <value>Download</value>
   </data>
+  <data name="FilesLabel" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="AddFiles" xml:space="preserve">
+    <value>Add files</value>
+  </data>
+  <data name="RemoveSelected" xml:space="preserve">
+    <value>Remove selected</value>
+  </data>
+  <data name="ClearAll" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="NoCommonFormat" xml:space="preserve">
+    <value>Selected files have no common target format.</value>
+  </data>
+  <data name="BatchTitle" xml:space="preserve">
+    <value>Batch convert</value>
+  </data>
+  <data name="FileColumn" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="StatusColumn" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="StatusPending" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="StatusConverting" xml:space="preserve">
+    <value>Converting</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="StatusSkipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="BatchSummary" xml:space="preserve">
+    <value>Done {0}/{1}, failed {2}</value>
+  </data>
+  <data name="ErrorsLabel" xml:space="preserve">
+    <value>Errors</value>
+  </data>
 </root>
