@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.5.9，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.5.10，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.9"
+#define MyAppVersion "1.5.10"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -41,6 +41,9 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 ; 注册右键菜单需写 HKLM，安装包必须提权
 PrivilegesRequired=admin
+; 不弹"需要关闭的程序"对话框——被占用的右键菜单 DLL 由 [Code] 里先结束 explorer 再写、写完重启
+CloseApplications=no
+RestartApplications=no
 
 [Languages]
 ; 中文在前 = 默认语言；语言选择对话框在有多个语言时自动显示
@@ -52,20 +55,19 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 chinesesimplified.CreateDesktopIcon=创建桌面快捷方式
 chinesesimplified.AdditionalTasks=附加任务：
 chinesesimplified.RegisteringContextMenu=正在注册右键菜单...
-chinesesimplified.FinishNote=UniversalConvert 安装完成。右键菜单已注册；若未立即生效，请重启资源管理器或注销后重新登录。
 english.CreateDesktopIcon=Create a desktop icon
 english.AdditionalTasks=Additional tasks:
 english.RegisteringContextMenu=Registering context menu...
-english.FinishNote=UniversalConvert installation is complete. The context menu has been registered; if it doesn't appear right away, restart Explorer or sign out and back in.
 
 [Files]
-; restartreplace：文件被占用（如 explorer 加载了右键菜单 DLL）时不提示关闭程序，改为重启后替换
-Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace
-Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace
+; exe 等非 explorer 占用的文件先正常复制
+Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
+; 被 explorer 加载的 DLL 放到这里：BeforeInstall 里先结束 explorer，再写入，ssPostInstall 里重启
+Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion; BeforeInstall: KillExplorer
 ; 语言卫星程序集（en\...\resources.dll）
-Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
-Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
-Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
+Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
@@ -89,10 +91,27 @@ Type: filesandordirs; Name: "{app}\plugins"
 Type: filesandordirs; Name: "{app}\tools"
 
 [Code]
+var
+  ExplorerKilled: Boolean;
+
+procedure KillExplorer();
+var
+  ResultCode: Integer;
+begin
+  if not ExplorerKilled then
+  begin
+    Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    ExplorerKilled := True;
+  end;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
-    MsgBox(CustomMessage('FinishNote'), mbInformation, MB_OK);
+    if ExplorerKilled then
+      ExecAsOriginalUser('explorer.exe', '', '', SW_HIDE, ewNoWait, ResultCode);
   end;
 end;

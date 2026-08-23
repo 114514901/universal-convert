@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.10] - 2026-08-23
+
+### 修复
+- 安装流程改为：先复制普通文件 → 结束 explorer → 写右键菜单 DLL → 注册 → 重启 explorer，不再依赖重启电脑、也不在开始时暴力结束 explorer
+
 ## [1.5.9] - 2026-08-23
 
 ### 新增
@@ -142,6 +147,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.10]: https://github.com/114514901/universal-convert/releases/tag/v1.5.10
 [1.5.9]: https://github.com/114514901/universal-convert/releases/tag/v1.5.9
 [1.5.8]: https://github.com/114514901/universal-convert/releases/tag/v1.5.8
 [1.5.7]: https://github.com/114514901/universal-convert/releases/tag/v1.5.7
