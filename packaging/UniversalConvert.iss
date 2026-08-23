@@ -44,7 +44,8 @@ PrivilegesRequired=admin
 
 [Languages]
 ; 中文在前 = 默认语言；语言选择对话框在有多个语言时自动显示
-Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+; 中文语言文件随仓库打包（choco 的 innosetup 不带 Languages 目录），英文用编译器自带的 Default.isl
+Name: "chinesesimplified"; MessagesFile: "languages\ChineseSimplified.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [CustomMessages]
