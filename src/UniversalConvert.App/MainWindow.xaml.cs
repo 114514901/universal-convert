@@ -18,15 +18,17 @@ namespace UniversalConvert.App
     public partial class MainWindow : Window
     {
         private readonly CoreHost _host;
+        private readonly SettingsManager _settingsManager;
         private readonly List<string> _files = new List<string>();
         private ConversionEntry[] _commonTargets = new ConversionEntry[0];
         private UpdateInfo _updateInfo;
 
-        public MainWindow(CoreHost host, string[] initialFiles = null)
+        public MainWindow(CoreHost host, SettingsManager settingsManager, string[] initialFiles = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
             _host = host;
+            _settingsManager = settingsManager;
 
             if (initialFiles != null)
             {
@@ -46,12 +48,18 @@ namespace UniversalConvert.App
                 AdminBanner.Visibility = Visibility.Visible;
             }
 
-            _updateInfo = await UpdateChecker.CheckAsync();
+            _updateInfo = await UpdateChecker.CheckAsync(_settingsManager.Get("updateChannel"));
             if (_updateInfo != null)
             {
                 UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, _updateInfo.Version);
                 UpdateBanner.Visibility = Visibility.Visible;
             }
+        }
+
+        private void OnOpenSettings(object sender, RoutedEventArgs e)
+        {
+            var window = new SettingsWindow(_settingsManager) { Owner = this };
+            window.ShowDialog();
         }
 
         private void OnViewReleaseNotes(object sender, RoutedEventArgs e)

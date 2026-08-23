@@ -78,6 +78,8 @@ namespace UniversalConvert.App.Localization
         public static string Downloading => Get("Downloading");
         public static string DownloadComplete => Get("DownloadComplete");
         public static string DownloadFailed => Get("DownloadFailed");
+        public static string Settings => Get("Settings");
+        public static string Save => Get("Save");
 
         private static string Get(string key)
         {

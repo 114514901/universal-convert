@@ -12,6 +12,7 @@ namespace UniversalConvert.App
     public partial class App : Application
     {
         private CoreHost _host;
+        private SettingsManager _settingsManager;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -20,6 +21,7 @@ namespace UniversalConvert.App
             var config = new ConfigStore().Load();
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), Log);
+            _settingsManager = new SettingsManager(config, _host.Plugins);
 
             var parsed = CommandLineContract.Parse(e.Args);
 
@@ -33,7 +35,7 @@ namespace UniversalConvert.App
             }
             else
             {
-                var main = new MainWindow(_host, parsed.ExtraFiles);
+                var main = new MainWindow(_host, _settingsManager, parsed.ExtraFiles);
                 MainWindow = main;
                 main.Show();
             }

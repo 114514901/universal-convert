@@ -13,41 +13,51 @@ namespace UniversalConvert.App
         public string Version { get; set; }
         public string Url { get; set; }
         public string DownloadUrl { get; set; }
+        public bool IsPrerelease { get; set; }
     }
 
     /// <summary>
     /// 检查 GitHub Release 是否有新版本，并支持带进度的下载。
-    /// 注意：私有仓库的 Release API 与资产下载都需要鉴权，匿名访问会失败。
-    /// 若要启用自动更新，仓库需设为公开，或在配置中提供 token。
+    /// 通道规则：channel 为 "dev" 时检查含 prerelease 的版本；"stable" 时只查稳定版；
+    /// "auto"（默认）则跟随当前版本（当前为 prerelease 就查开发版）。
     /// </summary>
     public static class UpdateChecker
     {
-        private const string ApiUrl = "https://api.github.com/repos/114514901/universal-convert/releases/latest";
+        private const string ApiBase = "https://api.github.com/repos/114514901/universal-convert/releases";
         private const string AssetSuffix = "Setup.exe";
 
-        public static async Task<UpdateInfo> CheckAsync()
+        public static async Task<UpdateInfo> CheckAsync(string channel = "auto")
         {
             try
             {
+                var current = CurrentVersion();
+                if (current == null) return null;
+
+                bool isDev = channel == "dev" || (channel == "auto" && current.IsPrerelease);
+                var url = isDev ? ApiBase + "?per_page=1" : ApiBase + "/latest";
+
                 using (var client = new WebClient())
                 {
                     client.Headers.Add("User-Agent", "UniversalConvert");
-                    var json = await client.DownloadStringTaskAsync(ApiUrl).ConfigureAwait(false);
+                    var json = await client.DownloadStringTaskAsync(url).ConfigureAwait(false);
 
-                    var obj = JObject.Parse(json);
+                    JObject obj = isDev
+                        ? (JObject)JArray.Parse(json)[0]
+                        : JObject.Parse(json);
+
                     var tag = (string)obj["tag_name"];
-                    var url = (string)obj["html_url"];
+                    var htmlUrl = (string)obj["html_url"];
                     if (string.IsNullOrEmpty(tag)) return null;
 
-                    var latest = ParseVersion(tag);
-                    var current = CurrentVersion();
-                    if (latest == null || current == null || latest <= current) return null;
+                    var latest = SemVersion.Parse(tag);
+                    if (latest == null || latest <= current) return null;
 
                     return new UpdateInfo
                     {
                         Version = tag,
-                        Url = url,
-                        DownloadUrl = FindDownloadUrl(obj)
+                        Url = htmlUrl,
+                        DownloadUrl = FindDownloadUrl(obj),
+                        IsPrerelease = obj["prerelease"] != null && (bool)obj["prerelease"]
                     };
                 }
             }
@@ -100,18 +110,11 @@ namespace UniversalConvert.App
             return null;
         }
 
-        private static Version CurrentVersion()
+        private static SemVersion CurrentVersion()
         {
-            var v = Assembly.GetExecutingAssembly().GetName().Version;
-            return new Version(v.Major, v.Minor, v.Build);
-        }
-
-        private static Version ParseVersion(string tag)
-        {
-            if (string.IsNullOrEmpty(tag)) return null;
-            var t = tag.TrimStart('v', 'V');
-            Version v;
-            return Version.TryParse(t, out v) ? v : null;
+            var attr = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return SemVersion.Parse(attr?.InformationalVersion);
         }
     }
 }

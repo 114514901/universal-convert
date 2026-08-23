@@ -55,6 +55,16 @@ namespace UniversalConvert.Core.Engine
             return null;
         }
 
+        public string GetSetting(string key, string defaultValue = null)
+        {
+            if (string.IsNullOrEmpty(key)) return defaultValue;
+            if (_config.Settings != null && _config.Settings.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+            return defaultValue;
+        }
+
         public void Log(string message)
         {
             _log(message);

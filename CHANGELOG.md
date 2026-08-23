@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.4.0] - 2026-08-23
+
+### 新增
+- 开发版/正式版双通道：开发版 tag 为 `vX.Y.Z-dev.N`（prerelease），正式版为 `vX.Y.Z`，应用按渠道检查更新
+- 通用设置系统：设置项 schema + 通用设置界面 + 持久化
+- 插件设置 API：`IPluginContext.GetSetting` 读取，`ISettingsContributor` 声明插件自定义设置
+- 「更新渠道」设置项（自动 / 仅正式版 / 包含开发版）
+
 ## [1.3.1] - 2026-08-23
 
 ### 变更
@@ -69,6 +77,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.4.0]: https://github.com/114514901/universal-convert/releases/tag/v1.4.0
 [1.3.1]: https://github.com/114514901/universal-convert/releases/tag/v1.3.1
 [1.3.0]: https://github.com/114514901/universal-convert/releases/tag/v1.3.0
 [1.2.3]: https://github.com/114514901/universal-convert/releases/tag/v1.2.3

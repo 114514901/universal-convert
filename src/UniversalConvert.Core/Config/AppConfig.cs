@@ -15,9 +15,13 @@ namespace UniversalConvert.Core.Config
         /// <summary>外部工具路径表：工具名 -> 可执行文件绝对路径，如 "ffmpeg" -> "C:\tools\ffmpeg.exe"。</summary>
         public IDictionary<string, string> ToolPaths { get; set; }
 
+        /// <summary>用户/插件设置项：键 -> 值。设置界面与插件都通过它读写。</summary>
+        public IDictionary<string, string> Settings { get; set; }
+
         public AppConfig()
         {
             ToolPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public string ResolvePluginsDirectory()

@@ -210,4 +210,10 @@
   <data name="DownloadFailed" xml:space="preserve">
     <value>下载失败：{0}</value>
   </data>
+  <data name="Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
 </root>

@@ -13,6 +13,9 @@ namespace UniversalConvert.Core.Plugins
         /// <summary>插件私有数据目录（用于写临时文件等）。</summary>
         string DataDirectory { get; }
 
+        /// <summary>读取设置项的值；未设置时返回 defaultValue。</summary>
+        string GetSetting(string key, string defaultValue = null);
+
         /// <summary>写日志。</summary>
         void Log(string message);
     }

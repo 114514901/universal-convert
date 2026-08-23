@@ -19,8 +19,15 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
 
+      - name: Set version
+        shell: pwsh
+        run: |
+          $ver = "1.4.0"
+          if ($env:GITHUB_REF_TYPE -eq "tag") { $ver = $env:GITHUB_REF_NAME.TrimStart("v") }
+          echo "VERSION=$ver" >> $env:GITHUB_ENV
+
       - name: Build
-        run: msbuild UniversalConvert.sln /p:Configuration=Release /restore /m
+        run: msbuild UniversalConvert.sln /p:Configuration=Release /restore /m /p:Version=${{ env.VERSION }}
 
       # 构建时拉取 ffmpeg 并打入安装包（GPL 版以支持默认 libx264；对外分发需遵守 GPL）
       - name: Download FFmpeg
@@ -64,11 +71,7 @@ jobs:
         shell: pwsh
         working-directory: packaging
         run: |
-          $ver = "1.0.0"
-          if ($env:GITHUB_REF_TYPE -eq "tag") {
-            $ver = $env:GITHUB_REF_NAME.TrimStart("v")
-          }
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DMyAppVersion=$ver" "UniversalConvert.iss"
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DMyAppVersion=$env:VERSION" "UniversalConvert.iss"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
@@ -82,3 +85,4 @@ jobs:
         with:
           files: output/*.exe
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
