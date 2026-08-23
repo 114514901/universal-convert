@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.2] - 2026-08-23
+
+### 修复
+- 修复右键菜单不显示：安装时补充 `regasm /codebase` 注册 COM 服务器（CLSID）。此前 SharpShell 的 `RegisterServer` 只写「关联」，导致 explorer 找到菜单项却找不到实现
+
 ## [1.5.1] - 2026-08-23
 
 ### 修复
@@ -93,6 +98,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.2]: https://github.com/114514901/universal-convert/releases/tag/v1.5.2
 [1.5.1]: https://github.com/114514901/universal-convert/releases/tag/v1.5.1
 [1.5.0]: https://github.com/114514901/universal-convert/releases/tag/v1.5.0
 [1.4.0]: https://github.com/114514901/universal-convert/releases/tag/v1.4.0

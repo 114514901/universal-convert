@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Principal;
+using SharpShell.Helpers;
 using SharpShell.ServerRegistration;
 using UniversalConvert.ContextMenu;
 using UniversalConvert.Core.Config;
@@ -51,9 +52,19 @@ namespace UniversalConvert.Installer
                 new ConfigStore().Save(config);
                 Log("安装目录: " + config.InstallDirectory);
 
-                // 2. 注册 SharpShell 扩展
-                var server = new ConvertContextMenu();
-                ServerRegistrationManager.RegisterServer(server, RegistrationType.OS64Bit);
+                // 2. 注册 COM 服务器（CLSID + InprocServer32）。
+                //    注意：SharpShell 的 RegisterServer 只写右键菜单"关联"，CLSID 必须单独用 regasm /codebase 注册。
+                var contextMenuPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UniversalConvert.ContextMenu.dll");
+                var regAsm = new RegAsm();
+                bool regOk = regAsm.Register64(contextMenuPath, true);
+                Log("regasm 注册" + (regOk ? "成功" : "失败") + ": " + regAsm.StandardError);
+                if (!regOk)
+                {
+                    throw new InvalidOperationException("regasm 注册 COM 服务器失败：" + regAsm.StandardError);
+                }
+
+                // 3. 注册 SharpShell 关联
+                ServerRegistrationManager.RegisterServer(new ConvertContextMenu(), RegistrationType.OS64Bit);
 
                 Log("注册成功。");
                 Console.WriteLine("右键菜单注册成功。重启资源管理器（或注销重登）后生效。");
@@ -75,6 +86,10 @@ namespace UniversalConvert.Installer
             {
                 Log("=== 开始卸载右键菜单 ===");
                 ServerRegistrationManager.UnregisterServer(new ConvertContextMenu(), RegistrationType.OS64Bit);
+
+                var contextMenuPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UniversalConvert.ContextMenu.dll");
+                new RegAsm().Unregister64(contextMenuPath);
+
                 Log("卸载成功。");
                 Console.WriteLine("右键菜单已卸载。");
                 return 0;
