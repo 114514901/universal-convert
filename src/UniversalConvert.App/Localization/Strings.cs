@@ -74,6 +74,10 @@ namespace UniversalConvert.App.Localization
         public static string StatusFailed => Get("StatusFailed");
         public static string BatchSummary => Get("BatchSummary");
         public static string ErrorsLabel => Get("ErrorsLabel");
+        public static string ViewReleaseNotes => Get("ViewReleaseNotes");
+        public static string Downloading => Get("Downloading");
+        public static string DownloadComplete => Get("DownloadComplete");
+        public static string DownloadFailed => Get("DownloadFailed");
 
         private static string Get(string key)
         {

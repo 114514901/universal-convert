@@ -22,10 +22,18 @@
             </Border>
             <Border x:Name="UpdateBanner" Background="#D1ECF1" BorderBrush="#17A2B8" BorderThickness="1"
                     CornerRadius="4" Padding="8" Visibility="Collapsed">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="UpdateBannerText" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                    <Button x:Name="UpdateButton" Content="{x:Static loc:Strings.DownloadUpdate}"
-                            Margin="8,0,0,0" Padding="10,2" Click="OnDownloadUpdate"/>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="UpdateBannerText" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <Button x:Name="ViewNotesButton" Content="{x:Static loc:Strings.ViewReleaseNotes}"
+                                Margin="8,0,0,0" Padding="10,2" Click="OnViewReleaseNotes"/>
+                        <Button x:Name="UpdateButton" Content="{x:Static loc:Strings.DownloadUpdate}"
+                                Margin="8,0,0,0" Padding="10,2" Click="OnDownloadUpdate"/>
+                    </StackPanel>
+                    <ProgressBar x:Name="UpdateProgressBar" Height="8" Margin="0,6,0,0"
+                                 Minimum="0" Maximum="100" Visibility="Collapsed"/>
+                    <TextBlock x:Name="UpdateStatusText" TextWrapping="Wrap" Margin="0,4,0,0"
+                               Foreground="#555555" Visibility="Collapsed"/>
                 </StackPanel>
             </Border>
         </StackPanel>

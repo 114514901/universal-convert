@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Principal;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -53,7 +54,7 @@ namespace UniversalConvert.App
             }
         }
 
-        private void OnDownloadUpdate(object sender, RoutedEventArgs e)
+        private void OnViewReleaseNotes(object sender, RoutedEventArgs e)
         {
             if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.Url)) return;
             try
@@ -63,6 +64,48 @@ namespace UniversalConvert.App
             catch
             {
                 // 忽略打开失败
+            }
+        }
+
+        private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
+        {
+            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.DownloadUrl)) return;
+
+            UpdateButton.IsEnabled = false;
+            ViewNotesButton.IsEnabled = false;
+            UpdateProgressBar.Visibility = Visibility.Visible;
+            UpdateStatusText.Visibility = Visibility.Visible;
+
+            var dest = Path.Combine(
+                Path.GetTempPath(),
+                "UniversalConvert-Setup-" + _updateInfo.Version.TrimStart('v', 'V') + ".exe");
+
+            var progress = new Progress<double>(p =>
+            {
+                UpdateProgressBar.Value = p;
+                UpdateStatusText.Text = string.Format(Strings.Downloading, (int)p);
+            });
+
+            try
+            {
+                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None);
+
+                UpdateProgressBar.Value = 100;
+                UpdateStatusText.Text = Strings.DownloadComplete;
+                try
+                {
+                    Process.Start(dest);
+                }
+                catch
+                {
+                    // 启动安装程序失败
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
+                UpdateButton.IsEnabled = true;
+                ViewNotesButton.IsEnabled = true;
             }
         }
 
