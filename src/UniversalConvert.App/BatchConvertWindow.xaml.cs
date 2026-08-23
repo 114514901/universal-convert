@@ -26,6 +26,7 @@ namespace UniversalConvert.App
         public BatchConvertWindow(CoreHost host, string[] files, string targetExt)
         {
             InitializeComponent();
+            Icon = AppIcon.Get();
             _host = host;
             _files = files;
             _targetExt = targetExt;

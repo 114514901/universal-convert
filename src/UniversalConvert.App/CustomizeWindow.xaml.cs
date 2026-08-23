@@ -28,6 +28,7 @@ namespace UniversalConvert.App
         public CustomizeWindow(ConversionEngine engine, string inputPath, ConversionEntry entry)
         {
             InitializeComponent();
+            Icon = AppIcon.Get();
             _engine = engine;
             _inputPath = inputPath;
             _entry = entry;

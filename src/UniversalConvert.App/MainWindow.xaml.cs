@@ -24,6 +24,7 @@ namespace UniversalConvert.App
         public MainWindow(CoreHost host, string[] initialFiles = null)
         {
             InitializeComponent();
+            Icon = AppIcon.Get();
             _host = host;
 
             if (initialFiles != null)

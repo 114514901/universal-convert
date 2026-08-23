@@ -21,6 +21,7 @@ namespace UniversalConvert.App
         public ConvertWindow(ConversionEngine engine, ConversionRequest request)
         {
             InitializeComponent();
+            Icon = AppIcon.Get();
             _engine = engine;
             _request = request;
 
