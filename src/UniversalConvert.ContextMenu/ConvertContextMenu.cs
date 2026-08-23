@@ -26,6 +26,13 @@ namespace UniversalConvert.ContextMenu
     {
         private static readonly Lazy<CoreHost> Host = new Lazy<CoreHost>(LoadHost, true);
 
+        private static readonly string LogFile = Path.Combine(ConfigStore.ConfigDirectory, "contextmenu.log");
+
+        static ConvertContextMenu()
+        {
+            WriteLog("ContextMenu DLL 已加载，BaseDirectory=" + BaseDirectory);
+        }
+
         private static string BaseDirectory
         {
             get
@@ -36,13 +43,19 @@ namespace UniversalConvert.ContextMenu
 
         protected override bool CanShowMenu()
         {
-            var host = Host.Value;
-            if (host == null) return false;
-
             var files = GetFiles();
             if (files.Length == 0) return false;
 
-            return files.Any(f => host.Registry.Supports(Path.GetExtension(f)));
+            var host = Host.Value;
+            if (host == null)
+            {
+                WriteLog("CanShowMenu: 宿主加载失败，返回 false");
+                return false;
+            }
+
+            var result = files.Any(f => host.Registry.Supports(Path.GetExtension(f)));
+            WriteLog("CanShowMenu: files=" + string.Join(", ", files.Select(Path.GetFileName)) + " result=" + result);
+            return result;
         }
 
         protected override ContextMenuStrip CreateMenu()
@@ -170,6 +183,7 @@ namespace UniversalConvert.ContextMenu
 
         private static CoreHost LoadHost()
         {
+            WriteLog("LoadHost: 开始加载");
             try
             {
                 var config = new ConfigStore().Load();
@@ -177,18 +191,34 @@ namespace UniversalConvert.ContextMenu
                 {
                     config.InstallDirectory = BaseDirectory;
                 }
+                var pluginsDir = config.ResolvePluginsDirectory();
+                WriteLog("LoadHost: InstallDirectory=" + config.InstallDirectory + ", pluginsDir=" + pluginsDir);
 
-                return new CoreHost(config, config.ResolvePluginsDirectory(), LogMessage);
+                var host = new CoreHost(config, pluginsDir, WriteLog);
+                WriteLog("LoadHost: 成功，插件数=" + host.Plugins.Count + "，转换条目数=" + host.Registry.Entries.Count);
+                return host;
             }
             catch (Exception ex)
             {
-                LogMessage("ContextMenu host load failed: " + ex.Message);
+                WriteLog("LoadHost: 失败 " + ex);
                 return null;
             }
         }
 
-        private static void LogMessage(string message)
+        private static void WriteLog(string message)
         {
+            try
+            {
+                Directory.CreateDirectory(ConfigStore.ConfigDirectory);
+                File.AppendAllText(
+                    LogFile,
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + message + Environment.NewLine);
+            }
+            catch
+            {
+                // 日志失败不影响主流程
+            }
+
             Debug.WriteLine("[UniversalConvert.ContextMenu] " + message);
         }
     }
