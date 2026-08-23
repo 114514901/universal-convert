@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using UniversalConvert.Core.Config;
 
 namespace UniversalConvert.App
 {
@@ -21,7 +20,6 @@ namespace UniversalConvert.App
     /// 检查 GitHub Release 是否有新版本，并支持带进度的下载。
     /// 通道规则：channel 为 "dev" 时检查含 prerelease 的版本；"stable" 时只查稳定版；
     /// "auto"（默认）则跟随当前版本（当前为 prerelease 就查开发版）。
-    /// 检查过程写入 %AppData%\UniversalConvert\update.log 便于排查。
     /// </summary>
     public static class UpdateChecker
     {
@@ -33,15 +31,10 @@ namespace UniversalConvert.App
             try
             {
                 var current = AppVersion.Current;
-                if (current == null)
-                {
-                    Log("当前版本解析失败，跳过检查");
-                    return null;
-                }
+                if (current == null) return null;
 
                 bool isDev = channel == "dev" || (channel == "auto" && current.IsPrerelease);
                 var url = isDev ? ApiBase + "?per_page=1" : ApiBase + "/latest";
-                Log("检查更新: 当前=" + current + ", 渠道=" + channel + ", isDev=" + isDev + ", url=" + url);
 
                 using (var client = new WebClient())
                 {
@@ -54,20 +47,11 @@ namespace UniversalConvert.App
 
                     var tag = (string)obj["tag_name"];
                     var htmlUrl = (string)obj["html_url"];
-                    if (string.IsNullOrEmpty(tag))
-                    {
-                        Log("响应无 tag_name");
-                        return null;
-                    }
+                    if (string.IsNullOrEmpty(tag)) return null;
 
                     var latest = SemVersion.Parse(tag);
-                    if (latest == null || latest.CompareTo(current) <= 0)
-                    {
-                        Log("无更新: latest=" + tag + " <= current=" + current);
-                        return null;
-                    }
+                    if (latest == null || latest.CompareTo(current) <= 0) return null;
 
-                    Log("发现更新: " + tag);
                     return new UpdateInfo
                     {
                         Version = tag,
@@ -78,9 +62,8 @@ namespace UniversalConvert.App
                     };
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Log("检查失败: " + ex);
                 return null;
             }
         }
@@ -126,21 +109,6 @@ namespace UniversalConvert.App
                 }
             }
             return null;
-        }
-
-        private static void Log(string message)
-        {
-            try
-            {
-                Directory.CreateDirectory(ConfigStore.ConfigDirectory);
-                File.AppendAllText(
-                    Path.Combine(ConfigStore.ConfigDirectory, "update.log"),
-                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + message + Environment.NewLine);
-            }
-            catch
-            {
-                // 日志失败不影响主流程
-            }
         }
     }
 }
