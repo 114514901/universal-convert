@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.6] - 2026-08-23
+
+### 改进
+- 右键菜单项添加应用图标，并改为「使用 UniversalConvert 转换为」「使用 UniversalConvert 打开」
+
 ## [1.5.5] - 2026-08-23
 
 ### 新增
@@ -118,6 +123,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.6]: https://github.com/114514901/universal-convert/releases/tag/v1.5.6
 [1.5.5]: https://github.com/114514901/universal-convert/releases/tag/v1.5.5
 [1.5.4]: https://github.com/114514901/universal-convert/releases/tag/v1.5.4
 [1.5.3]: https://github.com/114514901/universal-convert/releases/tag/v1.5.3

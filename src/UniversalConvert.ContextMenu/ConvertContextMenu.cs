@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,6 +29,8 @@ namespace UniversalConvert.ContextMenu
 
         private static readonly string LogFile = Path.Combine(ConfigStore.ConfigDirectory, "contextmenu.log");
 
+        private static readonly Lazy<Bitmap> MenuIcon = new Lazy<Bitmap>(LoadMenuIcon);
+
         static ConvertContextMenu()
         {
             WriteLog("ContextMenu DLL 已加载，BaseDirectory=" + BaseDirectory);
@@ -38,6 +41,28 @@ namespace UniversalConvert.ContextMenu
             get
             {
                 return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+            }
+        }
+
+        private static Bitmap LoadMenuIcon()
+        {
+            try
+            {
+                var exePath = Path.Combine(BaseDirectory, "UniversalConvert.App.exe");
+                using (var icon = Icon.ExtractAssociatedIcon(exePath))
+                {
+                    if (icon == null) return null;
+
+                    var size = SystemInformation.SmallIconSize;
+                    using (var small = new Icon(icon, size.Width, size.Height))
+                    {
+                        return small.ToBitmap();
+                    }
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -84,7 +109,8 @@ namespace UniversalConvert.ContextMenu
             var ext = Path.GetExtension(file);
             var conversions = host.Registry.GetConversionsFor(ext).ToList();
 
-            var root = new ToolStripMenuItem("转换为");
+            var root = new ToolStripMenuItem("使用 UniversalConvert 转换为");
+            root.Image = MenuIcon.Value;
             if (conversions.Count == 0)
             {
                 root.Enabled = false;
@@ -135,14 +161,16 @@ namespace UniversalConvert.ContextMenu
             menu.Items.Add(root);
 
             menu.Items.Add(new ToolStripSeparator());
-            var open = new ToolStripMenuItem("打开 UniversalConvert...");
+            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
+            open.Image = MenuIcon.Value;
             open.Click += (s, e) => LaunchOpen(new[] { file });
             menu.Items.Add(open);
         }
 
         private void BuildMultiFileMenu(ContextMenuStrip menu, IList<string> files)
         {
-            var open = new ToolStripMenuItem("用 UniversalConvert 打开");
+            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
+            open.Image = MenuIcon.Value;
             open.Click += (s, e) => LaunchOpen(files);
             menu.Items.Add(open);
         }
