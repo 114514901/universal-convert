@@ -91,6 +91,8 @@ namespace UniversalConvert.Plugin.FFmpeg
                 sb.Append(" -b:v ").Append(value);
             if (TryGet(request.Options, "audioBitrate", out value))
                 sb.Append(" -b:a ").Append(value);
+            if (TryGet(request.Options, "sampleRate", out value))
+                sb.Append(" -ar ").Append(value);
             if (TryGet(request.Options, "fps", out value))
                 sb.Append(" -r ").Append(value);
             if (TryGet(request.Options, "scale", out value))
@@ -182,21 +184,34 @@ namespace UniversalConvert.Plugin.FFmpeg
                 {
                     EnumOption("videoCodec", "视频编码", "libx264",
                         Choice("libx264", "H.264 (libx264)"),
-                        Choice("libx265", "H.265 (libx265)")),
+                        Choice("libx265", "H.265 (libx265)"),
+                        Choice("libvpx-vp9", "VP9 (libvpx-vp9)"),
+                        Choice("mpeg4", "MPEG-4")),
                     EnumOption("scale", "分辨率", "",
                         Choice("", "原始"),
+                        Choice("3840:2160", "4K (3840×2160)"),
+                        Choice("2560:1440", "2K (2560×1440)"),
                         Choice("1920:1080", "1080p (1920×1080)"),
                         Choice("1280:720", "720p (1280×720)"),
-                        Choice("854:480", "480p (854×480)")),
-                    EnumOption("videoBitrate", "视频码率", "4000k",
+                        Choice("854:480", "480p (854×480)"),
+                        Choice("640:360", "360p (640×360)")),
+                    EnumOption("videoBitrate", "视频码率", "",
+                        Choice("", "原始"),
+                        Choice("500k", "500 kbps"),
+                        Choice("1000k", "1000 kbps"),
                         Choice("2000k", "2000 kbps"),
                         Choice("4000k", "4000 kbps"),
-                        Choice("8000k", "8000 kbps")),
+                        Choice("8000k", "8000 kbps"),
+                        Choice("12000k", "12000 kbps"),
+                        Choice("20000k", "20000 kbps")),
                     EnumOption("fps", "帧率", "",
                         Choice("", "原始"),
                         Choice("24", "24 fps"),
+                        Choice("25", "25 fps"),
                         Choice("30", "30 fps"),
-                        Choice("60", "60 fps"))
+                        Choice("48", "48 fps"),
+                        Choice("60", "60 fps"),
+                        Choice("120", "120 fps"))
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -216,9 +231,19 @@ namespace UniversalConvert.Plugin.FFmpeg
                 Options = new List<OptionDefinition>
                 {
                     EnumOption("audioBitrate", "音频码率", "192k",
+                        Choice("", "原始"),
+                        Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
+                        Choice("160k", "160 kbps"),
                         Choice("192k", "192 kbps"),
-                        Choice("320k", "320 kbps"))
+                        Choice("256k", "256 kbps"),
+                        Choice("320k", "320 kbps")),
+                    EnumOption("sampleRate", "采样率", "",
+                        Choice("", "原始"),
+                        Choice("44100", "44100 Hz"),
+                        Choice("48000", "48000 Hz"),
+                        Choice("88200", "88200 Hz"),
+                        Choice("96000", "96000 Hz"))
                 },
                 Presets = new List<ConversionPreset>
                 {

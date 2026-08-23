@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.2.1] - 2026-08-23
+
+### 变更
+- 自定义表单：参数项改为「文字靠左、控件靠右」对齐，枚举下拉改为可编辑（可输入或选择）
+- 码率增加「原始」选项，新增「采样率」选项，并扩充码率/分辨率/帧率/编码等可选项
+
 ## [1.2.0] - 2026-08-23
 
 ### 新增
@@ -43,6 +49,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.2.1]: https://github.com/114514901/universal-convert/releases/tag/v1.2.1
 [1.2.0]: https://github.com/114514901/universal-convert/releases/tag/v1.2.0
 [1.1.2]: https://github.com/114514901/universal-convert/releases/tag/v1.1.2
 [1.1.1]: https://github.com/114514901/universal-convert/releases/tag/v1.1.1

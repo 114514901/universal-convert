@@ -254,6 +254,10 @@ namespace UniversalConvert.Plugin.Ncm
             {
                 sb.Append(" -b:a ").Append(value);
             }
+            if (options != null && options.TryGetValue("sampleRate", out value) && !string.IsNullOrEmpty(value))
+            {
+                sb.Append(" -ar ").Append(value);
+            }
 
             sb.Append(' ').Append(ProcessRunner.Quote(output));
             return sb.ToString();
@@ -335,9 +339,19 @@ namespace UniversalConvert.Plugin.Ncm
                 Options = new List<OptionDefinition>
                 {
                     EnumOption("audioBitrate", "音频码率", "192k",
+                        Choice("", "原始"),
+                        Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
+                        Choice("160k", "160 kbps"),
                         Choice("192k", "192 kbps"),
-                        Choice("320k", "320 kbps"))
+                        Choice("256k", "256 kbps"),
+                        Choice("320k", "320 kbps")),
+                    EnumOption("sampleRate", "采样率", "",
+                        Choice("", "原始"),
+                        Choice("44100", "44100 Hz"),
+                        Choice("48000", "48000 Hz"),
+                        Choice("88200", "88200 Hz"),
+                        Choice("96000", "96000 Hz"))
                 },
                 Presets = new List<ConversionPreset>
                 {

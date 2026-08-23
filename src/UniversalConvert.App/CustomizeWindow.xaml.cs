@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using UniversalConvert.App.Localization;
@@ -53,14 +54,16 @@ namespace UniversalConvert.App
         {
             foreach (var option in _entry.Options)
             {
-                var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+                // 文字靠左、控件靠右对齐
+                var row = new DockPanel { Margin = new Thickness(0, 0, 0, 8), LastChildFill = false };
 
                 var label = new TextBlock
                 {
                     Text = option.Label,
-                    Width = 140,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0, 0, 12, 0)
                 };
+                DockPanel.SetDock(label, Dock.Left);
                 row.Children.Add(label);
 
                 FrameworkElement control;
@@ -77,25 +80,42 @@ namespace UniversalConvert.App
                         break;
 
                     case OptionType.Enum:
-                        var combo = new ComboBox { Width = 200 };
+                        var combo = new ComboBox { Width = 220, IsEditable = true, IsTextSearchEnabled = false };
                         combo.ItemsSource = option.Choices;
                         combo.DisplayMemberPath = "Label";
-                        combo.SelectedValuePath = "Value";
-                        setter = v => combo.SelectedValue = v;
-                        getter = () => combo.SelectedValue as string;
+                        setter = v =>
+                        {
+                            var match = option.Choices.FirstOrDefault(c => c.Value == v);
+                            if (match != null)
+                            {
+                                combo.SelectedItem = match;
+                            }
+                            else
+                            {
+                                combo.Text = v ?? string.Empty;
+                            }
+                        };
+                        getter = () =>
+                        {
+                            // 若文本与某候选项的标签一致，取其值；否则当作手动输入返回
+                            var text = combo.Text ?? string.Empty;
+                            var byLabel = option.Choices.FirstOrDefault(c => c.Label == text);
+                            return byLabel != null ? byLabel.Value : text;
+                        };
                         control = combo;
                         break;
 
                     case OptionType.Int:
                     case OptionType.String:
                     default:
-                        var textBox = new TextBox { Width = 200 };
+                        var textBox = new TextBox { Width = 220 };
                         setter = v => textBox.Text = v ?? string.Empty;
                         getter = () => textBox.Text;
                         control = textBox;
                         break;
                 }
 
+                DockPanel.SetDock(control, Dock.Right);
                 row.Children.Add(control);
                 OptionsPanel.Children.Add(row);
 
