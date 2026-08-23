@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -22,6 +24,8 @@ namespace UniversalConvert.App
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), Log);
             _settingsManager = new SettingsManager(config, _host.Plugins);
+
+            ApplyLanguage(_settingsManager);
 
             var parsed = CommandLineContract.Parse(e.Args);
 
@@ -103,6 +107,23 @@ namespace UniversalConvert.App
             var window = new CustomizeWindow(_host.Engine, inputPath, entry);
             MainWindow = window;
             window.Show();
+        }
+
+        private static void ApplyLanguage(SettingsManager settings)
+        {
+            var language = settings.Get("language");
+            CultureInfo culture = null;
+
+            if (language == "zh") culture = new CultureInfo("zh-CN");
+            else if (language == "en") culture = new CultureInfo("en");
+
+            if (culture != null)
+            {
+                CultureInfo.DefaultThreadCurrentUICulture = culture;
+                CultureInfo.DefaultThreadCurrentCulture = culture;
+                Thread.CurrentThread.CurrentUICulture = culture;
+                Thread.CurrentThread.CurrentCulture = culture;
+            }
         }
 
         private static void Log(string message)

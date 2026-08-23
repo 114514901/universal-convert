@@ -95,9 +95,17 @@ namespace UniversalConvert.App.Localization
         public static string OpenProject => Get("OpenProject");
         public static string ThirdPartyText => Get("ThirdPartyText");
 
-        private static string Get(string key)
+        /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
+        public static string Get(string key)
         {
             return Rm.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+        }
+
+        /// <summary>解析标签：以 '@' 开头视为资源键并本地化，否则原样返回。</summary>
+        public static string L(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            return text[0] == '@' ? Get(text.Substring(1)) : text;
         }
     }
 }

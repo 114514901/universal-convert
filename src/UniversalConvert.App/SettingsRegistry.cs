@@ -7,6 +7,7 @@ namespace UniversalConvert.App
     /// <summary>
     /// 应用级设置项注册表。新增一个设置 = 在此追加一条 SettingDefinition，
     /// 设置界面会自动渲染，无需改 UI。
+    /// 标签/分组/候选项用 '@资源键' 表示（经 Strings.L 本地化），插件设置可用普通字符串。
     /// </summary>
     public static class SettingsRegistry
     {
@@ -14,17 +15,32 @@ namespace UniversalConvert.App
         {
             new SettingDefinition
             {
-                Key = "updateChannel",
-                Category = "更新",
-                Label = "更新渠道",
-                Description = "选择接收正式版还是开发版更新",
+                Key = "language",
+                Category = "@SettingsCategoryGeneral",
+                Label = "@SettingLanguage",
+                Description = "@SettingLanguageDescription",
                 Type = OptionType.Enum,
                 DefaultValue = "auto",
                 Choices = new List<OptionChoice>
                 {
-                    new OptionChoice { Value = "auto", Label = "自动（跟随当前版本）" },
-                    new OptionChoice { Value = "stable", Label = "仅正式版" },
-                    new OptionChoice { Value = "dev", Label = "包含开发版" }
+                    new OptionChoice { Value = "auto", Label = "@LanguageAuto" },
+                    new OptionChoice { Value = "zh", Label = "@LanguageZh" },
+                    new OptionChoice { Value = "en", Label = "@LanguageEn" }
+                }
+            },
+            new SettingDefinition
+            {
+                Key = "updateChannel",
+                Category = "@SettingsCategoryUpdate",
+                Label = "@SettingUpdateChannel",
+                Description = "@SettingUpdateChannelDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "auto",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "auto", Label = "@UpdateChannelAuto" },
+                    new OptionChoice { Value = "stable", Label = "@UpdateChannelStable" },
+                    new OptionChoice { Value = "dev", Label = "@UpdateChannelDev" }
                 }
             }
         };

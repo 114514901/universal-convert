@@ -258,4 +258,40 @@
   <data name="ThirdPartyText" xml:space="preserve">
     <value>包含第三方组件：FFmpeg（GPL）、NCM 解密（MIT）、KGM 解密（反 996 许可证）。</value>
   </data>
+  <data name="SettingsCategoryGeneral" xml:space="preserve">
+    <value>常规</value>
+  </data>
+  <data name="SettingsCategoryUpdate" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="SettingLanguage" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="SettingLanguageDescription" xml:space="preserve">
+    <value>界面语言（重启后生效）</value>
+  </data>
+  <data name="SettingUpdateChannel" xml:space="preserve">
+    <value>更新渠道</value>
+  </data>
+  <data name="SettingUpdateChannelDescription" xml:space="preserve">
+    <value>选择接收正式版还是开发版更新</value>
+  </data>
+  <data name="LanguageAuto" xml:space="preserve">
+    <value>跟随系统</value>
+  </data>
+  <data name="LanguageZh" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="LanguageEn" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="UpdateChannelAuto" xml:space="preserve">
+    <value>自动（跟随当前版本）</value>
+  </data>
+  <data name="UpdateChannelStable" xml:space="preserve">
+    <value>仅正式版</value>
+  </data>
+  <data name="UpdateChannelDev" xml:space="preserve">
+    <value>包含开发版</value>
+  </data>
 </root>

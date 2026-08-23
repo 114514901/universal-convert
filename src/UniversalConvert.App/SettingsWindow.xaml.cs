@@ -10,8 +10,8 @@ using UniversalConvert.Core.Plugins;
 namespace UniversalConvert.App
 {
     /// <summary>
-    /// 通用设置界面：根据 SettingDefinition 列表动态渲染控件，按分组展示。
-    /// 新增设置项无需改这里。
+    /// 通用设置界面：根据 SettingDefinition 列表动态渲染控件，按分类（Category）生成选项卡。
+    /// 标签/分组/候选项以 '@资源键' 形式经 Strings.L 本地化。新增设置项无需改这里。
     /// </summary>
     public partial class SettingsWindow : Window
     {
@@ -30,24 +30,20 @@ namespace UniversalConvert.App
 
         private void BuildControls()
         {
-            var groups = _manager.Definitions.GroupBy(d => string.IsNullOrEmpty(d.Category) ? Strings.Settings : d.Category);
+            var groups = _manager.Definitions.GroupBy(d => Strings.L(d.Category) ?? Strings.Settings);
 
             foreach (var group in groups)
             {
-                var box = new GroupBox
-                {
-                    Header = group.Key,
-                    Margin = new Thickness(0, 0, 0, 12)
-                };
+                var tab = new TabItem { Header = group.Key };
+                var panel = new StackPanel { Margin = new Thickness(12) };
 
-                var panel = new StackPanel { Margin = new Thickness(8) };
                 foreach (var definition in group)
                 {
                     panel.Children.Add(BuildRow(definition));
                 }
 
-                box.Content = panel;
-                SettingsPanel.Children.Add(box);
+                tab.Content = panel;
+                SettingsTabs.Items.Add(tab);
             }
         }
 
@@ -57,13 +53,13 @@ namespace UniversalConvert.App
 
             var label = new TextBlock
             {
-                Text = definition.Label,
+                Text = Strings.L(definition.Label),
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 12, 0)
             };
             if (!string.IsNullOrEmpty(definition.Description))
             {
-                label.ToolTip = definition.Description;
+                label.ToolTip = Strings.L(definition.Description);
             }
             DockPanel.SetDock(label, Dock.Left);
             row.Children.Add(label);
@@ -82,19 +78,22 @@ namespace UniversalConvert.App
                     break;
 
                 case OptionType.Enum:
+                    var choices = definition.Choices
+                        .Select(c => new OptionChoice { Value = c.Value, Label = Strings.L(c.Label) })
+                        .ToList();
                     var combo = new ComboBox { Width = 220, IsEditable = true, IsTextSearchEnabled = false };
-                    combo.ItemsSource = definition.Choices;
+                    combo.ItemsSource = choices;
                     combo.DisplayMemberPath = "Label";
                     setter = v =>
                     {
-                        var match = definition.Choices.FirstOrDefault(c => c.Value == v);
+                        var match = choices.FirstOrDefault(c => c.Value == v);
                         if (match != null) combo.SelectedItem = match;
                         else combo.Text = v ?? string.Empty;
                     };
                     getter = () =>
                     {
                         var text = combo.Text ?? string.Empty;
-                        var byLabel = definition.Choices.FirstOrDefault(c => c.Label == text);
+                        var byLabel = choices.FirstOrDefault(c => c.Label == text);
                         return byLabel != null ? byLabel.Value : text;
                     };
                     control = combo;

@@ -258,4 +258,40 @@
   <data name="ThirdPartyText" xml:space="preserve">
     <value>Includes third-party components: FFmpeg (GPL), NCM decrypt (MIT), KGM decrypt (Anti-996).</value>
   </data>
+  <data name="SettingsCategoryGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsCategoryUpdate" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="SettingLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingLanguageDescription" xml:space="preserve">
+    <value>Interface language (takes effect after restart)</value>
+  </data>
+  <data name="SettingUpdateChannel" xml:space="preserve">
+    <value>Update channel</value>
+  </data>
+  <data name="SettingUpdateChannelDescription" xml:space="preserve">
+    <value>Choose to receive stable or dev updates</value>
+  </data>
+  <data name="LanguageAuto" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+  <data name="LanguageZh" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="LanguageEn" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="UpdateChannelAuto" xml:space="preserve">
+    <value>Auto (follow current version)</value>
+  </data>
+  <data name="UpdateChannelStable" xml:space="preserve">
+    <value>Stable only</value>
+  </data>
+  <data name="UpdateChannelDev" xml:space="preserve">
+    <value>Include dev builds</value>
+  </data>
 </root>
