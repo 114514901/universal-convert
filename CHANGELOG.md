@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.2.3] - 2026-08-23
+
+### 新增
+- 图片格式转换：jpg/jpeg/png/bmp/webp/tiff/tif 互转（基于 FFmpeg）
+
 ## [1.2.2] - 2026-08-23
 
 ### 新增
@@ -54,6 +59,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.2.3]: https://github.com/114514901/universal-convert/releases/tag/v1.2.3
 [1.2.2]: https://github.com/114514901/universal-convert/releases/tag/v1.2.2
 [1.2.1]: https://github.com/114514901/universal-convert/releases/tag/v1.2.1
 [1.2.0]: https://github.com/114514901/universal-convert/releases/tag/v1.2.0

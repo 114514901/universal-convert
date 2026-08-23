@@ -28,6 +28,10 @@ namespace UniversalConvert.Plugin.FFmpeg
             { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".wma", ".opus" };
         private static readonly string[] AudioOutputs =
             { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".opus" };
+        private static readonly string[] ImageInputs =
+            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif" };
+        private static readonly string[] ImageOutputs =
+            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif" };
 
         public override IList<ConversionCapability> GetCapabilities()
         {
@@ -63,6 +67,21 @@ namespace UniversalConvert.Plugin.FFmpeg
                 });
             }
 
+            foreach (var image in ImageInputs)
+            {
+                var outputs = ImageOutputs
+                    .Where(o => !string.Equals(o, image, StringComparison.OrdinalIgnoreCase))
+                    .Select(ImageOutput)
+                    .ToList();
+
+                caps.Add(new ConversionCapability
+                {
+                    InputExtension = image,
+                    InputDisplayName = image.TrimStart('.').ToUpperInvariant() + " 图片",
+                    Outputs = outputs
+                });
+            }
+
             return caps;
         }
 
@@ -74,7 +93,11 @@ namespace UniversalConvert.Plugin.FFmpeg
             var outExt = request.OutputExtension ?? string.Empty;
             if (!outExt.StartsWith(".")) outExt = "." + outExt;
 
-            if (AudioOutputs.Contains(outExt))
+            if (ImageOutputs.Contains(outExt))
+            {
+                // 图片输出：直接转格式，不加 map/vn
+            }
+            else if (AudioOutputs.Contains(outExt))
             {
                 // 音频输出：丢弃视频流
                 sb.Append(" -vn");
@@ -251,6 +274,15 @@ namespace UniversalConvert.Plugin.FFmpeg
                     Preset("192 kbps", "audioBitrate=192k"),
                     Preset("128 kbps", "audioBitrate=128k")
                 }
+            };
+        }
+
+        private static OutputFormat ImageOutput(string ext)
+        {
+            return new OutputFormat
+            {
+                Extension = ext,
+                DisplayName = ext.TrimStart('.').ToUpperInvariant()
             };
         }
 
