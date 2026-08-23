@@ -1,6 +1,6 @@
 using System;
 using System.Security.Principal;
-using SharpShell;
+using SharpShell.ServerRegistration;
 using UniversalConvert.ContextMenu;
 using UniversalConvert.Core.Config;
 
@@ -46,8 +46,8 @@ namespace UniversalConvert.Installer
 
                 // 2. 注册 SharpShell 扩展
                 ServerRegistrationManager.RegisterServer(
-                    typeof(ConvertContextMenu),
-                    ServerRegistrationManager.RegistrationType.OS64Bit);
+                    new ConvertContextMenu(),
+                    RegistrationType.OS64Bit);
 
                 Console.WriteLine("右键菜单注册成功。请在资源管理器中刷新（或重启 explorer）后生效。");
                 return 0;
@@ -66,8 +66,8 @@ namespace UniversalConvert.Installer
             try
             {
                 ServerRegistrationManager.UnregisterServer(
-                    typeof(ConvertContextMenu),
-                    ServerRegistrationManager.RegistrationType.OS64Bit);
+                    new ConvertContextMenu(),
+                    RegistrationType.OS64Bit);
 
                 Console.WriteLine("右键菜单已卸载。");
                 return 0;
