@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.7.3，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.7.4，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.7.3"
+#define MyAppVersion "1.7.4"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -94,6 +94,22 @@ Type: filesandordirs; Name: "{app}\tools"
 var
   ExplorerKilled: Boolean;
 
+procedure CloseRunningApp();
+var
+  ResultCode: Integer;
+begin
+  // 先优雅关闭（发 WM_CLOSE），再强制结束残留进程，避免 exe/dll 被占用导致安装不完整
+  Exec('taskkill.exe', '/im UniversalConvert.App.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/f /im UniversalConvert.App.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  // 复制文件前显式关闭正在运行的实例（CloseApplications 检测不可靠，这里兜底）
+  CloseRunningApp;
+  Result := '';
+end;
+
 procedure KillExplorer();
 var
   ResultCode: Integer;
@@ -113,9 +129,9 @@ begin
   begin
     if ExplorerKilled then
     begin
-      // 以普通权限重启 explorer；ExecAsOriginalUser 失败时退而用 ShellExec（ShellExecute 会按 explorer 特例降权）
-      if not ExecAsOriginalUser('explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode) then
-        ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+      // 只用 ShellExecute 重启 explorer：它对 explorer.exe 有特例（自动降权并成为 shell），
+      // 避免之前 ExecAsOriginalUser 半成功后又 ShellExec 一次导致新开资源管理器窗口
+      ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
     end;
   end;
 end;
