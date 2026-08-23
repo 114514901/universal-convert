@@ -36,8 +36,6 @@ OutputBaseFilename=UniversalConvert-Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-; 安装完成页提示（不再强制结束 explorer）
-FinishedLabel={cm:FinishNote}
 ; 只支持 64 位（SharpShell 按 OS64Bit 注册，ffmpeg 用 64 位构建）
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
@@ -88,3 +86,12 @@ Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "uninstall"; Flags
 ; 清理用户后续手动放入的插件/工具
 Type: filesandordirs; Name: "{app}\plugins"
 Type: filesandordirs; Name: "{app}\tools"
+
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    MsgBox(CustomMessage('FinishNote'), mbInformation, MB_OK);
+  end;
+end;

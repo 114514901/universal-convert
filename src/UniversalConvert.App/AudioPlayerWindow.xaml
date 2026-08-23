@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.AudioPlayer}" Height="190" Width="440"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Closed="OnWindowClosed">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

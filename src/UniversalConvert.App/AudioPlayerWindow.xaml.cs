@@ -79,8 +79,13 @@ namespace UniversalConvert.App
 
         private void OnClose(object sender, RoutedEventArgs e)
         {
-            _player.Stop();
             Close();
+        }
+
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            // 无论通过按钮还是窗口 X 关闭，都停止播放，避免后台继续出声
+            _player.Stop();
         }
     }
 }
