@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.1.1] - 2026-08-23
+
+### 变更
+- NCM 插件改为「先解密成原格式，再按需 FFmpeg 转码」，`.ncm` 现可转换为全部音频格式（mp3/flac/wav/aac/ogg/m4a/opus），不再只是解密成原格式
+
 ## [1.1.0] - 2026-08-23
 
 ### 新增
@@ -28,5 +33,6 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.1.1]: https://github.com/114514901/universal-convert/releases/tag/v1.1.1
 [1.1.0]: https://github.com/114514901/universal-convert/releases/tag/v1.1.0
 [1.0.0]: https://github.com/114514901/universal-convert/releases/tag/v1.0.0
