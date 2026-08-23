@@ -324,4 +324,7 @@
   <data name="PlayingSimple" xml:space="preserve">
     <value>正在播放</value>
   </data>
+  <data name="Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
 </root>

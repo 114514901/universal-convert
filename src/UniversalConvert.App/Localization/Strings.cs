@@ -102,6 +102,7 @@ namespace UniversalConvert.App.Localization
         public static string PlaybackDone => Get("PlaybackDone");
         public static string Playing => Get("Playing");
         public static string PlayingSimple => Get("PlayingSimple");
+        public static string Volume => Get("Volume");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

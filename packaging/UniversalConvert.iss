@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.5.8，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.5.9，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.8"
+#define MyAppVersion "1.5.9"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -59,12 +59,13 @@ english.RegisteringContextMenu=Registering context menu...
 english.FinishNote=UniversalConvert installation is complete. The context menu has been registered; if it doesn't appear right away, restart Explorer or sign out and back in.
 
 [Files]
-Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+; restartreplace：文件被占用（如 explorer 加载了右键菜单 DLL）时不提示关闭程序，改为重启后替换
+Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace
+Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace
 ; 语言卫星程序集（en\...\resources.dll）
-Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
+Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
+Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked

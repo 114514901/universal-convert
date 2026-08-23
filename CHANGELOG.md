@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.9] - 2026-08-23
+
+### 新增
+- 音频播放器新增音量滑块、进度滑块（可拖动/点击定位）、时长与剩余时间显示
+
+### 修复
+- 安装升级时 explorer 不再被列入「需要关闭的程序」（占用文件改为重启后替换）
+
 ## [1.5.8] - 2026-08-23
 
 ### 修复
@@ -134,6 +142,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.9]: https://github.com/114514901/universal-convert/releases/tag/v1.5.9
 [1.5.8]: https://github.com/114514901/universal-convert/releases/tag/v1.5.8
 [1.5.7]: https://github.com/114514901/universal-convert/releases/tag/v1.5.7
 [1.5.6]: https://github.com/114514901/universal-convert/releases/tag/v1.5.6

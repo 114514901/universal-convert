@@ -324,4 +324,7 @@
   <data name="PlayingSimple" xml:space="preserve">
     <value>Playing</value>
   </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
 </root>
