@@ -1,0 +1,36 @@
+# ---- 构建产物 ----
+[Bb]in/
+[Oo]bj/
+[Dd]ist/
+[Oo]utput/
+artifacts/
+BuildResults/
+
+# ---- Visual Studio ----
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# ---- NuGet ----
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*/
+!**/[Pp]ackages/build/
+
+# ---- 强命名私钥（如以后生成）----
+*.snk
+
+# ---- Inno Setup 输出 ----
+SetupOutput/
+*.exe
+
+# ---- 杂项 ----
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db

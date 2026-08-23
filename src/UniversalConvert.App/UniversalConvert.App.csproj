@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>UniversalConvert.App</RootNamespace>
+    <AssemblyName>UniversalConvert.App</AssemblyName>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UniversalConvert.Core\UniversalConvert.Core.csproj" />
+  </ItemGroup>
+
+</Project>

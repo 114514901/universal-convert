@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>UniversalConvert.Installer</RootNamespace>
+    <AssemblyName>UniversalConvert.Installer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UniversalConvert.ContextMenu\UniversalConvert.ContextMenu.csproj" />
+    <ProjectReference Include="..\UniversalConvert.Core\UniversalConvert.Core.csproj" />
+  </ItemGroup>
+
+</Project>

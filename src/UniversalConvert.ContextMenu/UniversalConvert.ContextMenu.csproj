@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>UniversalConvert.ContextMenu</RootNamespace>
+    <AssemblyName>UniversalConvert.ContextMenu</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpShell" Version="2.7.2" />
+    <ProjectReference Include="..\UniversalConvert.Core\UniversalConvert.Core.csproj" />
+  </ItemGroup>
+
+</Project>
