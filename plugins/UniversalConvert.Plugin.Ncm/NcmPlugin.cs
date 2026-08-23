@@ -31,8 +31,8 @@ namespace UniversalConvert.Plugin.Ncm
         private IPluginContext _context;
 
         public string Id => "com.universalconvert.ncm";
-        public string Name => "NCM 解密模块";
-        public string Description => "解密网易云音乐 .ncm 文件（可选择转码为其他音频格式）";
+        public string Name => "NCM 解密";
+        public string Description => "网易云音乐 .ncm 解密（可选转码为其它音频格式）";
         public string Version => "1.0.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
@@ -54,7 +54,7 @@ namespace UniversalConvert.Plugin.Ncm
                 new ConversionCapability
                 {
                     InputExtension = ".ncm",
-                    InputDisplayName = "网易云音乐 NCM 格式",
+                    InputDisplayName = "网易云音乐 NCM",
                     Outputs = AudioFormats.Select(AudioOutput).ToList()
                 }
             };
@@ -341,7 +341,7 @@ namespace UniversalConvert.Plugin.Ncm
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("audioBitrate", "音频编码比特率", "192k",
+                    EnumOption("audioBitrate", "音频码率", "192k",
                         Choice("", "原始"),
                         Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
@@ -349,7 +349,7 @@ namespace UniversalConvert.Plugin.Ncm
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
                         Choice("320k", "320 kbps")),
-                    EnumOption("sampleRate", "音频采样率", "",
+                    EnumOption("sampleRate", "采样率", "",
                         Choice("", "原始"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
