@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.7.1，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.7.2，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.7.1"
+#define MyAppVersion "1.7.2"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -41,8 +41,9 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
 ; 注册右键菜单需写 HKLM，安装包必须提权
 PrivilegesRequired=admin
-; 不弹"需要关闭的程序"对话框——被占用的右键菜单 DLL 由 [Code] 里先结束 explorer 再写、写完重启
-CloseApplications=no
+; 弹「需要关闭的程序」提示（如正在运行的 UniversalConvert），但排除 explorer——explorer 由 [Code] 的杀/重启流程处理
+CloseApplications=yes
+CloseApplicationsFilter=explorer.exe
 RestartApplications=no
 
 [Languages]

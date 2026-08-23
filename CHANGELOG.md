@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.2] - 2026-08-23
+
+### 修复
+- 安装时不再忽略正在运行的 UniversalConvert：恢复「关闭程序」提示（仅排除 explorer），避免文件占用导致安装不完整
+
 ## [1.7.1] - 2026-08-23
 
 ### 修复
@@ -165,6 +170,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.2]: https://github.com/114514901/universal-convert/releases/tag/v1.7.2
 [1.7.1]: https://github.com/114514901/universal-convert/releases/tag/v1.7.1
 [1.7.0]: https://github.com/114514901/universal-convert/releases/tag/v1.7.0
 [1.6.0]: https://github.com/114514901/universal-convert/releases/tag/v1.6.0
