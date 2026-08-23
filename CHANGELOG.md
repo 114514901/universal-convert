@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.7] - 2026-08-23
+
+### 新增
+- 简易音频播放：主界面双击音频文件可播放；批量转换窗口双击已完成项（播放转换后的文件）
+
 ## [1.5.6] - 2026-08-23
 
 ### 改进
@@ -123,6 +128,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.7]: https://github.com/114514901/universal-convert/releases/tag/v1.5.7
 [1.5.6]: https://github.com/114514901/universal-convert/releases/tag/v1.5.6
 [1.5.5]: https://github.com/114514901/universal-convert/releases/tag/v1.5.5
 [1.5.4]: https://github.com/114514901/universal-convert/releases/tag/v1.5.4

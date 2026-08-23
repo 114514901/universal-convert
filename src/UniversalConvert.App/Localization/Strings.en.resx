@@ -300,4 +300,28 @@
   <data name="SettingWorkerThreadsDescription" xml:space="preserve">
     <value>Files converted in parallel</value>
   </data>
+  <data name="AudioPlayer" xml:space="preserve">
+    <value>Audio playback</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Pause</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="CannotPlay" xml:space="preserve">
+    <value>Cannot play this file</value>
+  </data>
+  <data name="PlaybackDone" xml:space="preserve">
+    <value>Playback finished</value>
+  </data>
+  <data name="Playing" xml:space="preserve">
+    <value>Playing (duration {0})</value>
+  </data>
+  <data name="PlayingSimple" xml:space="preserve">
+    <value>Playing</value>
+  </data>
 </root>

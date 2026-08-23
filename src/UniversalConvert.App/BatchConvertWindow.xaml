@@ -19,7 +19,8 @@
         <TextBlock x:Name="TitleText" Grid.Row="0" FontSize="14" FontWeight="SemiBold"
                    TextWrapping="Wrap" Margin="0,0,0,8"/>
 
-        <ListView x:Name="ItemList" Grid.Row="1" Margin="0,4,0,0">
+        <ListView x:Name="ItemList" Grid.Row="1" Margin="0,4,0,0"
+                  MouseDoubleClick="OnItemDoubleClick">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="{x:Static loc:Strings.FileColumn}" Width="380"

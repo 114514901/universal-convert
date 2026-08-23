@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -176,6 +177,30 @@ namespace UniversalConvert.App
                 if (idx >= 0) _files.RemoveAt(idx);
             }
             RefreshFileList();
+        }
+
+        private static readonly string[] PlayableAudioExtensions =
+            { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma" };
+
+        private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var name = FileList.SelectedItem as string;
+            if (string.IsNullOrEmpty(name)) return;
+
+            var idx = FindIndexByName(name);
+            if (idx < 0 || idx >= _files.Count) return;
+
+            var path = _files[idx];
+            if (!IsPlayableAudio(path)) return;
+
+            var window = new AudioPlayerWindow(path) { Owner = this };
+            window.Show();
+        }
+
+        private static bool IsPlayableAudio(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return PlayableAudioExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
         }
 
         private void OnClear(object sender, RoutedEventArgs e)

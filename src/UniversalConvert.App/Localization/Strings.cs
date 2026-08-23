@@ -94,6 +94,14 @@ namespace UniversalConvert.App.Localization
         public static string AboutDescription => Get("AboutDescription");
         public static string OpenProject => Get("OpenProject");
         public static string ThirdPartyText => Get("ThirdPartyText");
+        public static string AudioPlayer => Get("AudioPlayer");
+        public static string Play => Get("Play");
+        public static string Pause => Get("Pause");
+        public static string Stop => Get("Stop");
+        public static string CannotPlay => Get("CannotPlay");
+        public static string PlaybackDone => Get("PlaybackDone");
+        public static string Playing => Get("Playing");
+        public static string PlayingSimple => Get("PlayingSimple");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

@@ -62,7 +62,8 @@
                 </StackPanel>
             </DockPanel>
             <ListBox x:Name="FileList" Grid.Row="1" SelectionMode="Extended" Margin="0,6,0,0"
-                     ToolTip="{x:Static loc:Strings.DropHint}"/>
+                     ToolTip="{x:Static loc:Strings.DropHint}"
+                     MouseDoubleClick="OnFileDoubleClick"/>
         </Grid>
 
         <StackPanel Grid.Row="3" Margin="0,10,0,0">

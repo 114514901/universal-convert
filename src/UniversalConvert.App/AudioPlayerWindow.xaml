@@ -1,0 +1,25 @@
+<Window x:Class="UniversalConvert.App.AudioPlayerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
+        Title="{x:Static loc:Strings.AudioPlayer}" Height="190" Width="440"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleText" Grid.Row="0" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+        <TextBlock x:Name="StatusText" Grid.Row="1" Foreground="#666666" Margin="0,0,0,12"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Button x:Name="PlayPauseButton" Content="{x:Static loc:Strings.Pause}" Padding="16,6"
+                    IsEnabled="False" Click="OnPlayPause" Margin="0,0,8,0"/>
+            <Button Content="{x:Static loc:Strings.Stop}" Padding="16,6" Click="OnStop" Margin="0,0,8,0"/>
+            <Button Content="{x:Static loc:Strings.Close}" Padding="16,6" Click="OnClose"/>
+        </StackPanel>
+    </Grid>
+</Window>

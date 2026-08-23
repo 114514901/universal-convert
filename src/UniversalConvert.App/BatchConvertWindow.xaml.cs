@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -133,6 +134,7 @@ namespace UniversalConvert.App
                 {
                     _progressByIndex[index] = 100;
                     Interlocked.Increment(ref _doneCount);
+                    item.OutputPath = result.OutputPath;
                     if (!string.IsNullOrEmpty(result.OutputPath))
                     {
                         lock (_outputLock) _outputPaths.Add(result.OutputPath);
@@ -210,6 +212,16 @@ namespace UniversalConvert.App
             }
         }
 
+        private void OnItemDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var item = ItemList.SelectedItem as BatchItem;
+            if (item == null || string.IsNullOrEmpty(item.OutputPath)) return;
+            if (!File.Exists(item.OutputPath)) return;
+
+            var window = new AudioPlayerWindow(item.OutputPath) { Owner = this };
+            window.Show();
+        }
+
         private void OnClose(object sender, RoutedEventArgs e)
         {
             Close();
@@ -221,6 +233,9 @@ namespace UniversalConvert.App
         private string _status;
 
         public string FileName { get; set; }
+
+        /// <summary>转换成功后的输出文件路径；未完成时为 null。</summary>
+        public string OutputPath { get; set; }
 
         public string Status
         {

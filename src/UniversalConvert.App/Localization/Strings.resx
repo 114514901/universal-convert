@@ -300,4 +300,28 @@
   <data name="SettingWorkerThreadsDescription" xml:space="preserve">
     <value>同时转换的文件数</value>
   </data>
+  <data name="AudioPlayer" xml:space="preserve">
+    <value>音频播放</value>
+  </data>
+  <data name="Play" xml:space="preserve">
+    <value>播放</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>暂停</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="CannotPlay" xml:space="preserve">
+    <value>无法播放该文件</value>
+  </data>
+  <data name="PlaybackDone" xml:space="preserve">
+    <value>播放完成</value>
+  </data>
+  <data name="Playing" xml:space="preserve">
+    <value>正在播放（时长 {0}）</value>
+  </data>
+  <data name="PlayingSimple" xml:space="preserve">
+    <value>正在播放</value>
+  </data>
 </root>
