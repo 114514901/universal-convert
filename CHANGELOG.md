@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.8] - 2026-08-23
+
+### 修复
+- 移除安装时「强制结束 explorer」的步骤（会导致桌面/任务栏异常），改为完成页提示手动重启
+
 ## [1.5.7] - 2026-08-23
 
 ### 新增
@@ -128,6 +133,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.8]: https://github.com/114514901/universal-convert/releases/tag/v1.5.8
 [1.5.7]: https://github.com/114514901/universal-convert/releases/tag/v1.5.7
 [1.5.6]: https://github.com/114514901/universal-convert/releases/tag/v1.5.6
 [1.5.5]: https://github.com/114514901/universal-convert/releases/tag/v1.5.5

@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.5.7，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.5.8，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.7"
+#define MyAppVersion "1.5.8"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -36,6 +36,8 @@ OutputBaseFilename=UniversalConvert-Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+; 安装完成页提示（不再强制结束 explorer）
+FinishedLabel={cm:FinishNote}
 ; 只支持 64 位（SharpShell 按 OS64Bit 注册，ffmpeg 用 64 位构建）
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
@@ -52,11 +54,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 chinesesimplified.CreateDesktopIcon=创建桌面快捷方式
 chinesesimplified.AdditionalTasks=附加任务：
 chinesesimplified.RegisteringContextMenu=正在注册右键菜单...
-chinesesimplified.RestartExplorer=重启资源管理器以生效（推荐）
+chinesesimplified.FinishNote=UniversalConvert 安装完成。右键菜单已注册；若未立即生效，请重启资源管理器或注销后重新登录。
 english.CreateDesktopIcon=Create a desktop icon
 english.AdditionalTasks=Additional tasks:
 english.RegisteringContextMenu=Registering context menu...
-english.RestartExplorer=Restart Explorer to apply changes (recommended)
+english.FinishNote=UniversalConvert installation is complete. The context menu has been registered; if it doesn't appear right away, restart Explorer or sign out and back in.
 
 [Files]
 Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -77,9 +79,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 ; 文件复制完后，调用我们的注册器写 HKLM 右键菜单（继承安装包的管理员权限）
 Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "install"; \
     Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"
-; 完成页提供"重启资源管理器"复选框（默认勾选），重启后右键菜单立即生效
-Filename: "{cmd}"; Parameters: "/c taskkill /f /im explorer.exe & start explorer.exe"; \
-    Description: "{cm:RestartExplorer}"; Flags: postinstall runhidden
 
 [UninstallRun]
 ; 卸载时先反注册，再删文件（Inno 会先执行本段再删除文件）
