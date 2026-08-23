@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.1] - 2026-08-23
+
+### 修复
+- 修复「查看更新内容」在中文系统上乱码（更新检查强制使用 UTF-8 解码响应）
+
 ## [1.5.0] - 2026-08-23
 
 ### 新增
@@ -88,6 +93,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.1]: https://github.com/114514901/universal-convert/releases/tag/v1.5.1
 [1.5.0]: https://github.com/114514901/universal-convert/releases/tag/v1.5.0
 [1.4.0]: https://github.com/114514901/universal-convert/releases/tag/v1.4.0
 [1.3.1]: https://github.com/114514901/universal-convert/releases/tag/v1.3.1

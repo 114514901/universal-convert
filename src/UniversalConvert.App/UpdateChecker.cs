@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -39,6 +40,7 @@ namespace UniversalConvert.App
                 using (var client = new WebClient())
                 {
                     client.Headers.Add("User-Agent", "UniversalConvert");
+                    client.Encoding = Encoding.UTF8; // 强制 UTF-8，避免中文系统按 GBK 解码导致乱码
                     var json = await client.DownloadStringTaskAsync(url).ConfigureAwait(false);
 
                     JObject obj = isDev
