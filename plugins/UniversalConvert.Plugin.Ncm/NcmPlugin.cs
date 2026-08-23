@@ -67,7 +67,7 @@ namespace UniversalConvert.Plugin.Ncm
                 var started = DateTime.UtcNow;
                 try
                 {
-                    var outputPath = Convert(request, progress, cancellationToken);
+                    var outputPath = ConvertCore(request, progress, cancellationToken);
                     return ConversionResult.Succeeded(outputPath, DateTime.UtcNow - started);
                 }
                 catch (OperationCanceledException)
@@ -81,7 +81,7 @@ namespace UniversalConvert.Plugin.Ncm
             }, cancellationToken);
         }
 
-        private string Convert(ConversionRequest request, IProgress<ConversionProgress> progress, CancellationToken ct)
+        private string ConvertCore(ConversionRequest request, IProgress<ConversionProgress> progress, CancellationToken ct)
         {
             var input = request.InputPath;
             if (!File.Exists(input))
