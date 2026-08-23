@@ -294,4 +294,10 @@
   <data name="UpdateChannelDev" xml:space="preserve">
     <value>Include dev builds</value>
   </data>
+  <data name="SettingWorkerThreads" xml:space="preserve">
+    <value>Processing threads</value>
+  </data>
+  <data name="SettingWorkerThreadsDescription" xml:space="preserve">
+    <value>Files converted in parallel</value>
+  </data>
 </root>

@@ -285,7 +285,13 @@ namespace UniversalConvert.App
             }
 
             var targetExt = _commonTargets[OutputCombo.SelectedIndex].OutputExtension;
-            var window = new BatchConvertWindow(_host, _files.ToArray(), targetExt) { Owner = this };
+            int workerThreads;
+            if (!int.TryParse(_settingsManager.Get("workerThreads"), out workerThreads))
+            {
+                workerThreads = 2;
+            }
+
+            var window = new BatchConvertWindow(_host, _files.ToArray(), targetExt, workerThreads) { Owner = this };
             window.ShowDialog();
         }
 

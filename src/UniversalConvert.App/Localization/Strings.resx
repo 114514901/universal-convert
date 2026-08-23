@@ -294,4 +294,10 @@
   <data name="UpdateChannelDev" xml:space="preserve">
     <value>包含开发版</value>
   </data>
+  <data name="SettingWorkerThreads" xml:space="preserve">
+    <value>处理线程数</value>
+  </data>
+  <data name="SettingWorkerThreadsDescription" xml:space="preserve">
+    <value>同时转换的文件数</value>
+  </data>
 </root>

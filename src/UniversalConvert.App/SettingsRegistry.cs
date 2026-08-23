@@ -30,6 +30,22 @@ namespace UniversalConvert.App
             },
             new SettingDefinition
             {
+                Key = "workerThreads",
+                Category = "@SettingsCategoryGeneral",
+                Label = "@SettingWorkerThreads",
+                Description = "@SettingWorkerThreadsDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "2",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "1", Label = "1" },
+                    new OptionChoice { Value = "2", Label = "2" },
+                    new OptionChoice { Value = "4", Label = "4" },
+                    new OptionChoice { Value = "8", Label = "8" }
+                }
+            },
+            new SettingDefinition
+            {
                 Key = "updateChannel",
                 Category = "@SettingsCategoryUpdate",
                 Label = "@SettingUpdateChannel",
