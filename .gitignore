@@ -34,3 +34,4 @@ SetupOutput/
 *.cache
 .DS_Store
 Thumbs.db
+changelog_entry.md
