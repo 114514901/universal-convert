@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.7.0，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.7.1，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.7.0"
+#define MyAppVersion "1.7.1"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -60,14 +60,13 @@ english.AdditionalTasks=Additional tasks:
 english.RegisteringContextMenu=Registering context menu...
 
 [Files]
-; exe 等非 explorer 占用的文件先正常复制
+; 普通文件先复制（explorer 还活着，大文件 tools\ffmpeg 也趁现在复制）
 Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
-; 被 explorer 加载的 DLL 放到这里：BeforeInstall 里先结束 explorer，再写入，ssPostInstall 里重启
-Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion; BeforeInstall: KillExplorer
-; 语言卫星程序集（en\...\resources.dll）
 Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
+; 被 explorer 加载的 DLL 放最后：BeforeInstall 先结束 explorer，写入后由 ssPostInstall 重启
+Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion; BeforeInstall: KillExplorer
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
@@ -112,6 +111,10 @@ begin
   if CurStep = ssPostInstall then
   begin
     if ExplorerKilled then
-      ExecAsOriginalUser('explorer.exe', '', '', SW_HIDE, ewNoWait, ResultCode);
+    begin
+      // 以普通权限重启 explorer；ExecAsOriginalUser 失败时退而用 ShellExec（ShellExecute 会按 explorer 特例降权）
+      if not ExecAsOriginalUser('explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode) then
+        ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+    end;
   end;
 end;

@@ -63,6 +63,13 @@ jobs:
           python -c "import lzma; open('dist/plugins/kugou_key.dat','wb').write(lzma.open('plugins/UniversalConvert.Plugin.Kgm/kugou_key.xz','rb').read())"
           Get-Item dist\plugins\kugou_key.dat | Select-Object Name, Length
 
+      # 打包 Core SDK，供扩展仓库（universal-convert-extensions）编译插件时引用
+      - name: Package Core SDK
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "src\UniversalConvert.Core\bin\Release\net48\UniversalConvert.Core.dll", "src\UniversalConvert.Core\bin\Release\net48\Newtonsoft.Json.dll" -DestinationPath "UniversalConvert.Core.SDK.zip"
+          Get-Item UniversalConvert.Core.SDK.zip | Select-Object Name, Length
+
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y --no-progress
@@ -87,6 +94,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: output/*.exe
+          files: |
+            output/*.exe
+            UniversalConvert.Core.SDK.zip
           body_path: changelog_entry.md
           prerelease: ${{ contains(github.ref_name, '-') }}
