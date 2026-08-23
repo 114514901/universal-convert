@@ -62,8 +62,8 @@ namespace UniversalConvert.Plugin.Kgm
         private IPluginContext _context;
 
         public string Id => "com.universalconvert.kgm";
-        public string Name => "KGM 解密";
-        public string Description => "酷狗音乐 .kgm/.kgma 解密（可选转码为其它音频格式）";
+        public string Name => "KGM 解密模块";
+        public string Description => "解密酷狗音乐 .kgm / .kgma 文件（可选择转码为其他音频格式）";
         public string Version => "1.0.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
@@ -86,13 +86,13 @@ namespace UniversalConvert.Plugin.Kgm
                 new ConversionCapability
                 {
                     InputExtension = ".kgm",
-                    InputDisplayName = "酷狗音乐 KGM",
+                    InputDisplayName = "酷狗音乐 KGM 格式",
                     Outputs = outputs
                 },
                 new ConversionCapability
                 {
                     InputExtension = ".kgma",
-                    InputDisplayName = "酷狗音乐 KGMA",
+                    InputDisplayName = "酷狗音乐 KGMA 格式",
                     Outputs = outputs
                 }
             };
@@ -336,7 +336,7 @@ namespace UniversalConvert.Plugin.Kgm
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("audioBitrate", "音频码率", "192k",
+                    EnumOption("audioBitrate", "音频编码比特率", "192k",
                         Choice("", "原始"),
                         Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
@@ -344,7 +344,7 @@ namespace UniversalConvert.Plugin.Kgm
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
                         Choice("320k", "320 kbps")),
-                    EnumOption("sampleRate", "采样率", "",
+                    EnumOption("sampleRate", "音频采样率", "",
                         Choice("", "原始"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),

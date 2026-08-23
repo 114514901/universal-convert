@@ -13,291 +13,291 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DropHint" xml:space="preserve">
-    <value>将文件拖到此处，或点击选择</value>
+    <value>请将待处理文件拖放至此处，或单击“选择”按钮以启动文件检索进程……</value>
   </data>
   <data name="NoFileSelected" xml:space="preserve">
-    <value>未选择文件</value>
+    <value>目前尚未选择任何文件。</value>
   </data>
   <data name="SelectFile" xml:space="preserve">
-    <value>选择文件...</value>
+    <value>请单击此处以启动文件选择进程……</value>
   </data>
   <data name="OutputFormats" xml:space="preserve">
-    <value>可转换的目标格式</value>
+    <value>当前支持转换的目标格式列表</value>
   </data>
   <data name="Customize" xml:space="preserve">
-    <value>自定义...</value>
+    <value>自定义配置……</value>
   </data>
   <data name="Convert" xml:space="preserve">
-    <value>转换</value>
+    <value>启动目标格式转换进程</value>
   </data>
   <data name="SelectFileDialogTitle" xml:space="preserve">
-    <value>选择要转换的文件</value>
+    <value>请选择您希望进行格式转换的源文件。</value>
   </data>
   <data name="AllFilesFilter" xml:space="preserve">
-    <value>所有文件|*.*</value>
+    <value>所有文件（全部扩展名）|*.*</value>
   </data>
   <data name="PleaseSelectFormat" xml:space="preserve">
-    <value>请先选择目标格式。</value>
+    <value>请首先指定目标文件格式。</value>
   </data>
   <data name="NoParamsMessage" xml:space="preserve">
-    <value>该格式没有可自定义的参数，直接点击“转换”即可。</value>
+    <value>当前所选的目标格式不包含任何可自定义的参数。您可直接单击“转换”按钮以启动转换进程。</value>
   </data>
   <data name="Preparing" xml:space="preserve">
-    <value>准备中...</value>
+    <value>正在初始化转换环境……</value>
   </data>
   <data name="ConvertingTitle" xml:space="preserve">
-    <value>转换中</value>
+    <value>转换进程正在进行中……</value>
   </data>
   <data name="Cancel" xml:space="preserve">
-    <value>取消</value>
+    <value>取消（中止当前进程）</value>
   </data>
   <data name="Close" xml:space="preserve">
-    <value>关闭</value>
+    <value>关闭当前窗口</value>
   </data>
   <data name="OpenOutputFolder" xml:space="preserve">
-    <value>打开输出文件夹</value>
+    <value>启动文件资源管理器并打开输出目录</value>
   </data>
   <data name="Done" xml:space="preserve">
-    <value>完成</value>
+    <value>转换操作已完成</value>
   </data>
   <data name="ConvertingFormat" xml:space="preserve">
-    <value>正在转换：{0}  →  .{1}</value>
+    <value>当前正在执行将 {0} 转换至 .{1} 格式的操作……</value>
   </data>
   <data name="ConvertSucceeded" xml:space="preserve">
-    <value>转换完成（用时 {0:F1} 秒）</value>
+    <value>转换操作已完成，共耗时 {0:F1} 秒。</value>
   </data>
   <data name="ConvertFailedPrefix" xml:space="preserve">
-    <value>转换失败：</value>
+    <value>转换操作失败，原因如下：</value>
   </data>
   <data name="CustomizeTitle" xml:space="preserve">
-    <value>自定义转换</value>
+    <value>自定义转换参数设置</value>
   </data>
   <data name="Preset" xml:space="preserve">
-    <value>预设：</value>
+    <value>当前参数预设：</value>
   </data>
   <data name="StartConvert" xml:space="preserve">
-    <value>开始转换</value>
+    <value>启动格式转换进程</value>
   </data>
   <data name="DefaultRecommended" xml:space="preserve">
-    <value>默认（推荐）</value>
+    <value>默认预设（推荐）</value>
   </data>
   <data name="TargetFormat" xml:space="preserve">
-    <value>目标格式：{0}  (.{1})</value>
+    <value>目标输出格式：{0}（.{1}）</value>
   </data>
   <data name="InputFileMissing" xml:space="preserve">
-    <value>输入文件不存在：</value>
+    <value>无法定位所需的输入文件：</value>
   </data>
   <data name="UnsupportedConversion" xml:space="preserve">
-    <value>不支持将 {0} 转换为 .{1}</value>
+    <value>当前不支持执行从 {0} 至 .{1} 格式的转换操作。</value>
   </data>
   <data name="ToolNotInstalled" xml:space="preserve">
-    <value>  [工具未安装]</value>
+    <value>  [检测到所需工具未安装]</value>
   </data>
   <data name="AdminWarning" xml:space="preserve">
-    <value>当前以管理员身份运行：Windows 会禁用从资源管理器拖放文件，建议以普通权限运行。</value>
+    <value>本程序当前正以管理员权限运行。请注意，Windows 在管理员权限下会禁用从资源管理器直接拖放文件的功能，因此建议您使用普通权限启动本程序。</value>
   </data>
   <data name="Retry" xml:space="preserve">
-    <value>重试</value>
+    <value>重新尝试执行该操作</value>
   </data>
   <data name="CopyError" xml:space="preserve">
-    <value>复制报错</value>
+    <value>将错误诊断信息复制至剪贴板</value>
   </data>
   <data name="ErrorDetail" xml:space="preserve">
-    <value>详细信息</value>
+    <value>显示技术性详细错误信息</value>
   </data>
   <data name="ErrorUnknown" xml:space="preserve">
-    <value>转换失败</value>
+    <value>转换操作未能成功完成。</value>
   </data>
   <data name="ErrorUnknownSuggestion" xml:space="preserve">
-    <value>请查看下方详细信息。</value>
+    <value>请您查阅以下区域中显示的详细技术诊断信息。</value>
   </data>
   <data name="ErrorToolNotFound" xml:space="preserve">
-    <value>未找到所需工具</value>
+    <value>未能定位所需的处理工具。</value>
   </data>
   <data name="ErrorToolNotFoundSuggestion" xml:space="preserve">
-    <value>请安装对应工具，或在设置中配置其路径。</value>
+    <value>请您安装对应的处理工具，或在“设置”页面中手动配置该工具的可执行文件路径。</value>
   </data>
   <data name="ErrorInputFileMissing" xml:space="preserve">
-    <value>找不到输入文件</value>
+    <value>未能找到所指定的输入文件。</value>
   </data>
   <data name="ErrorInputFileMissingSuggestion" xml:space="preserve">
-    <value>请检查文件路径是否正确，文件是否被移动或删除。</value>
+    <value>请确认文件路径是否正确，并检查文件是否已被移动、重命名或删除。</value>
   </data>
   <data name="ErrorPermissionDenied" xml:space="preserve">
-    <value>没有写入权限</value>
+    <value>当前对输出目录的写入权限不足。</value>
   </data>
   <data name="ErrorPermissionDeniedSuggestion" xml:space="preserve">
-    <value>请检查输出目录是否有写入权限，或尝试以普通权限运行。</value>
+    <value>请检查输出目录是否授予了写入权限，或尝试以普通用户权限重新启动本程序。</value>
   </data>
   <data name="ErrorUnknownEncoder" xml:space="preserve">
-    <value>编码器不可用</value>
+    <value>当前环境缺少可用的编码器组件。</value>
   </data>
   <data name="ErrorUnknownEncoderSuggestion" xml:space="preserve">
-    <value>缺少所需编码器（如 libx264）。请安装完整版 FFmpeg（GPL 构建），或更换其他编码器。</value>
+    <value>系统缺少必需的编码器组件（例如 libx264）。建议您安装完整版 FFmpeg（GPL 构建），或更换为其他可用编码器。</value>
   </data>
   <data name="ErrorInvalidInput" xml:space="preserve">
-    <value>输入文件无效或已损坏</value>
+    <value>所指定的输入文件无效，或该文件已损坏。</value>
   </data>
   <data name="ErrorInvalidInputSuggestion" xml:space="preserve">
-    <value>请确认文件完整、格式正确且未被加密。</value>
+    <value>请确认文件内容完整、格式正确，且未经过加密处理。</value>
   </data>
   <data name="ErrorNoSpaceLeft" xml:space="preserve">
-    <value>磁盘空间不足</value>
+    <value>磁盘剩余空间不足以支持转换操作。</value>
   </data>
   <data name="ErrorNoSpaceLeftSuggestion" xml:space="preserve">
-    <value>请清理磁盘空间后重试。</value>
+    <value>请清理磁盘空间后重新尝试执行该操作。</value>
   </data>
   <data name="UpdateAvailable" xml:space="preserve">
-    <value>发现新版本 {0}，点击下载更新。</value>
+    <value>检测到可用新版本 {0}。请单击此处以启动下载更新进程。</value>
   </data>
   <data name="DownloadUpdate" xml:space="preserve">
-    <value>下载更新</value>
+    <value>启动更新下载进程</value>
   </data>
   <data name="FilesLabel" xml:space="preserve">
-    <value>待转换文件</value>
+    <value>等待执行转换操作的文件列表</value>
   </data>
   <data name="AddFiles" xml:space="preserve">
-    <value>添加文件</value>
+    <value>将新的待转换文件添加至当前列表</value>
   </data>
   <data name="RemoveSelected" xml:space="preserve">
-    <value>移除选中</value>
+    <value>将已选中的文件从列表中移除</value>
   </data>
   <data name="ClearAll" xml:space="preserve">
-    <value>清空</value>
+    <value>清空当前列表中的所有项目</value>
   </data>
   <data name="NoCommonFormat" xml:space="preserve">
-    <value>所选文件没有共同支持的目标格式。</value>
+    <value>当前所选文件之间不存在共同支持的目标格式。请选择其他文件或调整文件组合。</value>
   </data>
   <data name="BatchTitle" xml:space="preserve">
-    <value>批量转换</value>
+    <value>启动批量转换进程</value>
   </data>
   <data name="FileColumn" xml:space="preserve">
-    <value>文件</value>
+    <value>源文件名称</value>
   </data>
   <data name="StatusColumn" xml:space="preserve">
-    <value>状态</value>
+    <value>当前处理状态</value>
   </data>
   <data name="StatusPending" xml:space="preserve">
-    <value>等待</value>
+    <value>处于等待处理状态</value>
   </data>
   <data name="StatusConverting" xml:space="preserve">
-    <value>转换中</value>
+    <value>转换进程正在进行中……</value>
   </data>
   <data name="StatusDone" xml:space="preserve">
-    <value>完成</value>
+    <value>转换操作已完成</value>
   </data>
   <data name="StatusSkipped" xml:space="preserve">
-    <value>跳过</value>
+    <value>该文件已被跳过</value>
   </data>
   <data name="StatusFailed" xml:space="preserve">
-    <value>失败</value>
+    <value>转换操作未能成功完成</value>
   </data>
   <data name="BatchSummary" xml:space="preserve">
-    <value>完成 {0}/{1}，失败 {2}</value>
+    <value>共有 {1} 项操作，其中 {0} 项已成功完成，{2} 项未能完成。</value>
   </data>
   <data name="ErrorsLabel" xml:space="preserve">
-    <value>错误信息</value>
+    <value>错误诊断信息</value>
   </data>
   <data name="ViewReleaseNotes" xml:space="preserve">
-    <value>查看更新内容</value>
+    <value>查看本次更新的详细内容</value>
   </data>
   <data name="Downloading" xml:space="preserve">
-    <value>下载中 {0}%</value>
+    <value>更新下载进行中：{0}%……</value>
   </data>
   <data name="DownloadComplete" xml:space="preserve">
-    <value>下载完成，启动安装程序...</value>
+    <value>更新下载已完成，正在启动安装程序……</value>
   </data>
   <data name="DownloadFailed" xml:space="preserve">
-    <value>下载失败：{0}</value>
+    <value>更新下载操作未能成功完成：{0}</value>
   </data>
   <data name="Settings" xml:space="preserve">
-    <value>设置</value>
+    <value>参数设置</value>
   </data>
   <data name="Save" xml:space="preserve">
-    <value>保存</value>
+    <value>保存当前参数配置</value>
   </data>
   <data name="PluginManagerTitle" xml:space="preserve">
     <value>扩展管理器</value>
   </data>
   <data name="PluginNameColumn" xml:space="preserve">
-    <value>扩展</value>
+    <value>扩展模块名称</value>
   </data>
   <data name="VersionColumn" xml:space="preserve">
-    <value>版本</value>
+    <value>版本信息</value>
   </data>
   <data name="StatusCompatible" xml:space="preserve">
-    <value>正常</value>
+    <value>运行状态正常</value>
   </data>
   <data name="StatusAppTooOld" xml:space="preserve">
-    <value>应用版本过低（需要 ≥ {0}）</value>
+    <value>当前应用版本过低（最低要求为 ≥ {0}）</value>
   </data>
   <data name="StatusUnverified" xml:space="preserve">
-    <value>未验证（已知最高支持 {0}）</value>
+    <value>未通过兼容性验证（已知最高支持版本：{0}）</value>
   </data>
   <data name="ReleaseNotesTitle" xml:space="preserve">
-    <value>更新内容</value>
+    <value>本次更新的变更内容</value>
   </data>
   <data name="ReleaseNotesEmpty" xml:space="preserve">
-    <value>（暂无更新说明）</value>
+    <value>（暂未提供更新说明）</value>
   </data>
   <data name="Plugins" xml:space="preserve">
-    <value>插件</value>
+    <value>插件管理器</value>
   </data>
   <data name="About" xml:space="preserve">
-    <value>关于</value>
+    <value>有关本软件的详细信息</value>
   </data>
   <data name="VersionFormat" xml:space="preserve">
-    <value>版本 {0}</value>
+    <value>版本：{0}</value>
   </data>
   <data name="AboutDescription" xml:space="preserve">
-    <value>通用格式转换器：支持音视频、图片等格式互转，集成右键菜单与批量转换。</value>
+    <value>本程序为通用格式转换工具，支持音频、视频、图片等文件格式之间的相互转换操作，并集成了资源管理器右键菜单功能与批量转换能力。</value>
   </data>
   <data name="OpenProject" xml:space="preserve">
     <value>项目主页</value>
   </data>
   <data name="ThirdPartyText" xml:space="preserve">
-    <value>包含第三方组件：FFmpeg（GPL）、NCM 解密（MIT）、KGM 解密（反 996 许可证）。</value>
+    <value>本程序包含以下第三方组件：FFmpeg（GPL 许可证）、NCM 解密模块（MIT 许可证）、KGM 解密模块（反 996 许可证）。</value>
   </data>
   <data name="SettingsCategoryGeneral" xml:space="preserve">
-    <value>常规</value>
+    <value>常规设置</value>
   </data>
   <data name="SettingsCategoryUpdate" xml:space="preserve">
-    <value>更新</value>
+    <value>更新设置</value>
   </data>
   <data name="SettingLanguage" xml:space="preserve">
-    <value>语言</value>
+    <value>界面语言设置</value>
   </data>
   <data name="SettingLanguageDescription" xml:space="preserve">
-    <value>界面语言（重启后生效）</value>
+    <value>界面显示语言（重新启动程序后生效）</value>
   </data>
   <data name="SettingUpdateChannel" xml:space="preserve">
-    <value>更新渠道</value>
+    <value>更新发布渠道设置</value>
   </data>
   <data name="SettingUpdateChannelDescription" xml:space="preserve">
-    <value>选择接收正式版还是开发版更新</value>
+    <value>请选择您希望接收的更新类型：正式版更新或开发版更新。</value>
   </data>
   <data name="LanguageAuto" xml:space="preserve">
-    <value>跟随系统</value>
+    <value>自动跟随操作系统语言</value>
   </data>
   <data name="LanguageZh" xml:space="preserve">
-    <value>中文</value>
+    <value>中文（简体）</value>
   </data>
   <data name="LanguageEn" xml:space="preserve">
-    <value>English</value>
+    <value>英语</value>
   </data>
   <data name="UpdateChannelAuto" xml:space="preserve">
-    <value>自动（跟随当前版本）</value>
+    <value>自动（根据当前版本自动配置）</value>
   </data>
   <data name="UpdateChannelStable" xml:space="preserve">
-    <value>仅正式版</value>
+    <value>仅接收正式版更新</value>
   </data>
   <data name="UpdateChannelDev" xml:space="preserve">
-    <value>包含开发版</value>
+    <value>包含开发版（预览版）更新</value>
   </data>
   <data name="SettingWorkerThreads" xml:space="preserve">
-    <value>处理线程数</value>
+    <value>并发处理线程数量</value>
   </data>
   <data name="SettingWorkerThreadsDescription" xml:space="preserve">
-    <value>同时转换的文件数</value>
+    <value>同时进行转换操作的最大文件数量</value>
   </data>
 </root>

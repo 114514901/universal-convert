@@ -17,7 +17,7 @@ namespace UniversalConvert.Plugin.FFmpeg
     {
         public override string Id => "com.universalconvert.ffmpeg";
         public override string Name => "FFmpeg";
-        public override string Description => "音视频/图片转换，基于 FFmpeg";
+        public override string Description => "基于 FFmpeg 的音频、视频、图片格式转换功能";
         public override string Version => "1.0.0";
         protected override string ToolName => "ffmpeg";
 
@@ -206,20 +206,20 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("videoCodec", "视频编码", "libx264",
+                    EnumOption("videoCodec", "视频编码器", "libx264",
                         Choice("libx264", "H.264 (libx264)"),
                         Choice("libx265", "H.265 (libx265)"),
                         Choice("libvpx-vp9", "VP9 (libvpx-vp9)"),
                         Choice("mpeg4", "MPEG-4")),
-                    EnumOption("scale", "分辨率", "",
-                        Choice("", "原始"),
+                    EnumOption("scale", "视频分辨率", "",
+                        Choice("", "原始尺寸（不缩放）"),
                         Choice("3840:2160", "4K (3840×2160)"),
                         Choice("2560:1440", "2K (2560×1440)"),
                         Choice("1920:1080", "1080p (1920×1080)"),
                         Choice("1280:720", "720p (1280×720)"),
                         Choice("854:480", "480p (854×480)"),
                         Choice("640:360", "360p (640×360)")),
-                    EnumOption("videoBitrate", "视频码率", "",
+                    EnumOption("videoBitrate", "视频编码比特率", "",
                         Choice("", "原始"),
                         Choice("500k", "500 kbps"),
                         Choice("1000k", "1000 kbps"),
@@ -228,7 +228,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("8000k", "8000 kbps"),
                         Choice("12000k", "12000 kbps"),
                         Choice("20000k", "20000 kbps")),
-                    EnumOption("fps", "帧率", "",
+                    EnumOption("fps", "视频帧率", "",
                         Choice("", "原始"),
                         Choice("24", "24 fps"),
                         Choice("25", "25 fps"),
@@ -239,9 +239,9 @@ namespace UniversalConvert.Plugin.FFmpeg
                 },
                 Presets = new List<ConversionPreset>
                 {
-                    Preset("高清 1080p", "scale=1920:1080", "videoBitrate=4000k"),
-                    Preset("标清 720p", "scale=1280:720", "videoBitrate=2000k"),
-                    Preset("流畅 480p", "scale=854:480", "videoBitrate=1000k")
+                    Preset("1080p（全高清）", "scale=1920:1080", "videoBitrate=4000k"),
+                    Preset("720p（标清）", "scale=1280:720", "videoBitrate=2000k"),
+                    Preset("480p（流畅）", "scale=854:480", "videoBitrate=1000k")
                 }
             };
         }
@@ -254,7 +254,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("audioBitrate", "音频码率", "192k",
+                    EnumOption("audioBitrate", "音频编码比特率", "192k",
                         Choice("", "原始"),
                         Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
@@ -262,7 +262,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
                         Choice("320k", "320 kbps")),
-                    EnumOption("sampleRate", "采样率", "",
+                    EnumOption("sampleRate", "音频采样率", "",
                         Choice("", "原始"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
@@ -296,8 +296,8 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = "GIF",
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("scale", "尺寸", "",
-                        Choice("", "原始"),
+                    EnumOption("scale", "视频尺寸", "",
+                        Choice("", "原始尺寸（不缩放）"),
                         Choice("320:240", "320×240"),
                         Choice("480:320", "480×320"),
                         Choice("640:480", "640×480")),

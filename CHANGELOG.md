@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.5.6] - 2026-08-23
+
+### 变更
+- 界面文案全面改为微软式中文（主界面、转换弹窗、错误提示、设置、扩展管理器、关于等）
+- 插件元数据（参数标签、预设名、格式名、描述）同步更新
+
 ## [1.5.5] - 2026-08-23
 
 ### 新增
@@ -118,6 +124,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.5.6]: https://github.com/114514901/universal-convert/releases/tag/v1.5.6
 [1.5.5]: https://github.com/114514901/universal-convert/releases/tag/v1.5.5
 [1.5.4]: https://github.com/114514901/universal-convert/releases/tag/v1.5.4
 [1.5.3]: https://github.com/114514901/universal-convert/releases/tag/v1.5.3
