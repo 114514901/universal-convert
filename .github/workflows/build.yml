@@ -48,6 +48,13 @@ jobs:
           Copy-Item "src\UniversalConvert.Installer\bin\Release\net48\UniversalConvert.Installer.exe" "dist\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.FFmpeg\bin\Release\net48\UniversalConvert.Plugin.FFmpeg.dll" "dist\plugins\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.Ncm\bin\Release\net48\UniversalConvert.Plugin.Ncm.dll" "dist\plugins\" -Force
+          Copy-Item "plugins\UniversalConvert.Plugin.Kgm\bin\Release\net48\UniversalConvert.Plugin.Kgm.dll" "dist\plugins\" -Force
+
+      - name: Decompress KGM key table
+        shell: pwsh
+        run: |
+          python -c "import lzma; open('dist/plugins/kugou_key.dat','wb').write(lzma.open('plugins/UniversalConvert.Plugin.Kgm/kugou_key.xz','rb').read())"
+          Get-Item dist\plugins\kugou_key.dat | Select-Object Name, Length
 
       - name: Install Inno Setup
         shell: pwsh

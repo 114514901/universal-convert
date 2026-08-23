@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.3.0] - 2026-08-23
+
+### 新增
+- 酷狗音乐 KGM/KGMA 解密（移植自 ghtz08/kugou-kgm-decoder，反 996 许可证），可转码为其它音频格式
+
 ## [1.2.3] - 2026-08-23
 
 ### 新增
@@ -59,6 +64,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.3.0]: https://github.com/114514901/universal-convert/releases/tag/v1.3.0
 [1.2.3]: https://github.com/114514901/universal-convert/releases/tag/v1.2.3
 [1.2.2]: https://github.com/114514901/universal-convert/releases/tag/v1.2.2
 [1.2.1]: https://github.com/114514901/universal-convert/releases/tag/v1.2.1
