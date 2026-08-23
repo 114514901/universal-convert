@@ -36,8 +36,6 @@ OutputBaseFilename=UniversalConvert-Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-; 安装包图标（与 exe 图标同源）
-SetupIconFile=..\src\UniversalConvert.App\Resources\icon.ico
 ; 只支持 64 位（SharpShell 按 OS64Bit 注册，ffmpeg 用 64 位构建）
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64
