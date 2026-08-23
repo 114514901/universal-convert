@@ -3,8 +3,6 @@ name: build
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -17,13 +15,47 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
 
-      - name: Restore & Build
+      - name: Build
         run: msbuild UniversalConvert.sln /p:Configuration=Release /restore /m
 
-      - name: Upload artifacts
+      # 构建时拉取 ffmpeg 并打入安装包（注意：此处用 GPL 版以支持默认的 libx264 编码；
+      # 若对外分发需遵守 GPL，或改用 gyan.dev 的 "essentials"(LGPL) 版并调整默认编码器）
+      - name: Download FFmpeg
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "ffmpeg"
+          Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip" -OutFile $zip
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          tar -xf $zip -C $dir
+          $bin = (Get-ChildItem -Path $dir -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1).DirectoryName
+          New-Item -ItemType Directory -Force dist\tools | Out-Null
+          Copy-Item (Join-Path $bin "ffmpeg.exe") dist\tools\ -Force
+          Copy-Item (Join-Path $bin "ffprobe.exe") dist\tools\ -Force
+
+      - name: Assemble dist
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force dist\plugins | Out-Null
+          Copy-Item "src\UniversalConvert.App\bin\Release\net48\*" "dist\" -Recurse -Force
+          Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\UniversalConvert.ContextMenu.dll" "dist\" -Force
+          Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\SharpShell.dll" "dist\" -Force
+          Copy-Item "src\UniversalConvert.Installer\bin\Release\net48\UniversalConvert.Installer.exe" "dist\" -Force
+          Copy-Item "plugins\UniversalConvert.Plugin.FFmpeg\bin\Release\net48\UniversalConvert.Plugin.FFmpeg.dll" "dist\plugins\" -Force
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Compile installer
+        shell: cmd
+        working-directory: packaging
+        run: "\"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe\" UniversalConvert.iss"
+
+      - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: universal-convert-build
-          path: |
-            src/**/bin/Release/**
-            plugins/**/bin/Release/**
+          name: UniversalConvert-Setup
+          path: output/*.exe
