@@ -2,6 +2,17 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0] - 2026-08-24
+
+### 新增
+- 统一日志系统：分级日志（Debug/Info/Warn/Error）、按入口分文件（app.log / contextmenu.log / install.log）、启动时自动把上一次日志归档为 `app-时间戳.zip`
+- 本地崩溃报告器：捕获未处理异常，收集软件/系统/插件信息与最近日志，可选生成内存转储（仅保留最新一份），弹窗展示且不上传
+- 日志查看器：只读查看当前日志、刷新、打开日志目录
+- 设置新增「高级」选项卡：日志级别、崩溃转储开关、崩溃测试按钮、查看日志、清理日志
+
+### 变更
+- 核心转换流程增加日志埋点
+
 ## [1.7.6] - 2026-08-24
 
 ### 修复
@@ -206,6 +217,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4

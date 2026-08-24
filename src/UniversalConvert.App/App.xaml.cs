@@ -1,11 +1,14 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
 
@@ -20,12 +23,24 @@ namespace UniversalConvert.App
         {
             base.OnStartup(e);
 
+            // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
+
             CleanupStaleInstallerPackages();
 
             var config = new ConfigStore().Load();
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            _host = new CoreHost(config, config.ResolvePluginsDirectory(), Log);
+
+            // 日志：归档上一次运行日志，再配置本次日志（级别读设置，默认 Info）
+            ArchivePreviousLog();
+            Log.Configure(AppLogPath, Log.ParseLevel(GetConfigValue(config, "logLevel")));
+            Log.Info("=== UniversalConvert 启动，版本 " + (AppVersion.Current?.ToString() ?? "?") + " ===");
+
+            _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
             _settingsManager = new SettingsManager(config, _host.Plugins);
+
+            // 崩溃报告（转储开关读设置，默认开启）
+            CrashReporter.Install(_host, IsDumpEnabled(config));
 
             ApplyLanguage(_settingsManager);
 
@@ -143,9 +158,45 @@ namespace UniversalConvert.App
             catch { /* 忽略 */ }
         }
 
-        private static void Log(string message)
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("[UniversalConvert] " + message);
+            CrashReporter.HandleException(e.Exception);
+            e.Handled = true; // 已弹窗报告，阻止默认终止
+        }
+
+        /// <summary>归档上一次运行的日志：把 app.log 压成 app-时间戳.zip 后删除原文件。</summary>
+        private static void ArchivePreviousLog()
+        {
+            try
+            {
+                if (!File.Exists(AppLogPath)) return;
+                var dir = Path.GetDirectoryName(AppLogPath) ?? string.Empty;
+                var zipPath = Path.Combine(dir, "app-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".zip");
+                using (var zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+                {
+                    zip.CreateEntryFromFile(AppLogPath, "app.log", CompressionLevel.Optimal);
+                }
+                File.Delete(AppLogPath);
+            }
+            catch
+            {
+                // 归档失败不影响启动
+            }
+        }
+
+        private static string AppLogPath => Path.Combine(ConfigStore.ConfigDirectory, "logs", "app.log");
+
+        private static string GetConfigValue(AppConfig config, string key)
+        {
+            string value;
+            return config.Settings != null && config.Settings.TryGetValue(key, out value) ? value : null;
+        }
+
+        private static bool IsDumpEnabled(AppConfig config)
+        {
+            var value = GetConfigValue(config, "crashDumpEnabled");
+            bool enabled;
+            return string.IsNullOrEmpty(value) ? true : (!bool.TryParse(value, out enabled) || enabled);
         }
     }
 }

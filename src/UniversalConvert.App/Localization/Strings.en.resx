@@ -378,4 +378,40 @@
   <data name="LoadExtensionsFailed" xml:space="preserve">
     <value>Failed to load extensions: {0}</value>
   </data>
+  <data name="SettingsCategoryAdvanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="SettingLogLevel" xml:space="preserve">
+    <value>Log level</value>
+  </data>
+  <data name="SettingLogLevelDescription" xml:space="preserve">
+    <value>Log verbosity (Debug is most detailed)</value>
+  </data>
+  <data name="SettingCrashDumpEnabled" xml:space="preserve">
+    <value>Generate memory dump on crash</value>
+  </data>
+  <data name="SettingCrashDumpEnabledDescription" xml:space="preserve">
+    <value>Generate a .dmp dump file on crash (only latest kept)</value>
+  </data>
+  <data name="ViewLog" xml:space="preserve">
+    <value>View log</value>
+  </data>
+  <data name="ClearLog" xml:space="preserve">
+    <value>Clear logs</value>
+  </data>
+  <data name="CrashTest" xml:space="preserve">
+    <value>Test crash reporter</value>
+  </data>
+  <data name="LogCleared" xml:space="preserve">
+    <value>Logs cleared.</value>
+  </data>
+  <data name="LogViewerTitle" xml:space="preserve">
+    <value>Log viewer</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>Open log folder</value>
+  </data>
+  <data name="EmptyLog" xml:space="preserve">
+    <value>(No logs yet)</value>
+  </data>
 </root>

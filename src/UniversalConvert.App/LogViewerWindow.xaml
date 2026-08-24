@@ -1,0 +1,25 @@
+<Window x:Class="UniversalConvert.App.LogViewerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
+        Title="{x:Static loc:Strings.LogViewerTitle}" Height="520" Width="780"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="320" MinWidth="560">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="RefreshButton" Content="{x:Static loc:Strings.Refresh}" Padding="14,5" Click="OnRefresh"/>
+            <Button x:Name="OpenFolderButton" Content="{x:Static loc:Strings.OpenLogFolder}" Padding="14,5" Margin="8,0,0,0" Click="OnOpenFolder"/>
+        </StackPanel>
+
+        <TextBox Grid.Row="1" x:Name="LogText" IsReadOnly="True" TextWrapping="NoWrap"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 FontFamily="Consolas" FontSize="12"/>
+
+        <TextBlock Grid.Row="2" x:Name="PathText" Foreground="Gray" Margin="0,8,0,0" TextTrimming="CharacterEllipsis"/>
+    </Grid>
+</Window>

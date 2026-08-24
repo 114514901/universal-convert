@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
@@ -40,6 +42,12 @@ namespace UniversalConvert.App
                 foreach (var definition in group)
                 {
                     panel.Children.Add(BuildRow(definition));
+                }
+
+                // 高级类别追加特殊操作按钮（崩溃测试 / 查看日志 / 清理日志）
+                if (group.Any(d => d.Category == "@SettingsCategoryAdvanced"))
+                {
+                    panel.Children.Add(BuildAdvancedActions());
                 }
 
                 tab.Content = panel;
@@ -131,6 +139,55 @@ namespace UniversalConvert.App
             }
             _manager.Save();
             Close();
+        }
+
+        private FrameworkElement BuildAdvancedActions()
+        {
+            var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
+
+            var viewLog = new Button { Content = Strings.ViewLog, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left };
+            viewLog.Click += OnViewLog;
+
+            var clearLog = new Button { Content = Strings.ClearLog, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            clearLog.Click += OnClearLog;
+
+            var crashTest = new Button { Content = Strings.CrashTest, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            crashTest.Click += OnCrashTest;
+
+            panel.Children.Add(viewLog);
+            panel.Children.Add(clearLog);
+            panel.Children.Add(crashTest);
+            return panel;
+        }
+
+        private void OnViewLog(object sender, RoutedEventArgs e)
+        {
+            var window = new LogViewerWindow { Owner = this };
+            window.ShowDialog();
+        }
+
+        private void OnClearLog(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var dir = Path.Combine(ConfigStore.ConfigDirectory, "logs");
+                if (Directory.Exists(dir))
+                {
+                    foreach (var f in Directory.GetFiles(dir, "app-*.zip")) { try { File.Delete(f); } catch { } }
+                    foreach (var f in Directory.GetFiles(dir, "crash-*")) { try { File.Delete(f); } catch { } }
+                }
+                MessageBox.Show(Strings.LogCleared, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch
+            {
+                // 忽略清理失败
+            }
+        }
+
+        private void OnCrashTest(object sender, RoutedEventArgs e)
+        {
+            // 故意抛异常，触发崩溃报告器（会被 DispatcherUnhandledException 捕获并弹窗，App 不退出）
+            throw new InvalidOperationException("崩溃测试：这是手动触发的异常，用于验证崩溃报告器。");
         }
 
         private void OnCancel(object sender, RoutedEventArgs e)

@@ -58,6 +58,31 @@ namespace UniversalConvert.App
                     new OptionChoice { Value = "stable", Label = "@UpdateChannelStable" },
                     new OptionChoice { Value = "dev", Label = "@UpdateChannelDev" }
                 }
+            },
+            new SettingDefinition
+            {
+                Key = "logLevel",
+                Category = "@SettingsCategoryAdvanced",
+                Label = "@SettingLogLevel",
+                Description = "@SettingLogLevelDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "Info",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "Debug", Label = "Debug" },
+                    new OptionChoice { Value = "Info", Label = "Info" },
+                    new OptionChoice { Value = "Warn", Label = "Warn" },
+                    new OptionChoice { Value = "Error", Label = "Error" }
+                }
+            },
+            new SettingDefinition
+            {
+                Key = "crashDumpEnabled",
+                Category = "@SettingsCategoryAdvanced",
+                Label = "@SettingCrashDumpEnabled",
+                Description = "@SettingCrashDumpEnabledDescription",
+                Type = OptionType.Bool,
+                DefaultValue = "true"
             }
         };
     }

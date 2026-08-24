@@ -1,0 +1,207 @@
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows;
+using Microsoft.Win32.SafeHandles;
+using UniversalConvert.Core;
+using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
+
+namespace UniversalConvert.App
+{
+    /// <summary>
+    /// 本地崩溃报告器：捕获未处理异常，搜集软件/系统/插件信息与最近日志，
+    /// 写入 crash 日志（保留 5 份）并可选生成内存转储（只留 1 份），最后弹本地对话框展示。
+    /// 纯本地，不上传任何信息。
+    /// </summary>
+    public static class CrashReporter
+    {
+        private const int KeepCrashLogs = 5;
+        private const uint MiniDumpNormal = 0x00000000;
+
+        private static readonly object Sync = new object();
+        private static CoreHost _host;
+        private static bool _dumpEnabled = true;
+        private static DateTime _startTime = DateTime.Now;
+
+        [DllImport("dbghelp.dll", SetLastError = true)]
+        private static extern bool MiniDumpWriteDump(
+            IntPtr hProcess,
+            uint processId,
+            SafeFileHandle hFile,
+            uint dumpType,
+            IntPtr exceptionParam,
+            IntPtr userStreamParam,
+            IntPtr callbackParam);
+
+        /// <summary>安装崩溃捕获（App 启动时调用一次）。</summary>
+        public static void Install(CoreHost host, bool dumpEnabled)
+        {
+            _host = host;
+            _dumpEnabled = dumpEnabled;
+            _startTime = DateTime.Now;
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        }
+
+        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            HandleException(e.ExceptionObject as Exception);
+        }
+
+        /// <summary>处理一次未处理异常（DispatcherUnhandledException 也走这里）。</summary>
+        public static void HandleException(Exception ex)
+        {
+            if (ex == null) return;
+
+            lock (Sync) // 防止多个线程同时崩溃处理
+            {
+                try
+                {
+                    var info = BuildDiagnosticInfo(ex);
+                    var crashLogPath = WriteCrashLog(info);
+                    var dumpPath = _dumpEnabled ? WriteDump() : null;
+                    ShowReport(ex, crashLogPath, dumpPath);
+                }
+                catch
+                {
+                    // 崩溃处理本身失败时不再抛，避免二次崩溃
+                }
+            }
+        }
+
+        private static string BuildDiagnosticInfo(Exception ex)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== UniversalConvert 崩溃报告 ===");
+            sb.AppendLine("时间: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            sb.AppendLine();
+
+            sb.AppendLine("=== 软件信息 ===");
+            sb.AppendLine("版本: " + (AppVersion.Current?.ToString() ?? "未知"));
+            sb.AppendLine("安装目录: " + AppDomain.CurrentDomain.BaseDirectory);
+            sb.AppendLine("进程架构: " + (Environment.Is64BitProcess ? "x64" : "x86"));
+            sb.AppendLine("运行时长: " + (DateTime.Now - _startTime).ToString(@"hh\:mm\:ss"));
+            sb.AppendLine();
+
+            sb.AppendLine("=== 系统信息 ===");
+            sb.AppendLine("OS: " + Environment.OSVersion);
+            sb.AppendLine("64 位系统: " + (Environment.Is64BitOperatingSystem ? "是" : "否"));
+            sb.AppendLine(".NET: " + Environment.Version);
+            sb.AppendLine("进程工作集: " + (Environment.WorkingSet / 1024 / 1024) + " MB");
+            sb.AppendLine();
+
+            sb.AppendLine("=== 插件信息 ===");
+            if (_host != null)
+            {
+                sb.AppendLine("已加载插件数: " + _host.Plugins.Count);
+                foreach (var p in _host.Plugins)
+                {
+                    sb.AppendLine("  - " + p.Id + " (" + p.Name + ") v" + p.Version);
+                }
+                if (_host.LoadErrors.Count > 0)
+                {
+                    sb.AppendLine("加载错误:");
+                    foreach (var e in _host.LoadErrors)
+                    {
+                        sb.AppendLine("  - " + e.File + ": " + e.Message);
+                    }
+                }
+            }
+            else
+            {
+                sb.AppendLine("(插件信息不可用)");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("=== 异常 ===");
+            sb.AppendLine(ex.ToString());
+            sb.AppendLine();
+
+            sb.AppendLine("=== 最近日志 ===");
+            foreach (var line in Log.GetRecent(200))
+            {
+                sb.AppendLine(line);
+            }
+
+            return sb.ToString();
+        }
+
+        private static string WriteCrashLog(string info)
+        {
+            var dir = LogsDirectory;
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, "crash-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".log");
+            File.WriteAllText(path, info, Encoding.UTF8);
+
+            // 保留最近 5 份 crash 日志，删更旧的
+            var logs = Directory.GetFiles(dir, "crash-*.log")
+                .OrderByDescending(File.GetLastWriteTime)
+                .ToList();
+            for (int i = KeepCrashLogs; i < logs.Count; i++)
+            {
+                try { File.Delete(logs[i]); } catch { }
+            }
+
+            return path;
+        }
+
+        private static string WriteDump()
+        {
+            var dir = LogsDirectory;
+            Directory.CreateDirectory(dir);
+
+            // 只留一份：先删旧的 dmp
+            foreach (var f in Directory.GetFiles(dir, "crash-*.dmp"))
+            {
+                try { File.Delete(f); } catch { }
+            }
+
+            var path = Path.Combine(dir, "crash-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".dmp");
+            try
+            {
+                using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+                using (var process = Process.GetCurrentProcess())
+                {
+                    MiniDumpWriteDump(
+                        process.Handle,
+                        (uint)process.Id,
+                        fs.SafeFileHandle,
+                        MiniDumpNormal,
+                        IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                }
+                return File.Exists(path) ? path : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void ShowReport(Exception ex, string crashLogPath, string dumpPath)
+        {
+            var message =
+                "程序发生未处理的异常，已生成崩溃报告（未上传）。\n\n" +
+                "异常: " + ex.Message + "\n" +
+                "报告: " + crashLogPath +
+                (dumpPath != null ? "\n转储: " + dumpPath : "") +
+                "\n\n完整堆栈与诊断信息见报告文件。";
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => MessageBox.Show(
+                    message, "UniversalConvert 崩溃报告", MessageBoxButton.OK, MessageBoxImage.Error));
+            }
+            else
+            {
+                MessageBox.Show(
+                    message, "UniversalConvert 崩溃报告", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private static string LogsDirectory => Path.Combine(ConfigStore.ConfigDirectory, "logs");
+    }
+}
