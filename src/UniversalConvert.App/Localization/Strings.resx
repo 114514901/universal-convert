@@ -205,7 +205,7 @@
     <value>下载中 {0}%</value>
   </data>
   <data name="DownloadComplete" xml:space="preserve">
-    <value>下载完成，启动安装程序...</value>
+    <value>下载完成，正在安装...</value>
   </data>
   <data name="DownloadFailed" xml:space="preserve">
     <value>下载失败：{0}</value>

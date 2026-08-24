@@ -20,6 +20,8 @@ namespace UniversalConvert.App
         {
             base.OnStartup(e);
 
+            CleanupStaleInstallerPackages();
+
             var config = new ConfigStore().Load();
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), Log);
@@ -124,6 +126,21 @@ namespace UniversalConvert.App
                 Thread.CurrentThread.CurrentUICulture = culture;
                 Thread.CurrentThread.CurrentCulture = culture;
             }
+        }
+
+        private static void CleanupStaleInstallerPackages()
+        {
+            // 清理自动更新遗留在 %TEMP% 的旧安装包（升级装完后安装包不再被主动删除）。
+            // 删除失败（如正被某个正在运行的安装器占用）时静默忽略。
+            try
+            {
+                foreach (var f in Directory.GetFiles(Path.GetTempPath(), "UniversalConvert-Setup-*.exe"))
+                {
+                    try { File.Delete(f); }
+                    catch { /* 忽略 */ }
+                }
+            }
+            catch { /* 忽略 */ }
         }
 
         private static void Log(string message)

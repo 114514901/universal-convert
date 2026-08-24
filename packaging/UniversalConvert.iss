@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.7.4，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.7.5，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.7.4"
+#define MyAppVersion "1.7.5"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -56,21 +56,32 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 chinesesimplified.CreateDesktopIcon=创建桌面快捷方式
 chinesesimplified.AdditionalTasks=附加任务：
 chinesesimplified.RegisteringContextMenu=正在注册右键菜单...
+chinesesimplified.RunAfterInstall=立即运行 UniversalConvert
+chinesesimplified.AskDeleteUserData=是否同时删除配置、日志与已安装的扩展？
 english.CreateDesktopIcon=Create a desktop icon
 english.AdditionalTasks=Additional tasks:
 english.RegisteringContextMenu=Registering context menu...
+english.RunAfterInstall=Run UniversalConvert
+english.AskDeleteUserData=Delete settings, logs and installed extensions as well?
 
 [Files]
-; 普通文件先复制（explorer 还活着，大文件 tools\ffmpeg 也趁现在复制）
+; 先复制 explorer 不会锁定的文件（exe、语言卫星程序集、tools 大文件）。
+; tools\ffmpeg.exe 我们的代码只用 File.Exists 定位，从不加载进 explorer，正常安装不会被锁；
+; 趁 explorer 活着先把 ~100MB 大文件拷完，把「结束 explorer」压缩到最小时间窗口。
 Source: "{#DistDir}\*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#DistDir}\en\*"; DestDir: "{app}\en"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DistDir}\tools\*"; DestDir: "{app}\tools"; Flags: ignoreversion recursesubdirs createallsubdirs
-; 被 explorer 加载的 DLL 放最后：BeforeInstall 先结束 explorer，写入后由 ssPostInstall 重启
+; 下面这些 DLL 会被 explorer 锁定（右键菜单把它们加载进 explorer.exe：CoreHost 扫描 plugins 目录
+; Assembly.LoadFrom 插件 DLL；根目录的 ContextMenu/SharpShell/Core/Newtonsoft 也被 explorer 加载）。
+; 因此放到最后、紧挨在一起：写第一处前 KillExplorer 结束 explorer，写完由 ssPostInstall 统一重启。
+; explorer 关闭时间只有这几秒的小文件拷贝，不含 tools 大文件。
+; KillExplorer 内部有 ExplorerKilled 标志，只执行一次，后续条目的 BeforeInstall 是空操作。
+Source: "{#DistDir}\plugins\*"; DestDir: "{app}\plugins"; Flags: ignoreversion recursesubdirs createallsubdirs; BeforeInstall: KillExplorer
 Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion; BeforeInstall: KillExplorer
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
+Name: "runapp"; Description: "{cm:RunAfterInstall}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -80,6 +91,11 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 ; 文件复制完后，调用我们的注册器写 HKLM 右键菜单（继承安装包的管理员权限）
 Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "install"; \
     Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"
+; 手动安装：完成页勾选「立即运行」（postinstall + skipifsilent 使静默安装时不显示/不执行）
+Filename: "{app}\UniversalConvert.App.exe"; Description: "{cm:RunAfterInstall}"; \
+    Flags: nowait postinstall skipifsilent; Tasks: runapp
+; 自动更新静默安装：装完立即启动新版本（Check: WizardSilent 保证只在静默时执行，不与上面重复启动）
+Filename: "{app}\UniversalConvert.App.exe"; Flags: nowait; Tasks: runapp; Check: WizardSilent
 
 [UninstallRun]
 ; 卸载时先反注册，再删文件（Inno 会先执行本段再删除文件）
@@ -121,17 +137,34 @@ begin
   end;
 end;
 
-procedure CurStepChanged(CurStep: TSetupStep);
+procedure RestartExplorer();
 var
   ResultCode: Integer;
+begin
+  // 本机对 explorer 的系统自动恢复不可靠：taskkill 后可能只拉出一个"半加载"的损坏进程
+  // （进程在跑，但桌面/任务栏没起来、内存占用极低）。所以这里先强制清掉所有 explorer，
+  // 再显式拉起一个干净完整的 shell，不依赖系统自动恢复。
+  Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
     if ExplorerKilled then
+      RestartExplorer();
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  // 卸载完成后，询问是否一并删除用户数据（配置/日志/在线安装的扩展）。默认保留。
+  if CurUninstallStep = usPostUninstall then
+  begin
+    if MsgBox(ExpandConstant('{cm:AskDeleteUserData}'), mbConfirmation, MB_YESNO) = IDYES then
     begin
-      // 只用 ShellExecute 重启 explorer：它对 explorer.exe 有特例（自动降权并成为 shell），
-      // 避免之前 ExecAsOriginalUser 半成功后又 ShellExec 一次导致新开资源管理器窗口
-      ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+      DelTree(ExpandConstant('{userappdata}\UniversalConvert'), True, True, True);
     end;
   end;
 end;

@@ -205,7 +205,7 @@
     <value>Downloading {0}%</value>
   </data>
   <data name="DownloadComplete" xml:space="preserve">
-    <value>Download complete, launching installer...</value>
+    <value>Download complete, installing...</value>
   </data>
   <data name="DownloadFailed" xml:space="preserve">
     <value>Download failed: {0}</value>

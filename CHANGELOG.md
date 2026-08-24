@@ -2,6 +2,18 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.5] - 2026-08-24
+
+### 修复
+- 安装时插件 DLL 仍被 explorer 占用：`KillExplorer` 提前到第一处写 explorer 锁定文件之前，并重排复制顺序（exe/大文件在前、锁定的 DLL 压到最尾段），把结束 explorer 的时间窗口压到最小
+- 安装后重启 explorer 可能只拉起一个"半加载"的损坏进程，或新开一个"此电脑"窗口并残留进程：改为先 `taskkill` 清掉所有 explorer、再显式拉起完整 shell，不依赖系统自动恢复
+
+### 新增
+- 自动更新改为静默安装：下载完成后跳过安装向导、直接升级（`/SILENT` 装回原目录），装完自动启动新版本
+- 应用启动时自动清理 `%TEMP%` 里遗留的 `UniversalConvert-Setup-*.exe` 安装包
+- 卸载时可选一并删除用户配置、日志与已安装的扩展
+- 安装完成页新增「立即运行 UniversalConvert」选项
+
 ## [1.7.4] - 2026-08-23
 
 ### 修复
@@ -186,6 +198,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4
 [1.7.3]: https://github.com/114514901/universal-convert/releases/tag/v1.7.3
 [1.7.2]: https://github.com/114514901/universal-convert/releases/tag/v1.7.2

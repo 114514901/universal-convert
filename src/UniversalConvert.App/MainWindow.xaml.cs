@@ -109,7 +109,7 @@ namespace UniversalConvert.App
                 UpdateStatusText.Text = Strings.DownloadComplete;
                 try
                 {
-                    Process.Start(dest);
+                    LaunchInstallerSilent(dest);
                 }
                 catch
                 {
@@ -122,6 +122,23 @@ namespace UniversalConvert.App
                 UpdateButton.IsEnabled = true;
                 ViewNotesButton.IsEnabled = true;
             }
+        }
+
+        private void LaunchInstallerSilent(string installerPath)
+        {
+            // 自动更新：静默升级，跳过安装向导（只显示进度条），装完自动启动新版本。
+            // /DIR 让升级装回原安装目录（含非默认目录的情况）；
+            // 安装器要写 HKLM 注册右键菜单，用 runas 触发 UAC 提权。
+            var installDir = (_host.Config.InstallDirectory ?? AppDomain.CurrentDomain.BaseDirectory)
+                .TrimEnd('\\');
+
+            var psi = new ProcessStartInfo(installerPath)
+            {
+                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp /DIR=\"" + installDir + "\"",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+            Process.Start(psi);
         }
 
         private void OnAddFiles(object sender, RoutedEventArgs e)
