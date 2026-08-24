@@ -202,7 +202,7 @@ namespace UniversalConvert.App
         {
             var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
 
-            var checkButton = new Button { Content = Strings.CheckUpdate, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left };
+            var checkButton = new Button { Content = Strings.CheckUpdate, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left };
             checkButton.Click += OnCheckUpdate;
 
             _updateStatusText = new TextBlock { Margin = new Thickness(0, 8, 0, 0), TextWrapping = TextWrapping.Wrap, Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray) };
