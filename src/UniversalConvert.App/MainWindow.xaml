@@ -6,10 +6,6 @@
         WindowStartupLocation="CenterScreen"
         AllowDrop="True" Drop="OnDrop" DragOver="OnDragOver"
         Loaded="OnLoaded">
-    <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="48" ResizeBorderThickness="6" CornerRadius="8"
-                      GlassFrameThickness="0" UseAeroCaptionButtons="True"/>
-    </WindowChrome.WindowChrome>
     <Grid Background="#F3F3F3">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

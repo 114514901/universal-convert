@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -40,6 +41,14 @@ namespace UniversalConvert.App
             {
                 WindowStyle = WindowStyle.None;
                 AllowsTransparency = true;
+                WindowChrome.SetWindowChrome(this, new WindowChrome
+                {
+                    CaptionHeight = 48,
+                    ResizeBorderThickness = new Thickness(6),
+                    CornerRadius = new CornerRadius(8),
+                    GlassFrameThickness = new Thickness(0),
+                    UseAeroCaptionButtons = true
+                });
             }
 
             FileList.ItemsSource = _files;
