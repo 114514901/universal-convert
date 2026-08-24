@@ -2,6 +2,13 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.5] - 2026-08-24
+
+### 新增
+- 看护进程（watchdog）：后台心跳 + IsHungAppWindow 双通道检测主程序卡死（阈值约 15 秒），命中后结束进程并弹出卡死报告
+- 崩溃报告窗口新增「重启」按钮：任何崩溃/卡死都可由用户手动重启
+- 设置「高级」选项卡新增「测试卡死」按钮（真实阻塞 UI 线程用于测试看护功能）
+
 ## [2.0.0-dev.4] - 2026-08-24
 
 ### 修复
@@ -275,6 +282,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.5
 [2.0.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.4
 [2.0.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.3
 [2.0.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.2
