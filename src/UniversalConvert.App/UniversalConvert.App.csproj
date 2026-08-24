@@ -7,6 +7,7 @@
     <RootNamespace>UniversalConvert.App</RootNamespace>
     <AssemblyName>UniversalConvert.App</AssemblyName>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
 

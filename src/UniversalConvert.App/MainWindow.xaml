@@ -97,6 +97,11 @@
                        Foreground="#B87333" Visibility="Collapsed" Margin="0,4,0,0" TextWrapping="Wrap"/>
             <TextBlock x:Name="UntestedWarningText" Text="{x:Static loc:Strings.UntestedWarning}"
                        Foreground="#B87333" Visibility="Collapsed" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <DockPanel Margin="0,8,0,0">
+                <TextBlock Text="{x:Static loc:Strings.OutputLocation}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Button Content="{x:Static loc:Strings.Browse}" DockPanel.Dock="Right" Padding="10,3" Margin="8,0,0,0" Click="OnBrowseOutput"/>
+                <TextBox x:Name="OutputDirText"/>
+            </DockPanel>
         </StackPanel>
 
         <Grid Grid.Row="4" Margin="0,12,0,0">

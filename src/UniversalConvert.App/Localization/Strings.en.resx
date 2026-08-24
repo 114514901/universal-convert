@@ -462,4 +462,10 @@
   <data name="FormatColumn" xml:space="preserve">
     <value>Format</value>
   </data>
+  <data name="OutputLocation" xml:space="preserve">
+    <value>Output location</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Browse...</value>
+  </data>
 </root>

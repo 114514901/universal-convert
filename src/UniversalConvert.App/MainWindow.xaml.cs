@@ -34,6 +34,7 @@ namespace UniversalConvert.App
             _settingsManager = settingsManager;
 
             FileList.ItemsSource = _files;
+            OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
 
             if (initialFiles != null)
             {
@@ -369,6 +370,22 @@ namespace UniversalConvert.App
             CustomizeSelected();
         }
 
+        private void OnBrowseOutput(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dialog.Description = Strings.OutputLocation;
+                if (!string.IsNullOrEmpty(OutputDirText.Text))
+                {
+                    dialog.SelectedPath = OutputDirText.Text;
+                }
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    OutputDirText.Text = dialog.SelectedPath;
+                }
+            }
+        }
+
         private void OnConvert(object sender, RoutedEventArgs e)
         {
             if (_files.Count == 0 || OutputCombo.SelectedIndex < 0)
@@ -391,7 +408,8 @@ namespace UniversalConvert.App
             }
 
             var files = _files.Select(r => r.Path).ToArray();
-            var window = new BatchConvertWindow(_host, files, targetExt, workerThreads, perFileOptions) { Owner = this };
+            var outputDir = OutputDirText.Text?.Trim();
+            var window = new BatchConvertWindow(_host, files, targetExt, workerThreads, perFileOptions, outputDir) { Owner = this };
             window.ShowDialog();
         }
 

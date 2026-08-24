@@ -25,6 +25,7 @@ namespace UniversalConvert.App
         private readonly string[] _files;
         private readonly string _targetExt;
         private readonly int _workerThreads;
+        private readonly string _outputDir;
         private readonly ObservableCollection<BatchItem> _items = new ObservableCollection<BatchItem>();
         private readonly List<string> _outputPaths = new List<string>();
         private readonly StringBuilder _errorLog = new StringBuilder();
@@ -36,7 +37,7 @@ namespace UniversalConvert.App
         private int _failedCount;
 
         public BatchConvertWindow(CoreHost host, string[] files, string targetExt, int workerThreads,
-            IDictionary<string, IDictionary<string, string>> perFileOptions = null)
+            IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
@@ -44,6 +45,7 @@ namespace UniversalConvert.App
             _files = files;
             _targetExt = targetExt;
             _workerThreads = Math.Max(1, workerThreads);
+            _outputDir = outputDir;
             _dispatcher = Dispatcher.CurrentDispatcher;
 
             TitleText.Text = Strings.BatchTitle + "  →  ." + targetExt;
@@ -118,6 +120,7 @@ namespace UniversalConvert.App
                 {
                     PluginId = entry.PluginId,
                     InputPath = file,
+                    OutputPath = ResolveOutputPath(file),
                     InputExtension = Path.GetExtension(file),
                     OutputExtension = "." + _targetExt,
                     Options = options
@@ -176,6 +179,14 @@ namespace UniversalConvert.App
             {
                 semaphore.Release();
             }
+        }
+
+        /// <summary>指定输出目录则输出到该目录（文件名不变、换扩展名），否则返回 null 走插件默认（源目录）。</summary>
+        private string ResolveOutputPath(string file)
+        {
+            if (string.IsNullOrEmpty(_outputDir)) return null;
+            var name = Path.GetFileNameWithoutExtension(file);
+            return Path.Combine(_outputDir, name + "." + _targetExt);
         }
 
         private void RunOnUi(Action action)
