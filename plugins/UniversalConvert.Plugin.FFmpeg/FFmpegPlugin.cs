@@ -98,6 +98,11 @@ namespace UniversalConvert.Plugin.FFmpeg
             {
                 // 图片输出：直接转格式，不加 map/vn
             }
+            else if (outExt == ".gif")
+            {
+                // GIF 无音频：只取第一个视频流，丢弃音频
+                sb.Append(" -map 0:v:0");
+            }
             else if (AudioOutputs.Contains(outExt))
             {
                 // 音频输出：丢弃视频流

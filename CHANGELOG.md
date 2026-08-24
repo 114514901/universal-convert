@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.11] - 2026-08-24
+
+### 修复
+- mp4→gif 转换失败（音频流被错误映射进 GIF 导致 Encoder not found）：GIF 输出现在只取视频流
+- 自定义表单「默认」预设无视插件 DefaultValue：改为使用 DefaultValue（如 gif 帧率默认 10fps，与右键菜单一致）
+
 ## [2.0.0-dev.10] - 2026-08-24
 
 ### 新增
@@ -307,6 +313,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.11]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.11
 [2.0.0-dev.10]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.10
 [2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
 [2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8

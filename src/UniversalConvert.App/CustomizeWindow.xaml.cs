@@ -181,8 +181,8 @@ namespace UniversalConvert.App
 
                 foreach (var option in _entry.Options)
                 {
-                    // 默认（无预设）= 原始（空值，不重编码）
-                    string value = string.Empty;
+                    // 默认（无预设）= 用插件声明的 DefaultValue（多数为空 = 原始不重编码；gif 帧率等为具体默认值）
+                    string value = option.DefaultValue ?? string.Empty;
                     if (preset != null && preset.Options != null && preset.Options.TryGetValue(option.Key, out var presetValue))
                     {
                         value = presetValue;
