@@ -426,4 +426,16 @@
   <data name="DevVersionWarning" xml:space="preserve">
     <value>这是开发版，可能存在不稳定或未完成的功能，请谨慎使用。</value>
   </data>
+  <data name="CrashReportTitle" xml:space="preserve">
+    <value>崩溃报告</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>日志</value>
+  </data>
+  <data name="CopyReport" xml:space="preserve">
+    <value>复制崩溃报告</value>
+  </data>
+  <data name="CopyLog" xml:space="preserve">
+    <value>复制日志</value>
+  </data>
 </root>

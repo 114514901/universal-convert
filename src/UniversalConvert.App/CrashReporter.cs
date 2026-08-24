@@ -65,7 +65,9 @@ namespace UniversalConvert.App
                 info.dwOSVersionInfoSize = (uint)Marshal.SizeOf(typeof(RTL_OSVERSIONINFOW));
                 if (RtlGetVersion(ref info) == 0)
                 {
-                    return $"Windows {info.dwMajorVersion}.{info.dwMinorVersion} (Build {info.dwBuildNumber})";
+                    // Win10/Win11 的 Major.Minor 都是 10.0，靠 Build 区分：>=22000 为 Windows 11
+                    var name = info.dwBuildNumber >= 22000 ? "Windows 11" : "Windows 10";
+                    return $"{name} (Build {info.dwBuildNumber})";
                 }
             }
             catch { }
@@ -109,7 +111,7 @@ namespace UniversalConvert.App
                     var info = BuildDiagnosticInfo(ex);
                     var crashLogPath = WriteCrashLog(info);
                     var dumpPath = _dumpEnabled ? WriteDump() : null;
-                    ShowReport(ex, crashLogPath, dumpPath);
+                    ShowReport(ex, info, crashLogPath, dumpPath);
                 }
                 catch
                 {
@@ -226,26 +228,44 @@ namespace UniversalConvert.App
             }
         }
 
-        private static void ShowReport(Exception ex, string crashLogPath, string dumpPath)
+        private static void ShowReport(Exception ex, string info, string crashLogPath, string dumpPath)
         {
-            var message =
-                "程序发生未处理的异常，已生成崩溃报告（未上传）。\n\n" +
+            var summary =
                 "异常: " + ex.Message + "\n" +
                 "报告: " + crashLogPath +
-                (dumpPath != null ? "\n转储: " + dumpPath : "") +
-                "\n\n完整堆栈与诊断信息见报告文件。";
+                (dumpPath != null ? "\n转储: " + dumpPath : "");
+
+            var logText = ReadCurrentLog();
 
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher != null && !dispatcher.CheckAccess())
             {
-                dispatcher.Invoke(() => MessageBox.Show(
-                    message, "UniversalConvert 崩溃报告", MessageBoxButton.OK, MessageBoxImage.Error));
+                dispatcher.Invoke(() => OpenReportWindow(summary, info, logText));
             }
             else
             {
-                MessageBox.Show(
-                    message, "UniversalConvert 崩溃报告", MessageBoxButton.OK, MessageBoxImage.Error);
+                OpenReportWindow(summary, info, logText);
             }
+        }
+
+        private static void OpenReportWindow(string summary, string info, string logText)
+        {
+            var window = new CrashReportWindow(summary, info, logText, LogsDirectory);
+            window.ShowDialog();
+        }
+
+        private static string ReadCurrentLog()
+        {
+            try
+            {
+                var path = Log.FilePath;
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                {
+                    return File.ReadAllText(path);
+                }
+            }
+            catch { }
+            return string.Empty;
         }
 
         private static string LogsDirectory => Path.Combine(ConfigStore.ConfigDirectory, "logs");

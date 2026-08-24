@@ -426,4 +426,16 @@
   <data name="DevVersionWarning" xml:space="preserve">
     <value>This is a development build and may contain unstable or unfinished features.</value>
   </data>
+  <data name="CrashReportTitle" xml:space="preserve">
+    <value>Crash report</value>
+  </data>
+  <data name="LogLabel" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="CopyReport" xml:space="preserve">
+    <value>Copy crash report</value>
+  </data>
+  <data name="CopyLog" xml:space="preserve">
+    <value>Copy log</value>
+  </data>
 </root>

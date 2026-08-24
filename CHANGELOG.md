@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0-dev.5] - 2026-08-24
+
+### 修复
+- 崩溃报告 OS 版本显示成 `Windows 10.0`：按 Build 号区分 Win10/Win11（≥22000 为 Win11）
+
+### 新增
+- 崩溃报告窗口：左右分栏显示崩溃报告与运行日志，支持复制崩溃报告 / 复制日志 / 打开日志目录
+
 ## [1.8.0-dev.4] - 2026-08-24
 
 ### 修复
@@ -239,6 +247,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.5
 [1.8.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.4
 [1.8.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.3
 [1.8.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.2
