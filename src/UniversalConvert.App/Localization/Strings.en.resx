@@ -531,4 +531,25 @@
   <data name="TimeLabel" xml:space="preserve">
     <value>Time</value>
   </data>
+  <data name="ParamVideoCodec" xml:space="preserve">
+    <value>Video codec</value>
+  </data>
+  <data name="ParamScale" xml:space="preserve">
+    <value>Resolution</value>
+  </data>
+  <data name="ParamVideoBitrate" xml:space="preserve">
+    <value>Video bitrate</value>
+  </data>
+  <data name="ParamFps" xml:space="preserve">
+    <value>Frame rate</value>
+  </data>
+  <data name="ParamAudioBitrate" xml:space="preserve">
+    <value>Audio bitrate</value>
+  </data>
+  <data name="ParamSampleRate" xml:space="preserve">
+    <value>Sample rate</value>
+  </data>
+  <data name="ParamSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
 </root>

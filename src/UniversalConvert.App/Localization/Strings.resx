@@ -531,4 +531,25 @@
   <data name="TimeLabel" xml:space="preserve">
     <value>时间</value>
   </data>
+  <data name="ParamVideoCodec" xml:space="preserve">
+    <value>视频编码</value>
+  </data>
+  <data name="ParamScale" xml:space="preserve">
+    <value>分辨率</value>
+  </data>
+  <data name="ParamVideoBitrate" xml:space="preserve">
+    <value>视频码率</value>
+  </data>
+  <data name="ParamFps" xml:space="preserve">
+    <value>帧率</value>
+  </data>
+  <data name="ParamAudioBitrate" xml:space="preserve">
+    <value>音频码率</value>
+  </data>
+  <data name="ParamSampleRate" xml:space="preserve">
+    <value>采样率</value>
+  </data>
+  <data name="ParamSize" xml:space="preserve">
+    <value>尺寸</value>
+  </data>
 </root>

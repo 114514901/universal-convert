@@ -76,7 +76,7 @@ namespace UniversalConvert.App
 
                 var label = new TextBlock
                 {
-                    Text = option.Label,
+                    Text = Strings.L(option.Label),
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 12, 0)
                 };
@@ -100,11 +100,14 @@ namespace UniversalConvert.App
 
                     case OptionType.Enum:
                         var combo = new ComboBox { Width = 220, IsEditable = true, IsTextSearchEnabled = false };
-                        combo.ItemsSource = option.Choices;
+                        var choices = option.Choices
+                            .Select(c => new OptionChoice { Value = c.Value, Label = Strings.L(c.Label) })
+                            .ToList();
+                        combo.ItemsSource = choices;
                         combo.DisplayMemberPath = "Label";
                         setter = v =>
                         {
-                            var match = option.Choices.FirstOrDefault(c => c.Value == v);
+                            var match = choices.FirstOrDefault(c => c.Value == v);
                             if (match != null)
                             {
                                 combo.SelectedItem = match;
@@ -117,7 +120,7 @@ namespace UniversalConvert.App
                         getter = () =>
                         {
                             var text = combo.Text ?? string.Empty;
-                            var byLabel = option.Choices.FirstOrDefault(c => c.Label == text);
+                            var byLabel = choices.FirstOrDefault(c => c.Label == text);
                             return byLabel != null ? byLabel.Value : text;
                         };
                         combo.SelectionChanged += (s, e) => OnOptionManuallyChanged();

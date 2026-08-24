@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.7] - 2026-08-24
+
+### 修复
+- 自定义参数表单的参数名与「原始」选项本地化（插件元数据经 @资源键 + Strings.L 渲染，此前硬编码中文）
+
 ## [2.0.0-dev.6] - 2026-08-24
 
 ### 修复
@@ -287,6 +292,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.7]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.7
 [2.0.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.6
 [2.0.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.5
 [2.0.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.4
