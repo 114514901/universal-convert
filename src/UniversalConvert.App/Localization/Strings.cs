@@ -143,6 +143,9 @@ namespace UniversalConvert.App.Localization
         public static string FormatColumn => Get("FormatColumn");
         public static string OutputLocation => Get("OutputLocation");
         public static string Browse => Get("Browse");
+        public static string CheckUpdate => Get("CheckUpdate");
+        public static string CheckingUpdate => Get("CheckingUpdate");
+        public static string UpToDate => Get("UpToDate");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

@@ -516,4 +516,13 @@
   <data name="AcrylicOpacityLow" xml:space="preserve">
     <value>低</value>
   </data>
+  <data name="CheckUpdate" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="CheckingUpdate" xml:space="preserve">
+    <value>正在检查更新...</value>
+  </data>
+  <data name="UpToDate" xml:space="preserve">
+    <value>已是最新版</value>
+  </data>
 </root>

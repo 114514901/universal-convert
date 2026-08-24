@@ -21,6 +21,7 @@ namespace UniversalConvert.App
         private readonly SettingsManager _manager;
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
+        private TextBlock _updateStatusText;
 
         public SettingsWindow(SettingsManager manager)
         {
@@ -49,6 +50,12 @@ namespace UniversalConvert.App
                 if (group.Any(d => d.Category == "@SettingsCategoryAdvanced"))
                 {
                     panel.Children.Add(BuildAdvancedActions());
+                }
+
+                // 更新类别追加手动检查更新
+                if (group.Any(d => d.Category == "@SettingsCategoryUpdate"))
+                {
+                    panel.Children.Add(BuildUpdateActions());
                 }
 
                 tab.Content = panel;
@@ -188,6 +195,34 @@ namespace UniversalConvert.App
             catch
             {
                 // 重启失败则仅关闭
+            }
+        }
+
+        private FrameworkElement BuildUpdateActions()
+        {
+            var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
+
+            var checkButton = new Button { Content = Strings.CheckUpdate, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left };
+            checkButton.Click += OnCheckUpdate;
+
+            _updateStatusText = new TextBlock { Margin = new Thickness(0, 8, 0, 0), TextWrapping = TextWrapping.Wrap, Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray) };
+
+            panel.Children.Add(checkButton);
+            panel.Children.Add(_updateStatusText);
+            return panel;
+        }
+
+        private async void OnCheckUpdate(object sender, RoutedEventArgs e)
+        {
+            _updateStatusText.Text = Strings.CheckingUpdate;
+            var info = await UpdateChecker.CheckAsync(_manager.Get("updateChannel"));
+            if (info != null)
+            {
+                _updateStatusText.Text = string.Format(Strings.UpdateAvailable, info.Version);
+            }
+            else
+            {
+                _updateStatusText.Text = Strings.UpToDate;
             }
         }
 

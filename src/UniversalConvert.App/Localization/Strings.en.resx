@@ -516,4 +516,13 @@
   <data name="AcrylicOpacityLow" xml:space="preserve">
     <value>Low</value>
   </data>
+  <data name="CheckUpdate" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="CheckingUpdate" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="UpToDate" xml:space="preserve">
+    <value>You're up to date</value>
+  </data>
 </root>
