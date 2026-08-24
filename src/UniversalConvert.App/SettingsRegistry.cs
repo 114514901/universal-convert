@@ -120,6 +120,16 @@ namespace UniversalConvert.App
                     new OptionChoice { Value = "#8764B8", Label = "@ThemeAccentPurple" },
                     new OptionChoice { Value = "#00B7C3", Label = "@ThemeAccentTeal" }
                 }
+            },
+            new SettingDefinition
+            {
+                Key = "acrylicEnabled",
+                Category = "@SettingsCategoryPersonalization",
+                Label = "@SettingAcrylic",
+                Description = "@SettingAcrylicDescription",
+                Type = OptionType.Bool,
+                DefaultValue = "false",
+                RequiresRestart = true
             }
         };
     }

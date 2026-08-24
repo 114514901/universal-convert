@@ -10,6 +10,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -46,6 +47,9 @@ namespace UniversalConvert.App
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            // 亚克力背景（读设置）
+            ApplyAcrylic(_settingsManager.Get("acrylicEnabled") == "true");
+
             if (AppVersion.Current?.IsPrerelease == true)
             {
                 DevBanner.Visibility = Visibility.Visible;
@@ -423,6 +427,19 @@ namespace UniversalConvert.App
             catch
             {
                 return false;
+            }
+        }
+
+        private void ApplyAcrylic(bool enabled)
+        {
+            if (enabled)
+            {
+                Background = new SolidColorBrush(Color.FromArgb(0xCC, 0xF3, 0xF3, 0xF3));
+                AcrylicHelper.EnableAcrylic(this);
+            }
+            else
+            {
+                Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF3, 0xF3));
             }
         }
     }
