@@ -30,9 +30,9 @@ namespace UniversalConvert.Plugin.FFmpeg
         private static readonly string[] AudioOutputs =
             { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".opus" };
         private static readonly string[] ImageInputs =
-            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif" };
+            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif", ".heic", ".heif", ".avif" };
         private static readonly string[] ImageOutputs =
-            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif" };
+            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif", ".heic", ".heif", ".avif" };
 
         public override IList<ConversionCapability> GetCapabilities()
         {

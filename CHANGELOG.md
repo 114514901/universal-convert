@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.10] - 2026-08-24
+
+### 新增
+- FFmpeg 插件新增 HEIC/HEIF 与 AVIF 图片格式支持（与 jpg/png/webp 等互转）
+
 ## [2.0.0-dev.9] - 2026-08-24
 
 ### 修复
@@ -302,6 +307,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.10]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.10
 [2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
 [2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8
 [2.0.0-dev.7]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.7
