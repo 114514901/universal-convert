@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.9.0-dev.2] - 2026-08-24
+
+### 修复
+- 视频编码（videoCodec）补上「原始」选项并默认值改为「原始」，修复上一版「默认→空」导致视频编码为空、无法转换的问题
+
 ## [1.9.0-dev.1] - 2026-08-24
 
 ### 新增
@@ -243,6 +248,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.9.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.2
 [1.9.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
 [1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1

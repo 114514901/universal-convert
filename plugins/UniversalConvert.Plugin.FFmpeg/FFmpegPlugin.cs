@@ -206,7 +206,8 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("videoCodec", "视频编码", "libx264",
+                    EnumOption("videoCodec", "视频编码", "",
+                        Choice("", "原始"),
                         Choice("libx264", "H.264 (libx264)"),
                         Choice("libx265", "H.265 (libx265)"),
                         Choice("libvpx-vp9", "VP9 (libvpx-vp9)"),
