@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.9] - 2026-08-24
+
+### 修复
+- 设置「更新」手动检查到新版本后补上「查看更新内容」与「下载更新」按钮（此前只显示文本提示）
+
 ## [2.0.0-dev.8] - 2026-08-24
 
 ### 修复
@@ -297,6 +302,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
 [2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8
 [2.0.0-dev.7]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.7
 [2.0.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.6

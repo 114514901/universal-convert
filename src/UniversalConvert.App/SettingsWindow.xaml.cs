@@ -22,6 +22,10 @@ namespace UniversalConvert.App
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
         private TextBlock _updateStatusText;
+        private UpdateInfo _updateInfo;
+        private Button _viewNotesButton;
+        private Button _downloadButton;
+        private ProgressBar _updateProgressBar;
 
         public SettingsWindow(SettingsManager manager)
         {
@@ -207,23 +211,97 @@ namespace UniversalConvert.App
 
             _updateStatusText = new TextBlock { Margin = new Thickness(0, 8, 0, 0), TextWrapping = TextWrapping.Wrap, Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray) };
 
+            var actionRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
+            _viewNotesButton = new Button { Content = Strings.ViewReleaseNotes, Padding = new Thickness(16, 6, 16, 6), Margin = new Thickness(0, 0, 8, 0), Visibility = Visibility.Collapsed };
+            _viewNotesButton.Click += OnViewReleaseNotes;
+            _downloadButton = new Button { Content = Strings.DownloadUpdate, Padding = new Thickness(16, 6, 16, 6), Visibility = Visibility.Collapsed };
+            _downloadButton.Click += OnDownloadUpdate;
+            actionRow.Children.Add(_viewNotesButton);
+            actionRow.Children.Add(_downloadButton);
+
+            _updateProgressBar = new ProgressBar { Height = 6, Margin = new Thickness(0, 8, 0, 0), Minimum = 0, Maximum = 100, Visibility = Visibility.Collapsed };
+
             panel.Children.Add(checkButton);
             panel.Children.Add(_updateStatusText);
+            panel.Children.Add(actionRow);
+            panel.Children.Add(_updateProgressBar);
             return panel;
         }
 
         private async void OnCheckUpdate(object sender, RoutedEventArgs e)
         {
             _updateStatusText.Text = Strings.CheckingUpdate;
+            _viewNotesButton.Visibility = Visibility.Collapsed;
+            _downloadButton.Visibility = Visibility.Collapsed;
+            _updateProgressBar.Visibility = Visibility.Collapsed;
+
             var info = await UpdateChecker.CheckAsync(_manager.Get("updateChannel"));
             if (info != null)
             {
+                _updateInfo = info;
                 _updateStatusText.Text = string.Format(Strings.UpdateAvailable, info.Version);
+                _viewNotesButton.Visibility = Visibility.Visible;
+                if (!string.IsNullOrEmpty(info.DownloadUrl))
+                {
+                    _downloadButton.Visibility = Visibility.Visible;
+                }
             }
             else
             {
+                _updateInfo = null;
                 _updateStatusText.Text = Strings.UpToDate;
             }
+        }
+
+        private void OnViewReleaseNotes(object sender, RoutedEventArgs e)
+        {
+            if (_updateInfo == null) return;
+            var window = new ReleaseNotesWindow(_updateInfo.Version, _updateInfo.Body) { Owner = this };
+            window.ShowDialog();
+        }
+
+        private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
+        {
+            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.DownloadUrl)) return;
+
+            _downloadButton.IsEnabled = false;
+            _viewNotesButton.IsEnabled = false;
+            _updateProgressBar.Visibility = Visibility.Visible;
+
+            var dest = Path.Combine(Path.GetTempPath(), "UniversalConvert-Setup-" + _updateInfo.Version.TrimStart('v', 'V') + ".exe");
+
+            var progress = new Progress<double>(p =>
+            {
+                _updateProgressBar.Value = p;
+                _updateStatusText.Text = string.Format(Strings.Downloading, (int)p);
+            });
+
+            try
+            {
+                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None);
+
+                _updateProgressBar.Value = 100;
+                _updateStatusText.Text = Strings.DownloadComplete;
+                try { LaunchInstallerSilent(dest); } catch { /* 启动安装程序失败 */ }
+            }
+            catch (Exception ex)
+            {
+                _updateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
+                _downloadButton.IsEnabled = true;
+                _viewNotesButton.IsEnabled = true;
+            }
+        }
+
+        private void LaunchInstallerSilent(string installerPath)
+        {
+            var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+            var psi = new System.Diagnostics.ProcessStartInfo(installerPath)
+            {
+                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp /DIR=\"" + installDir + "\"",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+            System.Diagnostics.Process.Start(psi);
         }
 
         private FrameworkElement BuildAdvancedActions()
