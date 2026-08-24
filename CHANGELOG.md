@@ -2,6 +2,13 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.9.0-dev.1] - 2026-08-24
+
+### 新增
+- 主界面文件列表改为三列（文件 / 转换参数 / 格式），支持每个文件单独自定义参数
+- 文件列表右键菜单（自定义 / 预览 / 移除）与快捷键（Ctrl+A 全选、Del 删除）
+- 自定义页面：预设「默认」等价于全部参数「原始」（不重编码），手改参数自动切「自定义」
+
 ## [1.8.2] - 2026-08-24
 
 ### 新增
@@ -235,6 +242,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.9.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
 [1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1
 [1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
