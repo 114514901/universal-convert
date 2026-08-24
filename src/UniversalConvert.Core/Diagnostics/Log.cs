@@ -102,7 +102,7 @@ namespace UniversalConvert.Core.Diagnostics
                 }
             }
 
-            Debug.WriteLine("[UniversalConvert." + level + "] " + message);
+            System.Diagnostics.Debug.WriteLine("[UniversalConvert." + level + "] " + message);
         }
 
         private static string FormatLine(LogLevel level, string message)
