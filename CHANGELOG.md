@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.2] - 2026-08-24
+
+### 修复
+- 启动不再被更新检查卡住：改为后台异步检查，网络/代理问题不影响界面加载
+- 无边框窗口改用自定义标题栏（含最小化/最大化/关闭按钮），修复 WindowChrome 导致按钮被挡、窗口直角的问题
+- 亚克力背景在部分 Win11 上失效：加 BLURBEHIND 降级兜底
+
+### 新增
+- 设置「更新」选项卡新增「检查更新」按钮，显示检查状态与结果
+
 ## [2.0.0-dev.1] - 2026-08-24
 
 ### 新增
@@ -254,6 +264,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.2
 [2.0.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.1
 [1.9.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.2
 [1.9.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.1
