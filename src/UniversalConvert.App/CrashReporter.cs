@@ -37,6 +37,37 @@ namespace UniversalConvert.App
             IntPtr userStreamParam,
             IntPtr callbackParam);
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RTL_OSVERSIONINFOW
+        {
+            public uint dwOSVersionInfoSize;
+            public uint dwMajorVersion;
+            public uint dwMinorVersion;
+            public uint dwBuildNumber;
+            public uint dwPlatformId;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szCSDVersion;
+        }
+
+        [DllImport("ntdll.dll", SetLastError = true)]
+        private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOW versionInfo);
+
+        /// <summary>获取真实 OS 版本（Environment.OSVersion 在未声明 manifest 时返回假的 6.2）。</summary>
+        private static string GetOSVersion()
+        {
+            try
+            {
+                var info = new RTL_OSVERSIONINFOW();
+                info.dwOSVersionInfoSize = (uint)Marshal.SizeOf(typeof(RTL_OSVERSIONINFOW));
+                if (RtlGetVersion(ref info) == 0)
+                {
+                    return $"Windows {info.dwMajorVersion}.{info.dwMinorVersion} (Build {info.dwBuildNumber})";
+                }
+            }
+            catch { }
+            return Environment.OSVersion.ToString();
+        }
+
         /// <summary>安装崩溃捕获（App 启动时调用一次）。</summary>
         public static void Install(CoreHost host, bool dumpEnabled)
         {
@@ -87,7 +118,7 @@ namespace UniversalConvert.App
             sb.AppendLine();
 
             sb.AppendLine("=== 系统信息 ===");
-            sb.AppendLine("OS: " + Environment.OSVersion);
+            sb.AppendLine("OS: " + GetOSVersion());
             sb.AppendLine("64 位系统: " + (Environment.Is64BitOperatingSystem ? "是" : "否"));
             sb.AppendLine(".NET: " + Environment.Version);
             sb.AppendLine("进程工作集: " + (Environment.WorkingSet / 1024 / 1024) + " MB");

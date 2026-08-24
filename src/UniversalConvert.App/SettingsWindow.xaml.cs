@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using UniversalConvert.App.Localization;
@@ -186,8 +187,8 @@ namespace UniversalConvert.App
 
         private void OnCrashTest(object sender, RoutedEventArgs e)
         {
-            // 故意抛异常，触发崩溃报告器（会被 DispatcherUnhandledException 捕获并弹窗，App 不退出）
-            throw new InvalidOperationException("崩溃测试：这是手动触发的异常，用于验证崩溃报告器。");
+            // 后台线程抛未处理异常，走 AppDomain.UnhandledException，App 会真的退出（测试真实崩溃路径）
+            Task.Run(() => { throw new InvalidOperationException("崩溃测试：后台线程未处理异常"); });
         }
 
         private void OnCancel(object sender, RoutedEventArgs e)
