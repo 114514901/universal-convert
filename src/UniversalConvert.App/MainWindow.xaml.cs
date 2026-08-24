@@ -91,6 +91,12 @@ namespace UniversalConvert.App
                 AdminBanner.Visibility = Visibility.Visible;
             }
 
+            // 后台异步检查更新，不阻塞启动（网络/代理问题不影响界面加载）
+            _ = CheckUpdateAsync();
+        }
+
+        private async Task CheckUpdateAsync()
+        {
             _updateInfo = await UpdateChecker.CheckAsync(_settingsManager.Get("updateChannel"));
             if (_updateInfo != null)
             {
