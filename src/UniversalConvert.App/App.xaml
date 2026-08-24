@@ -9,6 +9,7 @@
                 <ui:ThemeResources />
                 <ui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
+            <SolidColorBrush x:Key="AccentBorderBrush" Color="#0078D4"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

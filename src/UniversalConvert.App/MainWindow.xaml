@@ -60,8 +60,8 @@
             </Grid.RowDefinitions>
 
             <!-- 文件卡片 -->
-            <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="12"
-                    BorderBrush="#E5E5E5" BorderThickness="1">
+            <Border x:Name="FileCard" Grid.Row="0" Background="White" CornerRadius="8" Padding="12"
+                    BorderBrush="{DynamicResource AccentBorderBrush}" BorderThickness="1">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -102,8 +102,8 @@
             </Border>
 
             <!-- 输出设置卡片 -->
-            <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="12" Margin="0,12,0,0"
-                    BorderBrush="#E5E5E5" BorderThickness="1">
+            <Border x:Name="OutputCard" Grid.Row="1" Background="White" CornerRadius="8" Padding="12" Margin="0,12,0,0"
+                    BorderBrush="{DynamicResource AccentBorderBrush}" BorderThickness="1">
                 <StackPanel>
                     <TextBlock Text="{x:Static loc:Strings.OutputFormats}" FontWeight="SemiBold"/>
                     <ComboBox x:Name="OutputCombo" Margin="0,8,0,0" SelectionChanged="OnOutputSelectionChanged"/>

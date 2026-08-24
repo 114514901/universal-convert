@@ -34,6 +34,12 @@ namespace UniversalConvert.App
             _host = host;
             _settingsManager = settingsManager;
 
+            // 亚克力需要窗口允许透明（WPF 切软件渲染，这是亚克力的代价）
+            if (settingsManager.Get("acrylicEnabled") == "true")
+            {
+                AllowsTransparency = true;
+            }
+
             FileList.ItemsSource = _files;
             OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
 
@@ -434,12 +440,17 @@ namespace UniversalConvert.App
         {
             if (enabled)
             {
-                Background = new SolidColorBrush(Color.FromArgb(0xCC, 0xF3, 0xF3, 0xF3));
+                Background = Brushes.Transparent;
+                var cardBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF));
+                FileCard.Background = cardBrush;
+                OutputCard.Background = cardBrush;
                 AcrylicHelper.EnableAcrylic(this);
             }
             else
             {
                 Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF3, 0xF3));
+                FileCard.Background = Brushes.White;
+                OutputCard.Background = Brushes.White;
             }
         }
     }

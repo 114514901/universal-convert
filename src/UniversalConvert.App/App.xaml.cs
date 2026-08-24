@@ -216,6 +216,8 @@ namespace UniversalConvert.App
             {
                 var color = (Color)ColorConverter.ConvertFromString(hex);
                 ThemeManager.Current.AccentColor = color;
+                // 同步更新自定义元素（卡片边框等）绑定的强调色
+                Application.Current.Resources["AccentBorderBrush"] = new SolidColorBrush(color);
             }
             catch
             {
