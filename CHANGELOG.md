@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.1] - 2026-08-24
+
+### 新增
+- 全新现代 UI：引入 ModernWpf（Fluent 设计），主界面/设置/关于窗口卡片式重排
+- 个性化设置：主题色（预设色）、亚克力背景（含不透明度调节）
+
 ## [1.9.0-dev.2] - 2026-08-24
 
 ### 修复
@@ -248,6 +254,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.1
 [1.9.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.2
 [1.9.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
