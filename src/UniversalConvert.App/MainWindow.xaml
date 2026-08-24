@@ -41,15 +41,24 @@
             </Border>
         </StackPanel>
 
-        <!-- 标题栏 -->
-        <DockPanel Grid.Row="1" Margin="16,16,16,8">
-            <TextBlock FontSize="24" FontWeight="SemiBold" Text="UniversalConvert" VerticalAlignment="Center"/>
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+        <!-- 标题栏（自定义，含窗口控制按钮；无边框时用于拖动） -->
+        <Grid Grid.Row="1" Margin="0,0,8,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="Transparent" Padding="16,12,0,8" MouseLeftButtonDown="OnTitleBarMouseDown">
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="UniversalConvert" VerticalAlignment="Center"/>
+            </Border>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="{x:Static loc:Strings.Settings}" Padding="12,5" Click="OnOpenSettings" Margin="0,0,6,0"/>
                 <Button Content="{x:Static loc:Strings.Plugins}" Padding="12,5" Click="OnOpenPlugins" Margin="0,0,6,0"/>
-                <Button Content="{x:Static loc:Strings.About}" Padding="12,5" Click="OnOpenAbout"/>
+                <Button Content="{x:Static loc:Strings.About}" Padding="12,5" Click="OnOpenAbout" Margin="0,0,6,0"/>
+                <Button Content="—" Padding="10,5" Click="OnMinimize" Margin="0,0,2,0"/>
+                <Button Content="□" Padding="10,5" Click="OnMaximize" Margin="0,0,2,0"/>
+                <Button Content="✕" Padding="10,5" Click="OnCloseWindow"/>
             </StackPanel>
-        </DockPanel>
+        </Grid>
 
         <!-- 内容 -->
         <Grid Grid.Row="2" Margin="16,0,16,16">

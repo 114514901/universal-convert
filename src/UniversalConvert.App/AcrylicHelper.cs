@@ -13,6 +13,7 @@ namespace UniversalConvert.App
     {
         private const int WCA_ACCENT_POLICY = 19;
         private const int ACCENT_DISABLED = 0;
+        private const int ACCENT_ENABLE_BLURBEHIND = 3;
         private const int ACCENT_ENABLE_ACRYLICBLURBEHIND = 4;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -38,7 +39,11 @@ namespace UniversalConvert.App
         /// <summary>为窗口启用亚克力模糊背景（浅色，半透明白）。失败则静默忽略。</summary>
         public static void EnableAcrylic(Window window)
         {
-            Apply(window, ACCENT_ENABLE_ACRYLICBLURBEHIND, unchecked((int)0x99FFFFFF));
+            // 先尝试亚克力（Win10 1803+）；部分 Win11 上可能失效，降级为普通模糊
+            if (!Apply(window, ACCENT_ENABLE_ACRYLICBLURBEHIND, unchecked((int)0x99FFFFFF)))
+            {
+                Apply(window, ACCENT_ENABLE_BLURBEHIND, unchecked((int)0x99FFFFFF));
+            }
         }
 
         /// <summary>关闭亚克力，恢复普通背景。</summary>
@@ -47,12 +52,12 @@ namespace UniversalConvert.App
             Apply(window, ACCENT_DISABLED, 0);
         }
 
-        private static void Apply(Window window, int accentState, int gradientColor)
+        private static bool Apply(Window window, int accentState, int gradientColor)
         {
             try
             {
                 var hwnd = new WindowInteropHelper(window).Handle;
-                if (hwnd == IntPtr.Zero) return;
+                if (hwnd == IntPtr.Zero) return false;
 
                 var accent = new AccentPolicy
                 {
@@ -73,7 +78,7 @@ namespace UniversalConvert.App
                         SizeOfData = size,
                         Data = ptr
                     };
-                    SetWindowCompositionAttribute(hwnd, ref data);
+                    return SetWindowCompositionAttribute(hwnd, ref data) != 0;
                 }
                 finally
                 {
@@ -83,6 +88,7 @@ namespace UniversalConvert.App
             catch
             {
                 // 亚克力失败不影响主流程
+                return false;
             }
         }
     }

@@ -11,7 +11,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shell;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -35,20 +34,12 @@ namespace UniversalConvert.App
             _host = host;
             _settingsManager = settingsManager;
 
-            // 亚克力需要窗口允许透明（WPF 切软件渲染，这是亚克力的代价）；
-            // AllowsTransparency 强制要求 WindowStyle=None，配合 WindowChrome 保留拖动/系统按钮
+            // 亚克力需要窗口允许透明（WPF 切软件渲染）；AllowsTransparency 强制要求 WindowStyle=None。
+            // 标题栏用自定义控件（自带最小化/最大化/关闭），不依赖 WindowChrome。
             if (settingsManager.Get("acrylicEnabled") == "true")
             {
                 WindowStyle = WindowStyle.None;
                 AllowsTransparency = true;
-                WindowChrome.SetWindowChrome(this, new WindowChrome
-                {
-                    CaptionHeight = 48,
-                    ResizeBorderThickness = new Thickness(6),
-                    CornerRadius = new CornerRadius(8),
-                    GlassFrameThickness = new Thickness(0),
-                    UseAeroCaptionButtons = true
-                });
             }
 
             FileList.ItemsSource = _files;
@@ -60,6 +51,29 @@ namespace UniversalConvert.App
             }
 
             RefreshFileList();
+        }
+
+        private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                try { DragMove(); } catch { }
+            }
+        }
+
+        private void OnMinimize(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void OnMaximize(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+
+        private void OnCloseWindow(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
