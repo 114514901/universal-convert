@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.3] - 2026-08-24
+
+### 变更
+- 移除亚克力背景功能（设置项、AcrylicHelper 与本地化文案）
+- 移除自定义标题栏（最小化/最大化/关闭按钮与拖动），窗口恢复系统原生边框与标题栏；「设置/插件/关于」改为顶部工具栏
+
 ## [2.0.0-dev.2] - 2026-08-24
 
 ### 修复
@@ -264,6 +270,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.3
 [2.0.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.2
 [2.0.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.1
 [1.9.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.2
