@@ -414,4 +414,10 @@
   <data name="EmptyLog" xml:space="preserve">
     <value>（暂无日志）</value>
   </data>
+  <data name="SettingCrashDumpLevel" xml:space="preserve">
+    <value>崩溃转储等级</value>
+  </data>
+  <data name="SettingCrashDumpLevelDescription" xml:space="preserve">
+    <value>转储详细程度，越详细文件越大（FullMemory 可占数百 MB）</value>
+  </data>
 </root>

@@ -21,10 +21,14 @@ namespace UniversalConvert.App
     {
         private const int KeepCrashLogs = 5;
         private const uint MiniDumpNormal = 0x00000000;
+        private const uint MiniDumpWithDataSegments = 0x00000001;
+        private const uint MiniDumpWithFullMemory = 0x00000002;
+        private const uint MiniDumpWithIndirectlyReferencedMemory = 0x00000040;
 
         private static readonly object Sync = new object();
         private static CoreHost _host;
         private static bool _dumpEnabled = true;
+        private static uint _dumpType = MiniDumpNormal;
         private static DateTime _startTime = DateTime.Now;
 
         [DllImport("dbghelp.dll", SetLastError = true)]
@@ -68,11 +72,22 @@ namespace UniversalConvert.App
             return Environment.OSVersion.ToString();
         }
 
+        /// <summary>把设置里的转储等级字符串解析成 MiniDump 类型标志。</summary>
+        public static uint ParseDumpType(string level)
+        {
+            if (string.Equals(level, "FullMemory", StringComparison.OrdinalIgnoreCase))
+                return MiniDumpNormal | MiniDumpWithFullMemory;
+            if (string.Equals(level, "WithDataSegments", StringComparison.OrdinalIgnoreCase))
+                return MiniDumpNormal | MiniDumpWithDataSegments | MiniDumpWithIndirectlyReferencedMemory;
+            return MiniDumpNormal;
+        }
+
         /// <summary>安装崩溃捕获（App 启动时调用一次）。</summary>
-        public static void Install(CoreHost host, bool dumpEnabled)
+        public static void Install(CoreHost host, bool dumpEnabled, uint dumpType)
         {
             _host = host;
             _dumpEnabled = dumpEnabled;
+            _dumpType = dumpType;
             _startTime = DateTime.Now;
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         }
@@ -200,7 +215,7 @@ namespace UniversalConvert.App
                         process.Handle,
                         (uint)process.Id,
                         fs.SafeFileHandle,
-                        MiniDumpNormal,
+                        _dumpType,
                         IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 }
                 return File.Exists(path) ? path : null;

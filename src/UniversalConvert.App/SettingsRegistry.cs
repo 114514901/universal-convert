@@ -83,6 +83,21 @@ namespace UniversalConvert.App
                 Description = "@SettingCrashDumpEnabledDescription",
                 Type = OptionType.Bool,
                 DefaultValue = "true"
+            },
+            new SettingDefinition
+            {
+                Key = "crashDumpLevel",
+                Category = "@SettingsCategoryAdvanced",
+                Label = "@SettingCrashDumpLevel",
+                Description = "@SettingCrashDumpLevelDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "Normal",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "Normal", Label = "Normal" },
+                    new OptionChoice { Value = "WithDataSegments", Label = "WithDataSegments" },
+                    new OptionChoice { Value = "FullMemory", Label = "FullMemory" }
+                }
             }
         };
     }

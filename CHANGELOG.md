@@ -2,6 +2,15 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0-dev.2] - 2026-08-24
+
+### 修复
+- 崩溃报告的系统信息 OS 版本错误（`Environment.OSVersion` 返回假的 6.2）：改用 `RtlGetVersion` 获取真实版本
+- 崩溃测试改为真实的后台线程崩溃（走 `AppDomain.UnhandledException`，App 会退出）
+
+### 新增
+- 崩溃转储等级配置（Normal / WithDataSegments / FullMemory）
+
 ## [1.8.0-dev.1] - 2026-08-24
 
 ### 新增
@@ -217,6 +226,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.2
 [1.8.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.1
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5

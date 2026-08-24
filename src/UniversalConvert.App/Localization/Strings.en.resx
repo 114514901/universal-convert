@@ -414,4 +414,10 @@
   <data name="EmptyLog" xml:space="preserve">
     <value>(No logs yet)</value>
   </data>
+  <data name="SettingCrashDumpLevel" xml:space="preserve">
+    <value>Crash dump level</value>
+  </data>
+  <data name="SettingCrashDumpLevelDescription" xml:space="preserve">
+    <value>Dump detail level (FullMemory can be hundreds of MB)</value>
+  </data>
 </root>

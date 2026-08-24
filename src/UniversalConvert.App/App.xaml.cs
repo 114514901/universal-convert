@@ -39,8 +39,9 @@ namespace UniversalConvert.App
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
             _settingsManager = new SettingsManager(config, _host.Plugins);
 
-            // 崩溃报告（转储开关读设置，默认开启）
-            CrashReporter.Install(_host, IsDumpEnabled(config));
+            // 崩溃报告（转储开关/等级读设置，默认开启 + Normal 等级）
+            CrashReporter.Install(_host, IsDumpEnabled(config),
+                CrashReporter.ParseDumpType(GetConfigValue(config, "crashDumpLevel")));
 
             ApplyLanguage(_settingsManager);
 
