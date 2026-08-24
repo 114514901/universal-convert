@@ -34,9 +34,11 @@ namespace UniversalConvert.App
             _host = host;
             _settingsManager = settingsManager;
 
-            // 亚克力需要窗口允许透明（WPF 切软件渲染，这是亚克力的代价）
+            // 亚克力需要窗口允许透明（WPF 切软件渲染，这是亚克力的代价）；
+            // AllowsTransparency 强制要求 WindowStyle=None，配合 WindowChrome 保留拖动/系统按钮
             if (settingsManager.Get("acrylicEnabled") == "true")
             {
+                WindowStyle = WindowStyle.None;
                 AllowsTransparency = true;
             }
 
