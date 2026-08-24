@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/v2.0 ]
     tags: [ 'v*' ]
   workflow_dispatch:
 
