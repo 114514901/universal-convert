@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -35,14 +34,6 @@ namespace UniversalConvert.App
             _host = host;
             _settingsManager = settingsManager;
 
-            // 亚克力需要窗口允许透明（WPF 切软件渲染）；AllowsTransparency 强制要求 WindowStyle=None。
-            // 标题栏用自定义控件（自带最小化/最大化/关闭），不依赖 WindowChrome。
-            if (settingsManager.Get("acrylicEnabled") == "true")
-            {
-                WindowStyle = WindowStyle.None;
-                AllowsTransparency = true;
-            }
-
             FileList.ItemsSource = _files;
             OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
 
@@ -54,34 +45,8 @@ namespace UniversalConvert.App
             RefreshFileList();
         }
 
-        private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                try { DragMove(); } catch { }
-            }
-        }
-
-        private void OnMinimize(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
-
-        private void OnMaximize(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-        }
-
-        private void OnCloseWindow(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // 亚克力背景（读设置）
-            ApplyAcrylic(_settingsManager.Get("acrylicEnabled") == "true");
-
             if (AppVersion.Current?.IsPrerelease == true)
             {
                 DevBanner.Visibility = Visibility.Visible;
@@ -465,31 +430,6 @@ namespace UniversalConvert.App
             catch
             {
                 return false;
-            }
-        }
-
-        private void ApplyAcrylic(bool enabled)
-        {
-            if (enabled)
-            {
-                // 亚克力不透明度（读设置，默认中 = 153）
-                byte alpha = 153;
-                if (int.TryParse(_settingsManager.Get("acrylicOpacity"), out var a) && a >= 0 && a <= 255)
-                {
-                    alpha = (byte)a;
-                }
-
-                Background = Brushes.Transparent;
-                var cardBrush = new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0xFF, 0xFF));
-                FileCard.Background = cardBrush;
-                OutputCard.Background = cardBrush;
-                AcrylicHelper.EnableAcrylic(this);
-            }
-            else
-            {
-                Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF3, 0xF3));
-                FileCard.Background = Brushes.White;
-                OutputCard.Background = Brushes.White;
             }
         }
     }

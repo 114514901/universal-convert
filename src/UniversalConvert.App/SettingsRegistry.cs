@@ -121,32 +121,6 @@ namespace UniversalConvert.App
                     new OptionChoice { Value = "#00B7C3", Label = "@ThemeAccentTeal" }
                 }
             },
-            new SettingDefinition
-            {
-                Key = "acrylicEnabled",
-                Category = "@SettingsCategoryPersonalization",
-                Label = "@SettingAcrylic",
-                Description = "@SettingAcrylicDescription",
-                Type = OptionType.Bool,
-                DefaultValue = "false",
-                RequiresRestart = true
-            },
-            new SettingDefinition
-            {
-                Key = "acrylicOpacity",
-                Category = "@SettingsCategoryPersonalization",
-                Label = "@SettingAcrylicOpacity",
-                Description = "@SettingAcrylicOpacityDescription",
-                Type = OptionType.Enum,
-                DefaultValue = "153",
-                RequiresRestart = true,
-                Choices = new List<OptionChoice>
-                {
-                    new OptionChoice { Value = "204", Label = "@AcrylicOpacityHigh" },
-                    new OptionChoice { Value = "153", Label = "@AcrylicOpacityMedium" },
-                    new OptionChoice { Value = "102", Label = "@AcrylicOpacityLow" }
-                }
-            }
         };
     }
 }
