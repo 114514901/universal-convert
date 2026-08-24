@@ -256,7 +256,7 @@
     <value>项目主页</value>
   </data>
   <data name="ThirdPartyText" xml:space="preserve">
-    <value>包含第三方组件：FFmpeg（GPL）、NCM 解密（MIT）、KGM 解密（反 996 许可证）。</value>
+    <value>包含第三方组件：FFmpeg（GPL）、NCM 解密（MIT）、KGM 解密（反 996 许可证）、QMC 解密（反 996/MIT）。</value>
   </data>
   <data name="SettingsCategoryGeneral" xml:space="preserve">
     <value>常规</value>

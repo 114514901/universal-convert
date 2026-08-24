@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0-dev.6] - 2026-08-24
+
+### 新增
+- 新增 QMC 解密插件：支持 QQ 音乐 `.qmc0`/`.qmc3`/`.qmcflac`/`.qmcogg` 老格式解密，解密后可自动转码为其它音频格式
+
 ## [1.8.0-dev.5] - 2026-08-24
 
 ### 修复
@@ -247,6 +252,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.6
 [1.8.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.5
 [1.8.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.4
 [1.8.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.3

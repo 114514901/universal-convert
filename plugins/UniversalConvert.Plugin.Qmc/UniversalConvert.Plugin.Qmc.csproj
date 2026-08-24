@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <RootNamespace>UniversalConvert.Plugin.Qmc</RootNamespace>
+    <AssemblyName>UniversalConvert.Plugin.Qmc</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\UniversalConvert.Core\UniversalConvert.Core.csproj" />
+  </ItemGroup>
+
+</Project>

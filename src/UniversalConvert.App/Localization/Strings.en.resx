@@ -256,7 +256,7 @@
     <value>Project home</value>
   </data>
   <data name="ThirdPartyText" xml:space="preserve">
-    <value>Includes third-party components: FFmpeg (GPL), NCM decrypt (MIT), KGM decrypt (Anti-996).</value>
+    <value>Includes third-party components: FFmpeg (GPL), NCM decrypt (MIT), KGM decrypt (Anti-996), QMC decrypt (Anti-996/MIT).</value>
   </data>
   <data name="SettingsCategoryGeneral" xml:space="preserve">
     <value>General</value>

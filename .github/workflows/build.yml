@@ -56,6 +56,7 @@ jobs:
           Copy-Item "plugins\UniversalConvert.Plugin.FFmpeg\bin\Release\net48\UniversalConvert.Plugin.FFmpeg.dll" "dist\plugins\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.Ncm\bin\Release\net48\UniversalConvert.Plugin.Ncm.dll" "dist\plugins\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.Kgm\bin\Release\net48\UniversalConvert.Plugin.Kgm.dll" "dist\plugins\" -Force
+          Copy-Item "plugins\UniversalConvert.Plugin.Qmc\bin\Release\net48\UniversalConvert.Plugin.Qmc.dll" "dist\plugins\" -Force
 
       - name: Decompress KGM key table
         shell: pwsh
