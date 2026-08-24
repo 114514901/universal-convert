@@ -35,7 +35,8 @@ namespace UniversalConvert.App
         private int _doneCount;
         private int _failedCount;
 
-        public BatchConvertWindow(CoreHost host, string[] files, string targetExt, int workerThreads)
+        public BatchConvertWindow(CoreHost host, string[] files, string targetExt, int workerThreads,
+            IDictionary<string, IDictionary<string, string>> perFileOptions = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
@@ -49,7 +50,14 @@ namespace UniversalConvert.App
 
             foreach (var f in files)
             {
-                _items.Add(new BatchItem { FileName = Path.GetFileName(f), Status = Strings.StatusPending });
+                IDictionary<string, string> options = null;
+                if (perFileOptions != null) perFileOptions.TryGetValue(f, out options);
+                _items.Add(new BatchItem
+                {
+                    FileName = Path.GetFileName(f),
+                    Status = Strings.StatusPending,
+                    Options = options
+                });
             }
             ItemList.ItemsSource = _items;
         }
@@ -105,7 +113,7 @@ namespace UniversalConvert.App
             {
                 RunOnUi(() => item.Status = Strings.StatusConverting);
 
-                var options = PresetMerger.Merge(entry.Options, entry.Presets, null, null);
+                var options = item.Options ?? PresetMerger.Merge(entry.Options, entry.Presets, null, null);
                 var request = new ConversionRequest
                 {
                     PluginId = entry.PluginId,
@@ -236,6 +244,9 @@ namespace UniversalConvert.App
 
         /// <summary>转换成功后的输出文件路径；未完成时为 null。</summary>
         public string OutputPath { get; set; }
+
+        /// <summary>该文件的自定义参数；null 表示用默认。</summary>
+        public IDictionary<string, string> Options { get; set; }
 
         public string Status
         {

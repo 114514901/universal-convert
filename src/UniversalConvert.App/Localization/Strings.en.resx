@@ -447,4 +447,19 @@
   <data name="LicenseText" xml:space="preserve">
     <value>License: GNU GPL v3.0 (see each plugin's LICENSE-NOTICE for third-party licenses)</value>
   </data>
+  <data name="Original" xml:space="preserve">
+    <value>Original</value>
+  </data>
+  <data name="ManualCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="ParamsColumn" xml:space="preserve">
+    <value>Parameters</value>
+  </data>
+  <data name="FormatColumn" xml:space="preserve">
+    <value>Format</value>
+  </data>
 </root>

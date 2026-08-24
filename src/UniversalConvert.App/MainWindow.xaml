@@ -65,9 +65,29 @@
                     <Button Content="{x:Static loc:Strings.ClearAll}" Padding="10,3" Click="OnClear"/>
                 </StackPanel>
             </DockPanel>
-            <ListBox x:Name="FileList" Grid.Row="1" SelectionMode="Extended" Margin="0,6,0,0"
-                     ToolTip="{x:Static loc:Strings.DropHint}"
-                     MouseDoubleClick="OnFileDoubleClick"/>
+            <ListView x:Name="FileList" Grid.Row="1" SelectionMode="Extended" Margin="0,6,0,0"
+                      ToolTip="{x:Static loc:Strings.DropHint}"
+                      MouseDoubleClick="OnFileDoubleClick" KeyDown="OnFileListKeyDown"
+                      SelectionChanged="OnFileSelectionChanged">
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{x:Static loc:Strings.Customize}" Click="OnCustomizeContext"/>
+                        <MenuItem Header="{x:Static loc:Strings.Preview}" Click="OnPreviewContext"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static loc:Strings.RemoveSelected}" Click="OnRemoveContext"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="{x:Static loc:Strings.FileColumn}" Width="300"
+                                        DisplayMemberBinding="{Binding FileName}"/>
+                        <GridViewColumn Header="{x:Static loc:Strings.ParamsColumn}" Width="130"
+                                        DisplayMemberBinding="{Binding CustomizeLabel}"/>
+                        <GridViewColumn Header="{x:Static loc:Strings.FormatColumn}" Width="80"
+                                        DisplayMemberBinding="{Binding Format}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </Grid>
 
         <StackPanel Grid.Row="3" Margin="0,10,0,0">

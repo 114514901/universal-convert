@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,7 +22,7 @@ namespace UniversalConvert.App
     {
         private readonly CoreHost _host;
         private readonly SettingsManager _settingsManager;
-        private readonly List<string> _files = new List<string>();
+        private readonly ObservableCollection<FileRow> _files = new ObservableCollection<FileRow>();
         private ConversionEntry[] _commonTargets = new ConversionEntry[0];
         private UpdateInfo _updateInfo;
 
@@ -31,12 +33,11 @@ namespace UniversalConvert.App
             _host = host;
             _settingsManager = settingsManager;
 
+            FileList.ItemsSource = _files;
+
             if (initialFiles != null)
             {
-                foreach (var f in initialFiles)
-                {
-                    if (File.Exists(f)) _files.Add(f);
-                }
+                AddFiles(initialFiles);
             }
 
             RefreshFileList();
@@ -131,9 +132,6 @@ namespace UniversalConvert.App
 
         private void LaunchInstallerSilent(string installerPath)
         {
-            // 自动更新：静默升级，跳过安装向导（只显示进度条），装完自动启动新版本。
-            // /DIR 让升级装回原安装目录（含非默认目录的情况）；
-            // 安装器要写 HKLM 注册右键菜单，用 runas 触发 UAC 提权。
             var installDir = (_host.Config.InstallDirectory ?? AppDomain.CurrentDomain.BaseDirectory)
                 .TrimEnd('\\');
 
@@ -182,21 +180,26 @@ namespace UniversalConvert.App
         {
             foreach (var f in files)
             {
-                if (File.Exists(f) && !_files.Contains(f, StringComparer.OrdinalIgnoreCase))
+                if (!File.Exists(f)) continue;
+                if (_files.Any(r => string.Equals(r.Path, f, StringComparison.OrdinalIgnoreCase))) continue;
+
+                _files.Add(new FileRow
                 {
-                    _files.Add(f);
-                }
+                    Path = f,
+                    FileName = Path.GetFileName(f),
+                    Format = Path.GetExtension(f),
+                    CustomizeLabel = Strings.Original
+                });
             }
             RefreshFileList();
         }
 
         private void OnRemoveSelected(object sender, RoutedEventArgs e)
         {
-            var indices = FileList.SelectedItems.Cast<string>().ToList();
-            foreach (var name in indices)
+            var rows = FileList.SelectedItems.Cast<FileRow>().ToList();
+            foreach (var row in rows)
             {
-                var idx = FindIndexByName(name);
-                if (idx >= 0) _files.RemoveAt(idx);
+                _files.Remove(row);
             }
             RefreshFileList();
         }
@@ -204,25 +207,59 @@ namespace UniversalConvert.App
         private static readonly string[] PlayableAudioExtensions =
             { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma" };
 
-        private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            var name = FileList.SelectedItem as string;
-            if (string.IsNullOrEmpty(name)) return;
-
-            var idx = FindIndexByName(name);
-            if (idx < 0 || idx >= _files.Count) return;
-
-            var path = _files[idx];
-            if (!IsPlayableAudio(path)) return;
-
-            var window = new AudioPlayerWindow(path) { Owner = this };
-            window.Show();
-        }
-
         private static bool IsPlayableAudio(string path)
         {
             var ext = Path.GetExtension(path);
             return PlayableAudioExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var row = FileList.SelectedItem as FileRow;
+            if (row == null || !IsPlayableAudio(row.Path)) return;
+
+            var window = new AudioPlayerWindow(row.Path) { Owner = this };
+            window.Show();
+        }
+
+        private void OnFileListKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.A && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                FileList.SelectAll();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Delete)
+            {
+                OnRemoveSelected(null, null);
+                e.Handled = true;
+            }
+        }
+
+        private void OnCustomizeContext(object sender, RoutedEventArgs e)
+        {
+            CustomizeSelected();
+        }
+
+        private void OnRemoveContext(object sender, RoutedEventArgs e)
+        {
+            OnRemoveSelected(sender, e);
+        }
+
+        private void OnPreviewContext(object sender, RoutedEventArgs e)
+        {
+            var row = FileList.SelectedItem as FileRow;
+            if (row == null || !File.Exists(row.Path)) return;
+
+            if (IsPlayableAudio(row.Path))
+            {
+                var window = new AudioPlayerWindow(row.Path) { Owner = this };
+                window.Show();
+            }
+            else
+            {
+                try { Process.Start(row.Path); } catch { }
+            }
         }
 
         private void OnClear(object sender, RoutedEventArgs e)
@@ -231,18 +268,8 @@ namespace UniversalConvert.App
             RefreshFileList();
         }
 
-        private int FindIndexByName(string fileName)
-        {
-            for (int i = 0; i < _files.Count; i++)
-            {
-                if (Path.GetFileName(_files[i]) == fileName) return i;
-            }
-            return -1;
-        }
-
         private void RefreshFileList()
         {
-            FileList.ItemsSource = _files.Select(Path.GetFileName).ToList();
             RefreshTargetFormats();
         }
 
@@ -267,7 +294,7 @@ namespace UniversalConvert.App
         {
             if (_files.Count == 0) return new ConversionEntry[0];
 
-            var baseEntries = _host.Registry.GetConversionsFor(Path.GetExtension(_files[0])).ToList();
+            var baseEntries = _host.Registry.GetConversionsFor(_files[0].Format).ToList();
             var result = new List<ConversionEntry>();
 
             foreach (var entry in baseEntries)
@@ -275,7 +302,7 @@ namespace UniversalConvert.App
                 bool supportedByAll = true;
                 for (int i = 1; i < _files.Count; i++)
                 {
-                    if (_host.Registry.GetEntry(Path.GetExtension(_files[i]), entry.OutputExtension) == null)
+                    if (_host.Registry.GetEntry(_files[i].Format, entry.OutputExtension) == null)
                     {
                         supportedByAll = false;
                         break;
@@ -295,21 +322,27 @@ namespace UniversalConvert.App
         private void UpdateButtons()
         {
             bool hasSelection = OutputCombo.SelectedIndex >= 0 && _commonTargets.Length > 0;
-            bool singleFile = _files.Count == 1;
+            bool hasFileSelected = FileList.SelectedItem != null;
 
             ConvertButton.IsEnabled = hasSelection;
 
-            CustomizeButton.IsEnabled = hasSelection && singleFile
+            CustomizeButton.IsEnabled = hasSelection && hasFileSelected
                 && _commonTargets[OutputCombo.SelectedIndex].HasCustomizableOptions;
 
-            // 未测试的解密格式显示警告
             bool isUntested = hasSelection && _commonTargets[OutputCombo.SelectedIndex].IsUntested;
             UntestedWarningText.Visibility = isUntested ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        private void OnCustomize(object sender, RoutedEventArgs e)
+        private void OnFileSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_files.Count != 1 || OutputCombo.SelectedIndex < 0)
+            UpdateButtons();
+        }
+
+        private void CustomizeSelected()
+        {
+            var row = FileList.SelectedItem as FileRow;
+            if (row == null) return;
+            if (OutputCombo.SelectedIndex < 0)
             {
                 MessageBox.Show(Strings.PleaseSelectFormat, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
@@ -323,8 +356,17 @@ namespace UniversalConvert.App
                 return;
             }
 
-            var window = new CustomizeWindow(_host.Engine, _files[0], entry) { Owner = this };
-            window.ShowDialog();
+            var result = CustomizeWindow.Collect(this, entry, row.Path);
+            if (result != null)
+            {
+                row.Options = result.Options;
+                row.CustomizeLabel = result.Label;
+            }
+        }
+
+        private void OnCustomize(object sender, RoutedEventArgs e)
+        {
+            CustomizeSelected();
         }
 
         private void OnConvert(object sender, RoutedEventArgs e)
@@ -342,7 +384,14 @@ namespace UniversalConvert.App
                 workerThreads = 2;
             }
 
-            var window = new BatchConvertWindow(_host, _files.ToArray(), targetExt, workerThreads) { Owner = this };
+            var perFileOptions = new Dictionary<string, IDictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var row in _files)
+            {
+                if (row.Options != null) perFileOptions[row.Path] = row.Options;
+            }
+
+            var files = _files.Select(r => r.Path).ToArray();
+            var window = new BatchConvertWindow(_host, files, targetExt, workerThreads, perFileOptions) { Owner = this };
             window.ShowDialog();
         }
 
@@ -358,5 +407,29 @@ namespace UniversalConvert.App
                 return false;
             }
         }
+    }
+
+    /// <summary>主界面文件列表的一行。</summary>
+    public class FileRow : INotifyPropertyChanged
+    {
+        public string Path { get; set; }
+        public string FileName { get; set; }
+        public string Format { get; set; }
+
+        private string _customizeLabel;
+        public string CustomizeLabel
+        {
+            get { return _customizeLabel; }
+            set
+            {
+                _customizeLabel = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CustomizeLabel)));
+            }
+        }
+
+        /// <summary>该文件的自定义参数；null 表示未自定义。</summary>
+        public IDictionary<string, string> Options { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

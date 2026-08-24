@@ -136,6 +136,11 @@ namespace UniversalConvert.App.Localization
         public static string UntestedWarning => Get("UntestedWarning");
         public static string StatusUntested => Get("StatusUntested");
         public static string LicenseText => Get("LicenseText");
+        public static string Original => Get("Original");
+        public static string ManualCustom => Get("ManualCustom");
+        public static string Preview => Get("Preview");
+        public static string ParamsColumn => Get("ParamsColumn");
+        public static string FormatColumn => Get("FormatColumn");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

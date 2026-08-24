@@ -447,4 +447,19 @@
   <data name="LicenseText" xml:space="preserve">
     <value>许可证：GNU GPL v3.0（各解密插件的第三方许可见各自目录的 LICENSE-NOTICE）</value>
   </data>
+  <data name="Original" xml:space="preserve">
+    <value>原始</value>
+  </data>
+  <data name="ManualCustom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Preview" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="ParamsColumn" xml:space="preserve">
+    <value>转换参数</value>
+  </data>
+  <data name="FormatColumn" xml:space="preserve">
+    <value>格式</value>
+  </data>
 </root>
