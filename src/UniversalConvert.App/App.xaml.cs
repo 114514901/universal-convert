@@ -25,9 +25,8 @@ namespace UniversalConvert.App
         {
             base.OnStartup(e);
 
-            // 应用主题：浅色 + Fluent 蓝主题色（后续可个性化）
+            // 应用主题：浅色（主题色稍后从设置读取）
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-            ThemeManager.Current.AccentColor = Color.FromRgb(0x00, 0x78, 0xD4);
 
             // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
             DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -36,6 +35,9 @@ namespace UniversalConvert.App
 
             var config = new ConfigStore().Load();
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            // 主题色（读设置，默认 Fluent 蓝）
+            ApplyAccentColor(GetConfigValue(config, "themeAccent"));
 
             // 日志：归档上一次运行日志，再配置本次日志（级别读设置，默认 Info）
             ArchivePreviousLog();
@@ -204,6 +206,21 @@ namespace UniversalConvert.App
             var value = GetConfigValue(config, "crashDumpEnabled");
             bool enabled;
             return string.IsNullOrEmpty(value) ? true : (!bool.TryParse(value, out enabled) || enabled);
+        }
+
+        /// <summary>应用主题色（十六进制字符串，如 "#0078D4"）；无效则忽略。</summary>
+        public static void ApplyAccentColor(string hex)
+        {
+            if (string.IsNullOrEmpty(hex)) return;
+            try
+            {
+                var color = (Color)ColorConverter.ConvertFromString(hex);
+                ThemeManager.Current.AccentColor = color;
+            }
+            catch
+            {
+                // 忽略无效颜色
+            }
         }
     }
 }

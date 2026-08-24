@@ -102,6 +102,24 @@ namespace UniversalConvert.App
                     new OptionChoice { Value = "WithDataSegments", Label = "WithDataSegments" },
                     new OptionChoice { Value = "FullMemory", Label = "FullMemory" }
                 }
+            },
+            new SettingDefinition
+            {
+                Key = "themeAccent",
+                Category = "@SettingsCategoryPersonalization",
+                Label = "@SettingThemeAccent",
+                Description = "@SettingThemeAccentDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "#0078D4",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "#0078D4", Label = "@ThemeAccentBlue" },
+                    new OptionChoice { Value = "#E81123", Label = "@ThemeAccentRed" },
+                    new OptionChoice { Value = "#107C10", Label = "@ThemeAccentGreen" },
+                    new OptionChoice { Value = "#FF8C00", Label = "@ThemeAccentOrange" },
+                    new OptionChoice { Value = "#8764B8", Label = "@ThemeAccentPurple" },
+                    new OptionChoice { Value = "#00B7C3", Label = "@ThemeAccentTeal" }
+                }
             }
         };
     }

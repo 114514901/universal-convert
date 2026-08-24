@@ -468,4 +468,31 @@
   <data name="Browse" xml:space="preserve">
     <value>浏览...</value>
   </data>
+  <data name="SettingsCategoryPersonalization" xml:space="preserve">
+    <value>个性化</value>
+  </data>
+  <data name="SettingThemeAccent" xml:space="preserve">
+    <value>主题色</value>
+  </data>
+  <data name="SettingThemeAccentDescription" xml:space="preserve">
+    <value>界面强调色</value>
+  </data>
+  <data name="ThemeAccentBlue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="ThemeAccentRed" xml:space="preserve">
+    <value>红色</value>
+  </data>
+  <data name="ThemeAccentGreen" xml:space="preserve">
+    <value>绿色</value>
+  </data>
+  <data name="ThemeAccentOrange" xml:space="preserve">
+    <value>橙色</value>
+  </data>
+  <data name="ThemeAccentPurple" xml:space="preserve">
+    <value>紫色</value>
+  </data>
+  <data name="ThemeAccentTeal" xml:space="preserve">
+    <value>青色</value>
+  </data>
 </root>

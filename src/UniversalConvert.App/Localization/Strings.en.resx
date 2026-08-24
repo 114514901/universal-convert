@@ -468,4 +468,31 @@
   <data name="Browse" xml:space="preserve">
     <value>Browse...</value>
   </data>
+  <data name="SettingsCategoryPersonalization" xml:space="preserve">
+    <value>Personalization</value>
+  </data>
+  <data name="SettingThemeAccent" xml:space="preserve">
+    <value>Theme color</value>
+  </data>
+  <data name="SettingThemeAccentDescription" xml:space="preserve">
+    <value>Accent color of the UI</value>
+  </data>
+  <data name="ThemeAccentBlue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="ThemeAccentRed" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="ThemeAccentGreen" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="ThemeAccentOrange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="ThemeAccentPurple" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="ThemeAccentTeal" xml:space="preserve">
+    <value>Teal</value>
+  </data>
 </root>
