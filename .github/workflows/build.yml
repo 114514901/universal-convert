@@ -36,12 +36,9 @@ jobs:
           $ErrorActionPreference = "Stop"
           $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
           $dir = Join-Path $env:RUNNER_TEMP "ffmpeg"
-          # BtbN 资产名带 git 哈希、每次 autobuild 都会变，固定 latest/download/<name> 会 404；
-          # 改为通过 API 找到 latest 里 master 分支的 win64-gpl（非 shared）zip 再下载。
-          $release = Invoke-RestMethod -Headers @{ "User-Agent" = "universal-convert-ci" } -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest"
-          $asset = $release.assets | Where-Object { $_.name -like "ffmpeg-N-*-win64-gpl.zip" } | Select-Object -First 1
-          if (-not $asset) { throw "未找到 BtbN win64-gpl zip 资产" }
-          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
+          # 用显式 latest 标签（releases/download/latest/...）；releases/latest/download/... 的重定向
+          # 可能解析到 autobuild 的哈希资产导致 404，故用显式标签 URL 保证稳定。
+          Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile $zip
           New-Item -ItemType Directory -Force $dir | Out-Null
           tar -xf $zip -C $dir
           $bin = (Get-ChildItem -Path $dir -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1).DirectoryName
