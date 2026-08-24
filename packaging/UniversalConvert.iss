@@ -152,20 +152,19 @@ var
   Attempt: Integer;
   i: Integer;
 begin
-  // 清掉可能残留的 explorer（含系统半拉起的损坏进程）
+  // 清掉可能残留的 explorer
   Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
-  // explorer 死后，任务栏等 shell 组件还会残留一段时间才彻底关闭；立即重启容易撞上
-  // 未清理完的组件，得到一个"无任务栏"的残废 shell。先给一个短暂清理窗口。
-  Sleep(2000);
-
-  // 启动 explorer 后轮询确认任务栏窗口（Shell_TrayWnd）真的出现；没出现说明又是残废，
-  // 再杀再启（最多 3 次）。结果驱动，不依赖精确时序。
+  // 根因：Inno 安装器是 32 位进程（CI 用 "Program Files (x86)" 的 ISCC 编译），
+  // ShellExec('explorer.exe') 会被 WOW64 重定向到 SysWOW64\explorer.exe（32 位 stub），
+  // stub 再带路径拉起 64 位 explorer → 只开"此电脑"窗口而非成为 shell。
+  // 改用完整路径 {win}\explorer.exe 直接启动 64 位 explorer，使其成为 shell。
   for Attempt := 1 to 3 do
   begin
-    ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+    ShellExec('open', ExpandConstant('{win}\explorer.exe'), '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
 
-    for i := 1 to 8 do
+    // 等任务栏窗口（Shell_TrayWnd）出现，确认成为完整 shell；没出现就再杀再启（最多 3 次）。
+    for i := 1 to 16 do
     begin
       if FindWindowW('Shell_TrayWnd', '') <> 0 then
         Exit;
