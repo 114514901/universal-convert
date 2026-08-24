@@ -16,6 +16,10 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,8">
+            <Border x:Name="DevBanner" Background="#F8D7DA" BorderBrush="#DC3545" BorderThickness="1"
+                    CornerRadius="4" Padding="8" Margin="0,0,0,6" Visibility="Collapsed">
+                <TextBlock Text="{x:Static loc:Strings.DevVersionWarning}" TextWrapping="Wrap"/>
+            </Border>
             <Border x:Name="AdminBanner" Background="#FFF3CD" BorderBrush="#FFC107" BorderThickness="1"
                     CornerRadius="4" Padding="8" Margin="0,0,0,6" Visibility="Collapsed">
                 <TextBlock Text="{x:Static loc:Strings.AdminWarning}" TextWrapping="Wrap"/>

@@ -44,6 +44,11 @@ namespace UniversalConvert.App
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            if (AppVersion.Current?.IsPrerelease == true)
+            {
+                DevBanner.Visibility = Visibility.Visible;
+            }
+
             if (IsAdministrator())
             {
                 AdminBanner.Visibility = Visibility.Visible;

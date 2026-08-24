@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0-dev.4] - 2026-08-24
+
+### 修复
+- 崩溃测试按钮点了不崩溃：`Task.Run` 的异常会被 .NET 当「未观察的 Task 异常」静默吞掉，改用原始 `Thread` 使其真正触发 `AppDomain.UnhandledException`
+
+### 新增
+- 开发版主界面警告横幅（pre-release 版本运行时显示）
+
 ## [1.8.0-dev.3] - 2026-08-24
 
 ### 新增
@@ -231,6 +239,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.4
 [1.8.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.3
 [1.8.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.2
 [1.8.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.1

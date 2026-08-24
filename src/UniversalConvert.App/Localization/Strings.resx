@@ -423,4 +423,7 @@
   <data name="RestartRequiredMessage" xml:space="preserve">
     <value>部分设置需要重启才能生效，是否立即重启？</value>
   </data>
+  <data name="DevVersionWarning" xml:space="preserve">
+    <value>这是开发版，可能存在不稳定或未完成的功能，请谨慎使用。</value>
+  </data>
 </root>

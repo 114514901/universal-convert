@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using UniversalConvert.App.Localization;
@@ -230,8 +230,16 @@ namespace UniversalConvert.App
 
         private void OnCrashTest(object sender, RoutedEventArgs e)
         {
-            // 后台线程抛未处理异常，走 AppDomain.UnhandledException，App 会真的退出（测试真实崩溃路径）
-            Task.Run(() => { throw new InvalidOperationException("崩溃测试：后台线程未处理异常"); });
+            // 后台线程抛未处理异常，走 AppDomain.UnhandledException，App 会真的退出。
+            // 用原始 Thread 而非 Task.Run：Task.Run 的异常会变成"未观察的 Task 异常"被 .NET 静默吞掉。
+            var thread = new Thread(() =>
+            {
+                throw new InvalidOperationException("崩溃测试：后台线程未处理异常");
+            })
+            {
+                IsBackground = true
+            };
+            thread.Start();
         }
 
         private void OnCancel(object sender, RoutedEventArgs e)

@@ -128,6 +128,7 @@ namespace UniversalConvert.App.Localization
         public static string OpenLogFolder => Get("OpenLogFolder");
         public static string EmptyLog => Get("EmptyLog");
         public static string RestartRequiredMessage => Get("RestartRequiredMessage");
+        public static string DevVersionWarning => Get("DevVersionWarning");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

@@ -423,4 +423,7 @@
   <data name="RestartRequiredMessage" xml:space="preserve">
     <value>Some settings require a restart to take effect. Restart now?</value>
   </data>
+  <data name="DevVersionWarning" xml:space="preserve">
+    <value>This is a development build and may contain unstable or unfinished features.</value>
+  </data>
 </root>
