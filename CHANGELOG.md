@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.6-dev.1] - 2026-08-24
+
+### 修复
+- 安装后重启 explorer 仍可能得到「无任务栏」的残废 shell，或新开「此电脑」窗口并残留进程：重启流程改为「延迟清理 + 启动后检测任务栏窗口（Shell_TrayWnd），未就绪则自动再杀再启」
+
 ## [1.7.5] - 2026-08-24
 
 ### 修复
@@ -198,6 +203,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.6-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.1
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4
 [1.7.3]: https://github.com/114514901/universal-convert/releases/tag/v1.7.3

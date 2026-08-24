@@ -15,9 +15,9 @@
 ;   2. 用 Inno Setup 打开并编译本脚本，输出 Setup 到 ..\output
 
 #define MyAppName "UniversalConvert"
-; 版本号默认 1.7.5，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
+; 版本号默认 1.7.6，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "1.7.5"
+#define MyAppVersion "1.7.6"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"
@@ -137,15 +137,41 @@ begin
   end;
 end;
 
+procedure Sleep(dwMilliseconds: LongWord);
+external 'Sleep@kernel32.dll stdcall';
+
+function FindWindowW(lpClassName, lpWindowName: String): LongWord;
+external 'FindWindowW@user32.dll stdcall';
+
 procedure RestartExplorer();
 var
   ResultCode: Integer;
+  Attempt: Integer;
+  i: Integer;
 begin
-  // 本机对 explorer 的系统自动恢复不可靠：taskkill 后可能只拉出一个"半加载"的损坏进程
-  // （进程在跑，但桌面/任务栏没起来、内存占用极低）。所以这里先强制清掉所有 explorer，
-  // 再显式拉起一个干净完整的 shell，不依赖系统自动恢复。
+  // 清掉可能残留的 explorer（含系统半拉起的损坏进程）
   Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+
+  // explorer 死后，任务栏等 shell 组件还会残留一段时间才彻底关闭；立即重启容易撞上
+  // 未清理完的组件，得到一个"无任务栏"的残废 shell。先给一个短暂清理窗口。
+  Sleep(2000);
+
+  // 启动 explorer 后轮询确认任务栏窗口（Shell_TrayWnd）真的出现；没出现说明又是残废，
+  // 再杀再启（最多 3 次）。结果驱动，不依赖精确时序。
+  for Attempt := 1 to 3 do
+  begin
+    ShellExec('open', 'explorer.exe', '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+
+    for i := 1 to 8 do
+    begin
+      if FindWindowW('Shell_TrayWnd', '') <> 0 then
+        Exit;
+      Sleep(500);
+    end;
+
+    Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(800);
+  end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
