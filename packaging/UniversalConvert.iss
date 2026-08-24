@@ -56,11 +56,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 chinesesimplified.CreateDesktopIcon=创建桌面快捷方式
 chinesesimplified.AdditionalTasks=附加任务：
 chinesesimplified.RegisteringContextMenu=正在注册右键菜单...
+chinesesimplified.AddContextMenu=添加到右键菜单（推荐）
 chinesesimplified.RunAfterInstall=立即运行 UniversalConvert
 chinesesimplified.AskDeleteUserData=是否同时删除配置、日志与已安装的扩展？
 english.CreateDesktopIcon=Create a desktop icon
 english.AdditionalTasks=Additional tasks:
 english.RegisteringContextMenu=Registering context menu...
+english.AddContextMenu=Add to context menu (recommended)
 english.RunAfterInstall=Run UniversalConvert
 english.AskDeleteUserData=Delete settings, logs and installed extensions as well?
 
@@ -82,6 +84,7 @@ Source: "{#DistDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion; BeforeInstal
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
 Name: "runapp"; Description: "{cm:RunAfterInstall}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: unchecked
+Name: "contextmenu"; Description: "{cm:AddContextMenu}"; GroupDescription: "{cm:AdditionalTasks}"; Flags: checkedonce
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -90,7 +93,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 ; 文件复制完后，调用我们的注册器写 HKLM 右键菜单（继承安装包的管理员权限）
 Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "install"; \
-    Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"
+    Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"; Tasks: contextmenu
 ; 手动安装：完成页勾选「立即运行」（postinstall + skipifsilent 使静默安装时不显示/不执行）
 Filename: "{app}\UniversalConvert.App.exe"; Description: "{cm:RunAfterInstall}"; \
     Flags: nowait postinstall skipifsilent; Tasks: runapp

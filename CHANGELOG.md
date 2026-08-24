@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.7.6-dev.2] - 2026-08-24
+
+### 新增
+- 右键菜单注册改为安装可选项（默认勾选、标注推荐），用户可在安装时关闭
+
 ## [1.7.6-dev.1] - 2026-08-24
 
 ### 修复
@@ -203,6 +208,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.7.6-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.2
 [1.7.6-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.1
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4
