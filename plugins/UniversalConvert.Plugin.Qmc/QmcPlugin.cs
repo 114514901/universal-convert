@@ -153,13 +153,13 @@ namespace UniversalConvert.Plugin.Qmc
             progress?.Report(new ConversionProgress(ConversionStage.Starting, 0, "解密 QMC 文件..."));
 
             int x = -1, y = 8, dx = 1, index = -1;
+            byte[] head = null;
 
             using (var fs = new FileStream(input, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
             {
                 long total = fs.Length;
                 long processed = 0;
-                byte[] head = null;
                 var buffer = new byte[0x8000];
                 int n;
 
