@@ -38,7 +38,7 @@ namespace UniversalConvert.App
         /// <summary>为窗口启用亚克力模糊背景（浅色，半透明白）。失败则静默忽略。</summary>
         public static void EnableAcrylic(Window window)
         {
-            Apply(window, ACCENT_ENABLE_ACRYLICBLURBEHIND, 0x99FFFFFF);
+            Apply(window, ACCENT_ENABLE_ACRYLICBLURBEHIND, unchecked((int)0x99FFFFFF));
         }
 
         /// <summary>关闭亚克力，恢复普通背景。</summary>
