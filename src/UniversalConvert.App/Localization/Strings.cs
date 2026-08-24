@@ -134,6 +134,7 @@ namespace UniversalConvert.App.Localization
         public static string CopyReport => Get("CopyReport");
         public static string CopyLog => Get("CopyLog");
         public static string UntestedWarning => Get("UntestedWarning");
+        public static string StatusUntested => Get("StatusUntested");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

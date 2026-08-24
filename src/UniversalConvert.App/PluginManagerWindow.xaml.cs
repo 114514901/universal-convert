@@ -47,6 +47,11 @@ namespace UniversalConvert.App
 
         private static string GetStatusText(PluginInfo info)
         {
+            if (info.Plugin.IsUntested)
+            {
+                return Strings.StatusUntested;
+            }
+
             switch (info.Compatibility)
             {
                 case PluginCompatibility.AppTooOld:

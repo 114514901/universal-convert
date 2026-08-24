@@ -441,4 +441,7 @@
   <data name="UntestedWarning" xml:space="preserve">
     <value>该格式解密未经测试，可能无法正常工作。</value>
   </data>
+  <data name="StatusUntested" xml:space="preserve">
+    <value>未经测试</value>
+  </data>
 </root>

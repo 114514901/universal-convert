@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.1] - 2026-08-24
+
+### 修复
+- 扩展管理器未显示「未经测试」状态：KGM/QMC 插件现在在扩展管理器里显示「未经测试」而非「正常」
+
 ## [1.8.0] - 2026-08-24
 
 ### 新增
@@ -225,6 +230,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1
 [1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5

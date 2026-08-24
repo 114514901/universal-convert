@@ -441,4 +441,7 @@
   <data name="UntestedWarning" xml:space="preserve">
     <value>This format's decryption is untested and may not work correctly.</value>
   </data>
+  <data name="StatusUntested" xml:space="preserve">
+    <value>Untested</value>
+  </data>
 </root>
