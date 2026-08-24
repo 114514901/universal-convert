@@ -131,6 +131,20 @@ namespace UniversalConvert.App
 
         private void OnSave(object sender, RoutedEventArgs e)
         {
+            // 检测需要重启的设置项是否被修改
+            var needsRestart = false;
+            foreach (var definition in _manager.Definitions)
+            {
+                if (!definition.RequiresRestart) continue;
+                if (!_getters.TryGetValue(definition.Key, out var getter)) continue;
+                if (!string.Equals(_manager.Get(definition.Key), getter(), StringComparison.Ordinal))
+                {
+                    needsRestart = true;
+                    break;
+                }
+            }
+
+            // 保存
             foreach (var definition in _manager.Definitions)
             {
                 if (_getters.TryGetValue(definition.Key, out var getter))
@@ -139,7 +153,36 @@ namespace UniversalConvert.App
                 }
             }
             _manager.Save();
+
+            // 需要重启则询问
+            if (needsRestart)
+            {
+                var result = MessageBox.Show(
+                    Strings.RestartRequiredMessage,
+                    "UniversalConvert",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    RestartApp();
+                }
+            }
+
             Close();
+        }
+
+        private static void RestartApp()
+        {
+            try
+            {
+                var exePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+                System.Diagnostics.Process.Start(exePath);
+                Application.Current.Shutdown();
+            }
+            catch
+            {
+                // 重启失败则仅关闭
+            }
         }
 
         private FrameworkElement BuildAdvancedActions()

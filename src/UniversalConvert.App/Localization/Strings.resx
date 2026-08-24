@@ -420,4 +420,7 @@
   <data name="SettingCrashDumpLevelDescription" xml:space="preserve">
     <value>转储详细程度，越详细文件越大（FullMemory 可占数百 MB）</value>
   </data>
+  <data name="RestartRequiredMessage" xml:space="preserve">
+    <value>部分设置需要重启才能生效，是否立即重启？</value>
+  </data>
 </root>

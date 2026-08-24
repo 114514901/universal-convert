@@ -27,6 +27,9 @@ namespace UniversalConvert.Core.Config
         /// <summary>默认值。</summary>
         public string DefaultValue { get; set; }
 
+        /// <summary>是否需重启应用才生效（保存时若有改动会提示重启）。</summary>
+        public bool RequiresRestart { get; set; }
+
         /// <summary>Enum 型时的候选项。</summary>
         public IList<OptionChoice> Choices { get; set; }
 

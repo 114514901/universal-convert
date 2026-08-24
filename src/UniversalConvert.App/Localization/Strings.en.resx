@@ -420,4 +420,7 @@
   <data name="SettingCrashDumpLevelDescription" xml:space="preserve">
     <value>Dump detail level (FullMemory can be hundreds of MB)</value>
   </data>
+  <data name="RestartRequiredMessage" xml:space="preserve">
+    <value>Some settings require a restart to take effect. Restart now?</value>
+  </data>
 </root>

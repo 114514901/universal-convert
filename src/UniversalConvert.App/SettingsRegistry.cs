@@ -21,6 +21,7 @@ namespace UniversalConvert.App
                 Description = "@SettingLanguageDescription",
                 Type = OptionType.Enum,
                 DefaultValue = "auto",
+                RequiresRestart = true,
                 Choices = new List<OptionChoice>
                 {
                     new OptionChoice { Value = "auto", Label = "@LanguageAuto" },
@@ -67,6 +68,7 @@ namespace UniversalConvert.App
                 Description = "@SettingLogLevelDescription",
                 Type = OptionType.Enum,
                 DefaultValue = "Info",
+                RequiresRestart = true,
                 Choices = new List<OptionChoice>
                 {
                     new OptionChoice { Value = "Debug", Label = "Debug" },
@@ -82,7 +84,8 @@ namespace UniversalConvert.App
                 Label = "@SettingCrashDumpEnabled",
                 Description = "@SettingCrashDumpEnabledDescription",
                 Type = OptionType.Bool,
-                DefaultValue = "true"
+                DefaultValue = "true",
+                RequiresRestart = true
             },
             new SettingDefinition
             {
@@ -92,6 +95,7 @@ namespace UniversalConvert.App
                 Description = "@SettingCrashDumpLevelDescription",
                 Type = OptionType.Enum,
                 DefaultValue = "Normal",
+                RequiresRestart = true,
                 Choices = new List<OptionChoice>
                 {
                     new OptionChoice { Value = "Normal", Label = "Normal" },

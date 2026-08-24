@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.0-dev.3] - 2026-08-24
+
+### 新增
+- 设置保存时检测「需重启生效」的设置项（语言、日志级别、转储开关/等级），若有改动则询问是否立即重启
+
 ## [1.8.0-dev.2] - 2026-08-24
 
 ### 修复
@@ -226,6 +231,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.3
 [1.8.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.2
 [1.8.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.1
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
