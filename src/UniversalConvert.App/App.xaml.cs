@@ -4,7 +4,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
+using ModernWpf;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Config;
@@ -22,6 +24,10 @@ namespace UniversalConvert.App
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // 应用主题：浅色 + Fluent 蓝主题色（后续可个性化）
+            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            ThemeManager.Current.AccentColor = Color.FromRgb(0x00, 0x78, 0xD4);
 
             // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
             DispatcherUnhandledException += OnDispatcherUnhandledException;
