@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Plugins;
 
@@ -29,14 +30,17 @@ namespace UniversalConvert.Core
 
             var loader = new PluginLoader(log);
 
+            Log.Info($"扫描内置插件目录: {pluginsDirectory}");
             var builtinPlugins = loader.Load(pluginsDirectory);
             _loadErrors.AddRange(loader.Errors);
 
+            Log.Info($"扫描用户插件目录: {ConfigStore.UserPluginsDirectory}");
             var userPlugins = loader.Load(ConfigStore.UserPluginsDirectory);
             _loadErrors.AddRange(loader.Errors);
 
             // 用户目录优先：同 Id 时用户安装的插件覆盖内置插件
             Plugins = MergePlugins(userPlugins, builtinPlugins);
+            Log.Info($"共加载 {Plugins.Count} 个插件");
 
             var context = new PluginContext(Config, log);
             foreach (var plugin in Plugins)
@@ -47,6 +51,7 @@ namespace UniversalConvert.Core
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"插件初始化失败 '{plugin.Id}': {ex.Message}");
                     log($"Failed to initialize plugin '{plugin.Id}': {ex.Message}");
                     _loadErrors.Add(new PluginLoadError { File = plugin.Id, Message = ex.Message });
                 }

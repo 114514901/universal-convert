@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using UniversalConvert.Core.Diagnostics;
 
 namespace UniversalConvert.App
 {
@@ -55,6 +56,7 @@ namespace UniversalConvert.App
                     var latest = SemVersion.Parse(tag);
                     if (latest == null || latest.CompareTo(current) <= 0) return null;
 
+                    Log.Info($"发现新版本 {tag}" + (obj["prerelease"] != null && (bool)obj["prerelease"] ? " (预发布)" : ""));
                     return new UpdateInfo
                     {
                         Version = tag,
@@ -65,8 +67,9 @@ namespace UniversalConvert.App
                     };
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Warn("检查更新失败: " + ex.Message);
                 return null;
             }
         }
@@ -75,11 +78,13 @@ namespace UniversalConvert.App
 
         public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct)
         {
+            Log.Info($"开始下载更新: {downloadUrl}");
             long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
 
             if (total <= 0)
             {
                 // 拿不到文件大小（或服务器不支持），回退单线程
+                Log.Info("服务器不支持分段下载，回退单线程");
                 await DownloadSequentialAsync(downloadUrl, destPath, progress, ct).ConfigureAwait(false);
                 return;
             }
@@ -112,6 +117,7 @@ namespace UniversalConvert.App
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
+            Log.Info("更新下载完成");
         }
 
         private static async Task<long> GetContentLengthAsync(string url, CancellationToken ct)

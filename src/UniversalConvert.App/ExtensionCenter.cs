@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
@@ -33,11 +34,14 @@ namespace UniversalConvert.App
 
         public static async Task<IList<ExtensionInfo>> GetAvailableAsync()
         {
+            Log.Info("拉取扩展仓库列表...");
             using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 var json = await client.DownloadStringTaskAsync(IndexUrl).ConfigureAwait(false);
-                return Parse(json);
+                var list = Parse(json);
+                Log.Info($"扩展仓库共 {list.Count} 个可用扩展");
+                return list;
             }
         }
 
@@ -87,6 +91,7 @@ namespace UniversalConvert.App
             var dir = GetInstallDirectory(info);
             var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
 
+            Log.Info($"安装扩展 {info.Id} {info.Version}...");
             try
             {
                 await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct).ConfigureAwait(false);
@@ -94,6 +99,7 @@ namespace UniversalConvert.App
                 if (Directory.Exists(dir)) Directory.Delete(dir, true);
                 Directory.CreateDirectory(dir);
                 PluginPackage.Extract(temp, dir);
+                Log.Info($"扩展 {info.Id} 安装完成: {dir}");
             }
             finally
             {
@@ -104,6 +110,7 @@ namespace UniversalConvert.App
         public static void Uninstall(ExtensionInfo info)
         {
             var dir = GetInstallDirectory(info);
+            Log.Info($"卸载扩展 {info.Id}: {dir}");
             if (Directory.Exists(dir)) Directory.Delete(dir, true);
         }
     }

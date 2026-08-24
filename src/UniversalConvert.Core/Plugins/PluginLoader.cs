@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using UniversalConvert.Core.Diagnostics;
 
 namespace UniversalConvert.Core.Plugins
 {
@@ -34,6 +35,7 @@ namespace UniversalConvert.Core.Plugins
 
             if (string.IsNullOrEmpty(pluginsDirectory) || !Directory.Exists(pluginsDirectory))
             {
+                Log.Debug("插件目录不存在: " + pluginsDirectory);
                 _log("Plugins directory not found: " + pluginsDirectory);
                 return result;
             }
@@ -54,6 +56,7 @@ namespace UniversalConvert.Core.Plugins
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"加载插件程序集失败 '{dll}': {ex.Message}");
                     _log($"Failed to load plugin assembly '{dll}': {ex.Message}");
                     _errors.Add(new PluginLoadError { File = dll, Message = ex.Message });
                 }
@@ -79,11 +82,13 @@ namespace UniversalConvert.Core.Plugins
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"实例化插件类型失败 '{type.FullName}': {ex.Message}");
                     _log($"Failed to instantiate plugin type '{type.FullName}': {ex.Message}");
                     _errors.Add(new PluginLoadError { File = type.FullName, Message = ex.Message });
                     continue;
                 }
 
+                Log.Debug($"已加载插件 '{plugin.Id}' ({dllPath})");
                 _log($"Loaded plugin '{plugin.Id}' from '{dllPath}'");
                 yield return plugin;
             }
