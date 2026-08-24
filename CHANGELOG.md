@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [1.8.2] - 2026-08-24
+
+### 新增
+- 添加 GPL-3.0 许可证（`LICENSE`），关于页面显示许可证信息
+
 ## [1.8.1] - 2026-08-24
 
 ### 修复
@@ -230,6 +235,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
 [1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1
 [1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6

@@ -16,6 +16,9 @@
         <TextBlock x:Name="ThirdPartyText" Margin="0,14,0,0" TextWrapping="Wrap" TextAlignment="Center"
                    MaxWidth="380" Foreground="#999999" FontSize="12"/>
 
+        <TextBlock x:Name="LicenseText" Margin="0,8,0,0" TextWrapping="Wrap" TextAlignment="Center"
+                   MaxWidth="380" Foreground="#999999" FontSize="12"/>
+
         <Button Content="{x:Static loc:Strings.OpenProject}" Margin="0,18,0,0" Padding="16,6"
                 Click="OnOpenProject" HorizontalAlignment="Center"/>
         <Button Content="{x:Static loc:Strings.Close}" Margin="0,8,0,0" Padding="16,6"

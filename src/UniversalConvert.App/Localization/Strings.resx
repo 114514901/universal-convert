@@ -444,4 +444,7 @@
   <data name="StatusUntested" xml:space="preserve">
     <value>未经测试</value>
   </data>
+  <data name="LicenseText" xml:space="preserve">
+    <value>许可证：GNU GPL v3.0（各解密插件的第三方许可见各自目录的 LICENSE-NOTICE）</value>
+  </data>
 </root>

@@ -18,6 +18,7 @@ namespace UniversalConvert.App
             VersionText.Text = string.Format(Strings.VersionFormat, AppVersion.Current?.ToString() ?? "?");
             DescText.Text = Strings.AboutDescription;
             ThirdPartyText.Text = Strings.ThirdPartyText;
+            LicenseText.Text = Strings.LicenseText;
         }
 
         private void OnOpenProject(object sender, RoutedEventArgs e)

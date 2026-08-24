@@ -444,4 +444,7 @@
   <data name="StatusUntested" xml:space="preserve">
     <value>Untested</value>
   </data>
+  <data name="LicenseText" xml:space="preserve">
+    <value>License: GNU GPL v3.0 (see each plugin's LICENSE-NOTICE for third-party licenses)</value>
+  </data>
 </root>

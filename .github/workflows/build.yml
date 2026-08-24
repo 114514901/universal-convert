@@ -22,7 +22,7 @@ jobs:
       - name: Set version
         shell: pwsh
         run: |
-          $ver = "1.8.1"
+          $ver = "1.8.2"
           if ($env:GITHUB_REF_TYPE -eq "tag") { $ver = $env:GITHUB_REF_NAME.TrimStart("v") }
           echo "VERSION=$ver" >> $env:GITHUB_ENV
 
