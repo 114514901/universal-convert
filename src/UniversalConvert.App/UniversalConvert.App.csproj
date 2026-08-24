@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UniversalConvert.Core\UniversalConvert.Core.csproj" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
 
 </Project>

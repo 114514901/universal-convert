@@ -145,13 +145,13 @@ namespace UniversalConvert.App
         {
             var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
 
-            var viewLog = new Button { Content = Strings.ViewLog, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left };
+            var viewLog = new Button { Content = Strings.ViewLog, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left };
             viewLog.Click += OnViewLog;
 
-            var clearLog = new Button { Content = Strings.ClearLog, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            var clearLog = new Button { Content = Strings.ClearLog, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
             clearLog.Click += OnClearLog;
 
-            var crashTest = new Button { Content = Strings.CrashTest, Padding = new Thickness(16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            var crashTest = new Button { Content = Strings.CrashTest, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
             crashTest.Click += OnCrashTest;
 
             panel.Children.Add(viewLog);
