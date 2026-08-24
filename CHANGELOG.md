@@ -2,20 +2,13 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
-## [1.7.6-dev.3] - 2026-08-24
+## [1.7.6] - 2026-08-24
 
 ### 修复
-- 重启 explorer 的根因：安装器是 32 位进程，`ShellExec('explorer.exe')` 被 WOW64 重定向到 `SysWOW64\explorer.exe`（32 位 stub），stub 带路径再拉起 64 位 explorer 导致只开「此电脑」窗口而非 shell。改用完整路径 `{win}\explorer.exe` 直接启动 64 位 explorer
-
-## [1.7.6-dev.2] - 2026-08-24
+- 安装后重启 explorer 只打开「此电脑」窗口而非完整 shell：根因是 32 位安装器被 WOW64 重定向到 `SysWOW64\explorer.exe`（32 位 stub），改用完整路径 `{win}\explorer.exe` 直接启动 64 位 explorer，并加任务栏窗口（Shell_TrayWnd）检测与自动重试兜底
 
 ### 新增
 - 右键菜单注册改为安装可选项（默认勾选、标注推荐），用户可在安装时关闭
-
-## [1.7.6-dev.1] - 2026-08-24
-
-### 修复
-- 安装后重启 explorer 仍可能得到「无任务栏」的残废 shell，或新开「此电脑」窗口并残留进程：重启流程改为「延迟清理 + 启动后检测任务栏窗口（Shell_TrayWnd），未就绪则自动再杀再启」
 
 ## [1.7.5] - 2026-08-24
 
@@ -213,9 +206,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
-[1.7.6-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.3
-[1.7.6-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.2
-[1.7.6-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6-dev.1
+[1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4
 [1.7.3]: https://github.com/114514901/universal-convert/releases/tag/v1.7.3
