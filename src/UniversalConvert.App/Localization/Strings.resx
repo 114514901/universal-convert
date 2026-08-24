@@ -501,4 +501,19 @@
   <data name="SettingAcrylicDescription" xml:space="preserve">
     <value>窗口背景毛玻璃效果（Win10 1803+）</value>
   </data>
+  <data name="SettingAcrylicOpacity" xml:space="preserve">
+    <value>亚克力不透明度</value>
+  </data>
+  <data name="SettingAcrylicOpacityDescription" xml:space="preserve">
+    <value>毛玻璃背景的不透明度</value>
+  </data>
+  <data name="AcrylicOpacityHigh" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="AcrylicOpacityMedium" xml:space="preserve">
+    <value>中</value>
+  </data>
+  <data name="AcrylicOpacityLow" xml:space="preserve">
+    <value>低</value>
+  </data>
 </root>

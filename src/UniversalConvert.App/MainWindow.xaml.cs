@@ -440,8 +440,15 @@ namespace UniversalConvert.App
         {
             if (enabled)
             {
+                // 亚克力不透明度（读设置，默认中 = 153）
+                byte alpha = 153;
+                if (int.TryParse(_settingsManager.Get("acrylicOpacity"), out var a) && a >= 0 && a <= 255)
+                {
+                    alpha = (byte)a;
+                }
+
                 Background = Brushes.Transparent;
-                var cardBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0xFF, 0xFF, 0xFF));
+                var cardBrush = new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0xFF, 0xFF));
                 FileCard.Background = cardBrush;
                 OutputCard.Background = cardBrush;
                 AcrylicHelper.EnableAcrylic(this);

@@ -501,4 +501,19 @@
   <data name="SettingAcrylicDescription" xml:space="preserve">
     <value>Frosted glass window background (Win10 1803+)</value>
   </data>
+  <data name="SettingAcrylicOpacity" xml:space="preserve">
+    <value>Acrylic opacity</value>
+  </data>
+  <data name="SettingAcrylicOpacityDescription" xml:space="preserve">
+    <value>Opacity of the frosted glass background</value>
+  </data>
+  <data name="AcrylicOpacityHigh" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="AcrylicOpacityMedium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="AcrylicOpacityLow" xml:space="preserve">
+    <value>Low</value>
+  </data>
 </root>
