@@ -16,6 +16,7 @@ namespace UniversalConvert.Core
         public const string OutputFlag = "--output";
         public const string PresetFlag = "--preset";
         public const string OpenFlag = "--open";
+        public const string ReportFlag = "--report";
 
         /// <summary>
         /// 构建"点击即转"命令行：App.exe --convert "a.mp4" --to mp3 [--preset "320 kbps"]。
@@ -48,6 +49,11 @@ namespace UniversalConvert.Core
             public bool IsConvertMode { get; set; }
             public bool IsCustomizeMode { get; set; }
             public bool IsOpenMode { get; set; }
+            public bool IsReportMode { get; set; }
+            /// <summary>报告类型（"hang" / "crash"），--report 时使用。</summary>
+            public string ReportKind { get; set; }
+            /// <summary>日志目录（供报告窗口读取 app.log），--report 时使用。</summary>
+            public string ReportDir { get; set; }
             public string InputPath { get; set; }
             public string OutputExtension { get; set; }
             public string OutputPath { get; set; }
@@ -85,6 +91,11 @@ namespace UniversalConvert.Core
                         break;
                     case OpenFlag:
                         result.IsOpenMode = true;
+                        break;
+                    case ReportFlag:
+                        result.IsReportMode = true;
+                        if (i + 1 < args.Length) result.ReportKind = args[++i];
+                        if (i + 1 < args.Length) result.ReportDir = args[++i];
                         break;
                     default:
                         if (!arg.StartsWith("--") && File.Exists(arg))

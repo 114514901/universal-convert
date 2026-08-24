@@ -239,9 +239,13 @@ namespace UniversalConvert.App
             var crashTest = new Button { Content = Strings.CrashTest, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
             crashTest.Click += OnCrashTest;
 
+            var testHang = new Button { Content = Strings.TestHang, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            testHang.Click += OnTestHang;
+
             panel.Children.Add(viewLog);
             panel.Children.Add(clearLog);
             panel.Children.Add(crashTest);
+            panel.Children.Add(testHang);
             return panel;
         }
 
@@ -281,6 +285,13 @@ namespace UniversalConvert.App
                 IsBackground = true
             };
             thread.Start();
+        }
+
+        private void OnTestHang(object sender, RoutedEventArgs e)
+        {
+            // 阻塞 UI 线程 60 秒模拟真实卡死：看护进程应在约 15~20 秒内检测到并结束进程。
+            // 若看护进程未生效，60 秒后自动恢复，避免永久卡死。
+            System.Threading.Thread.Sleep(60000);
         }
 
         private void OnCancel(object sender, RoutedEventArgs e)

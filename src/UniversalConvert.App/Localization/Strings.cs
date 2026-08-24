@@ -146,6 +146,10 @@ namespace UniversalConvert.App.Localization
         public static string CheckUpdate => Get("CheckUpdate");
         public static string CheckingUpdate => Get("CheckingUpdate");
         public static string UpToDate => Get("UpToDate");
+        public static string Restart => Get("Restart");
+        public static string TestHang => Get("TestHang");
+        public static string HangReportSummary => Get("HangReportSummary");
+        public static string HangReportText => Get("HangReportText");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

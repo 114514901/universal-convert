@@ -50,6 +50,7 @@ jobs:
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force dist\plugins | Out-Null
           Copy-Item "src\UniversalConvert.App\bin\Release\net48\*" "dist\" -Recurse -Force
+          Copy-Item "src\UniversalConvert.Watchdog\bin\Release\net48\UniversalConvert.Watchdog.exe" "dist\" -Force
           Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\UniversalConvert.ContextMenu.dll" "dist\" -Force
           Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\SharpShell.dll" "dist\" -Force
           Copy-Item "src\UniversalConvert.Installer\bin\Release\net48\UniversalConvert.Installer.exe" "dist\" -Force

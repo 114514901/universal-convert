@@ -43,6 +43,21 @@ namespace UniversalConvert.App
             catch { }
         }
 
+        private void OnRestart(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 启动一个全新实例（正常模式），再关闭当前报告进程
+                var exe = System.Reflection.Assembly.GetEntryAssembly().Location;
+                System.Diagnostics.Process.Start(exe);
+            }
+            catch
+            {
+                // 启动失败则仅关闭
+            }
+            Application.Current.Shutdown();
+        }
+
         private void OnClose(object sender, RoutedEventArgs e)
         {
             Close();

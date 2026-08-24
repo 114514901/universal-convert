@@ -31,6 +31,14 @@ namespace UniversalConvert.App
             // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
             DispatcherUnhandledException += OnDispatcherUnhandledException;
 
+            // 看护进程拉起的「卡死报告」模式：只显示报告窗口，不走完整启动流程
+            var parsed = CommandLineContract.Parse(e.Args);
+            if (parsed.IsReportMode)
+            {
+                RunReportMode(parsed);
+                return;
+            }
+
             CleanupStaleInstallerPackages();
 
             var config = new ConfigStore().Load();
@@ -53,7 +61,7 @@ namespace UniversalConvert.App
 
             ApplyLanguage(_settingsManager);
 
-            var parsed = CommandLineContract.Parse(e.Args);
+            StartHeartbeatAndWatchdog();
 
             if (parsed.IsConvertMode && !string.IsNullOrEmpty(parsed.InputPath))
             {
@@ -165,6 +173,78 @@ namespace UniversalConvert.App
                 }
             }
             catch { /* 忽略 */ }
+        }
+
+        private void RunReportMode(CommandLineContract.ParsedArguments parsed)
+        {
+            var logsDir = string.IsNullOrEmpty(parsed.ReportDir)
+                ? Path.Combine(ConfigStore.ConfigDirectory, "logs")
+                : parsed.ReportDir;
+
+            var logText = ReadFileSafe(Path.Combine(logsDir, "app.log"));
+            var summary = parsed.ReportKind == "hang" ? Strings.HangReportSummary : Strings.CrashReportTitle;
+            var reportText = parsed.ReportKind == "hang"
+                ? BuildHangReportText(logsDir)
+                : string.Empty;
+
+            var window = new CrashReportWindow(summary, reportText, logText, logsDir);
+            MainWindow = window;
+            window.Show();
+        }
+
+        private static string BuildHangReportText(string logsDir)
+        {
+            return Strings.HangReportText + Environment.NewLine +
+                   "日志目录: " + logsDir + Environment.NewLine +
+                   "时间: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        private static string ReadFileSafe(string path)
+        {
+            try
+            {
+                return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private void StartHeartbeatAndWatchdog()
+        {
+            try
+            {
+                var heartbeatPath = Heartbeat.Start();
+
+                var watchdogExe = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UniversalConvert.Watchdog.exe");
+                if (!File.Exists(watchdogExe))
+                {
+                    Log.Warn("看护进程不存在，跳过启动: " + watchdogExe);
+                    return;
+                }
+
+                var appPath = System.Reflection.Assembly.GetEntryAssembly().Location;
+                var logsDir = Path.Combine(ConfigStore.ConfigDirectory, "logs");
+                var args = string.Format(
+                    "--pid {0} --heartbeat \"{1}\" --app \"{2}\" --logs \"{3}\"",
+                    System.Diagnostics.Process.GetCurrentProcess().Id,
+                    heartbeatPath,
+                    appPath,
+                    logsDir);
+
+                var psi = new System.Diagnostics.ProcessStartInfo(watchdogExe, args)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                System.Diagnostics.Process.Start(psi);
+                Log.Info("已启动看护进程");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("启动看护进程失败: " + ex.Message);
+            }
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

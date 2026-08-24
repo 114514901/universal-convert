@@ -504,4 +504,16 @@
   <data name="UpToDate" xml:space="preserve">
     <value>已是最新版</value>
   </data>
+  <data name="Restart" xml:space="preserve">
+    <value>重启</value>
+  </data>
+  <data name="TestHang" xml:space="preserve">
+    <value>测试卡死</value>
+  </data>
+  <data name="HangReportSummary" xml:space="preserve">
+    <value>程序已无响应超过阈值，被看护进程强制结束。</value>
+  </data>
+  <data name="HangReportText" xml:space="preserve">
+    <value>检测到程序长时间无响应（UI 卡死或进程冻结），看护进程已将其结束。可点击「重启」重新启动应用。</value>
+  </data>
 </root>
