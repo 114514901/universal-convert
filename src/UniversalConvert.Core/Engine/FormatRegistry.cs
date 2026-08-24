@@ -32,6 +32,7 @@ namespace UniversalConvert.Core.Engine
                             OutputExtension = Normalize(output.Extension),
                             OutputDisplayName = output.DisplayName,
                             IsAvailable = plugin.IsToolAvailable(),
+                            IsUntested = plugin.IsUntested,
                             Presets = output.Presets,
                             Options = output.Options
                         });

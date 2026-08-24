@@ -75,6 +75,8 @@
             <ComboBox x:Name="OutputCombo" Margin="0,4,0,0" SelectionChanged="OnOutputSelectionChanged"/>
             <TextBlock x:Name="NoCommonFormatText" Text="{x:Static loc:Strings.NoCommonFormat}"
                        Foreground="#B87333" Visibility="Collapsed" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            <TextBlock x:Name="UntestedWarningText" Text="{x:Static loc:Strings.UntestedWarning}"
+                       Foreground="#B87333" Visibility="Collapsed" Margin="0,4,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
         <Grid Grid.Row="4" Margin="0,12,0,0">

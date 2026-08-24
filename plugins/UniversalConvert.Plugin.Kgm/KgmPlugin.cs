@@ -78,6 +78,8 @@ namespace UniversalConvert.Plugin.Kgm
             return true;
         }
 
+        public bool IsUntested => true;
+
         public IList<ConversionCapability> GetCapabilities()
         {
             var outputs = AudioFormats.Select(AudioOutput).ToList();

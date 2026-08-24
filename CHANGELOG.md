@@ -2,51 +2,24 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
-## [1.8.0-dev.6] - 2026-08-24
-
-### 新增
-- 新增 QMC 解密插件：支持 QQ 音乐 `.qmc0`/`.qmc3`/`.qmcflac`/`.qmcogg` 老格式解密，解密后可自动转码为其它音频格式
-
-## [1.8.0-dev.5] - 2026-08-24
-
-### 修复
-- 崩溃报告 OS 版本显示成 `Windows 10.0`：按 Build 号区分 Win10/Win11（≥22000 为 Win11）
-
-### 新增
-- 崩溃报告窗口：左右分栏显示崩溃报告与运行日志，支持复制崩溃报告 / 复制日志 / 打开日志目录
-
-## [1.8.0-dev.4] - 2026-08-24
-
-### 修复
-- 崩溃测试按钮点了不崩溃：`Task.Run` 的异常会被 .NET 当「未观察的 Task 异常」静默吞掉，改用原始 `Thread` 使其真正触发 `AppDomain.UnhandledException`
-
-### 新增
-- 开发版主界面警告横幅（pre-release 版本运行时显示）
-
-## [1.8.0-dev.3] - 2026-08-24
-
-### 新增
-- 设置保存时检测「需重启生效」的设置项（语言、日志级别、转储开关/等级），若有改动则询问是否立即重启
-
-## [1.8.0-dev.2] - 2026-08-24
-
-### 修复
-- 崩溃报告的系统信息 OS 版本错误（`Environment.OSVersion` 返回假的 6.2）：改用 `RtlGetVersion` 获取真实版本
-- 崩溃测试改为真实的后台线程崩溃（走 `AppDomain.UnhandledException`，App 会退出）
-
-### 新增
-- 崩溃转储等级配置（Normal / WithDataSegments / FullMemory）
-
-## [1.8.0-dev.1] - 2026-08-24
+## [1.8.0] - 2026-08-24
 
 ### 新增
 - 统一日志系统：分级日志（Debug/Info/Warn/Error）、按入口分文件（app.log / contextmenu.log / install.log）、启动时自动把上一次日志归档为 `app-时间戳.zip`
-- 本地崩溃报告器：捕获未处理异常，收集软件/系统/插件信息与最近日志，可选生成内存转储（仅保留最新一份），弹窗展示且不上传
+- 本地崩溃报告器：捕获未处理异常，收集软件/系统/插件信息与最近日志，可选生成内存转储（仅保留最新一份）；崩溃报告窗口左右分栏显示崩溃报告与运行日志，支持复制崩溃报告 / 复制日志 / 打开日志目录
 - 日志查看器：只读查看当前日志、刷新、打开日志目录
-- 设置新增「高级」选项卡：日志级别、崩溃转储开关、崩溃测试按钮、查看日志、清理日志
+- 设置新增「高级」选项卡：日志级别、崩溃转储开关、崩溃转储等级（Normal / WithDataSegments / FullMemory）、崩溃测试按钮、查看日志、清理日志
+- 设置保存时检测「需重启生效」的设置项（语言、日志级别、转储开关/等级），若有改动则询问是否立即重启
+- 开发版主界面警告横幅（pre-release 版本运行时显示）
+- 新增 QMC 解密插件：支持 QQ 音乐 `.qmc0`/`.qmc3`/`.qmcflac`/`.qmcogg` 老格式解密，解密后可自动转码为其它音频格式
+- KGM/QMC 解密插件标记「未经测试」，相关格式在界面显示警告
+
+### 修复
+- 崩溃报告的系统信息 OS 版本错误：改用 `RtlGetVersion` 获取真实版本，并按 Build 号区分 Win10/Win11（≥22000 为 Win11）
+- 崩溃测试按钮点了不崩溃：`Task.Run` 的异常会被 .NET 当「未观察的 Task 异常」静默吞掉，改用原始 `Thread` 使其真正触发 `AppDomain.UnhandledException`
 
 ### 变更
-- 核心转换流程增加日志埋点
+- 核心转换流程、插件加载、更新检查、扩展中心增加日志埋点
 
 ## [1.7.6] - 2026-08-24
 
@@ -252,12 +225,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
-[1.8.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.6
-[1.8.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.5
-[1.8.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.4
-[1.8.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.3
-[1.8.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.2
-[1.8.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0-dev.1
+[1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
 [1.7.6]: https://github.com/114514901/universal-convert/releases/tag/v1.7.6
 [1.7.5]: https://github.com/114514901/universal-convert/releases/tag/v1.7.5
 [1.7.4]: https://github.com/114514901/universal-convert/releases/tag/v1.7.4

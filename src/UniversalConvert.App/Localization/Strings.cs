@@ -133,6 +133,7 @@ namespace UniversalConvert.App.Localization
         public static string LogLabel => Get("LogLabel");
         public static string CopyReport => Get("CopyReport");
         public static string CopyLog => Get("CopyLog");
+        public static string UntestedWarning => Get("UntestedWarning");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

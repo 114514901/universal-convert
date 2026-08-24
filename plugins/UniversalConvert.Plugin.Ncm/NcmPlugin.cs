@@ -47,6 +47,8 @@ namespace UniversalConvert.Plugin.Ncm
             return true; // 解密始终可用；转码时才需要 FFmpeg
         }
 
+        public bool IsUntested => false;
+
         public IList<ConversionCapability> GetCapabilities()
         {
             return new List<ConversionCapability>

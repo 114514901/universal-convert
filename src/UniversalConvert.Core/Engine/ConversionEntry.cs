@@ -28,6 +28,9 @@ namespace UniversalConvert.Core.Engine
         /// <summary>插件当前是否可用（工具已安装）。</summary>
         public bool IsAvailable { get; set; }
 
+        /// <summary>该转换是否未经测试（未经测试的解密格式会在 UI 显示警告）。</summary>
+        public bool IsUntested { get; set; }
+
         /// <summary>该输出的命名预设（可能为空）。</summary>
         public IList<ConversionPreset> Presets { get; set; }
 

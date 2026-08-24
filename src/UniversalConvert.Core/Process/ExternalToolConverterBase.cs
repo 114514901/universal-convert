@@ -67,6 +67,8 @@ namespace UniversalConvert.Core.Process
             return !string.IsNullOrEmpty(FindTool());
         }
 
+        public virtual bool IsUntested => false;
+
         public virtual async Task<ConversionResult> ConvertAsync(
             ConversionRequest request,
             IProgress<ConversionProgress> progress,

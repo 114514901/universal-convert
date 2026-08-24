@@ -301,6 +301,10 @@ namespace UniversalConvert.App
 
             CustomizeButton.IsEnabled = hasSelection && singleFile
                 && _commonTargets[OutputCombo.SelectedIndex].HasCustomizableOptions;
+
+            // 未测试的解密格式显示警告
+            bool isUntested = hasSelection && _commonTargets[OutputCombo.SelectedIndex].IsUntested;
+            UntestedWarningText.Visibility = isUntested ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void OnCustomize(object sender, RoutedEventArgs e)

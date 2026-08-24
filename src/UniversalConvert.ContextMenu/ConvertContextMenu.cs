@@ -122,6 +122,7 @@ namespace UniversalConvert.ContextMenu
             {
                 var targetExt = conversion.OutputExtension;
                 var label = $"{conversion.OutputDisplayName}  (.{targetExt})";
+                if (conversion.IsUntested) label += "（未经测试）";
 
                 if (conversion.HasCustomizableOptions)
                 {

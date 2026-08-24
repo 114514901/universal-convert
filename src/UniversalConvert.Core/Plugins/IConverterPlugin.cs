@@ -53,6 +53,12 @@ namespace UniversalConvert.Core.Plugins
         bool IsToolAvailable();
 
         /// <summary>
+        /// 该插件的解密/转换是否未经测试（未经测试会在 UI 显示警告）。
+        /// 默认 false。
+        /// </summary>
+        bool IsUntested { get; }
+
+        /// <summary>
         /// 执行一次转换。运行在主程序进程，可启动外部进程、读写文件。
         /// </summary>
         Task<ConversionResult> ConvertAsync(
