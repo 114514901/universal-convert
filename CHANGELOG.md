@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.0-dev.8] - 2026-08-24
+
+### 修复
+- 看护进程超时（卡死）报告在英文设置下仍显示系统语言：报告模式现在也应用用户选择的语言
+
 ## [2.0.0-dev.7] - 2026-08-24
 
 ### 修复
@@ -292,6 +297,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8
 [2.0.0-dev.7]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.7
 [2.0.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.6
 [2.0.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.5

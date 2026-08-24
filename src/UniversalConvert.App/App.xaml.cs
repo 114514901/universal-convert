@@ -59,7 +59,7 @@ namespace UniversalConvert.App
             CrashReporter.Install(_host, IsDumpEnabled(config),
                 CrashReporter.ParseDumpType(GetConfigValue(config, "crashDumpLevel")));
 
-            ApplyLanguage(_settingsManager);
+            ApplyLanguage(_settingsManager.Get("language"));
 
             StartHeartbeatAndWatchdog();
 
@@ -143,9 +143,8 @@ namespace UniversalConvert.App
             window.Show();
         }
 
-        private static void ApplyLanguage(SettingsManager settings)
+        private static void ApplyLanguage(string language)
         {
-            var language = settings.Get("language");
             CultureInfo culture = null;
 
             if (language == "zh") culture = new CultureInfo("zh-CN");
@@ -177,6 +176,10 @@ namespace UniversalConvert.App
 
         private void RunReportMode(CommandLineContract.ParsedArguments parsed)
         {
+            // 报告窗口也遵循用户选择的语言（否则英文设置下仍显示系统语言）
+            var config = new ConfigStore().Load();
+            ApplyLanguage(GetConfigValue(config, "language"));
+
             var logsDir = string.IsNullOrEmpty(parsed.ReportDir)
                 ? Path.Combine(ConfigStore.ConfigDirectory, "logs")
                 : parsed.ReportDir;
