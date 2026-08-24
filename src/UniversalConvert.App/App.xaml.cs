@@ -195,8 +195,8 @@ namespace UniversalConvert.App
         private static string BuildHangReportText(string logsDir)
         {
             return Strings.HangReportText + Environment.NewLine +
-                   "日志目录: " + logsDir + Environment.NewLine +
-                   "时间: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                   Strings.LogDirectory + ": " + logsDir + Environment.NewLine +
+                   Strings.TimeLabel + ": " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         private static string ReadFileSafe(string path)

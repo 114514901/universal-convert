@@ -516,4 +516,19 @@
   <data name="HangReportText" xml:space="preserve">
     <value>The app was unresponsive for too long (UI hang or frozen process) and was terminated by the watchdog. Click Restart to launch it again.</value>
   </data>
+  <data name="ExceptionLabel" xml:space="preserve">
+    <value>Exception</value>
+  </data>
+  <data name="ReportLabel" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="DumpLabel" xml:space="preserve">
+    <value>Dump</value>
+  </data>
+  <data name="LogDirectory" xml:space="preserve">
+    <value>Log directory</value>
+  </data>
+  <data name="TimeLabel" xml:space="preserve">
+    <value>Time</value>
+  </data>
 </root>

@@ -150,6 +150,11 @@ namespace UniversalConvert.App.Localization
         public static string TestHang => Get("TestHang");
         public static string HangReportSummary => Get("HangReportSummary");
         public static string HangReportText => Get("HangReportText");
+        public static string ExceptionLabel => Get("ExceptionLabel");
+        public static string ReportLabel => Get("ReportLabel");
+        public static string DumpLabel => Get("DumpLabel");
+        public static string LogDirectory => Get("LogDirectory");
+        public static string TimeLabel => Get("TimeLabel");
 
         /// <summary>按 key 取本地化字符串（设置/插件标签用）。</summary>
         public static string Get(string key)

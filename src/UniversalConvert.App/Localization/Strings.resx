@@ -516,4 +516,19 @@
   <data name="HangReportText" xml:space="preserve">
     <value>检测到程序长时间无响应（UI 卡死或进程冻结），看护进程已将其结束。可点击「重启」重新启动应用。</value>
   </data>
+  <data name="ExceptionLabel" xml:space="preserve">
+    <value>异常</value>
+  </data>
+  <data name="ReportLabel" xml:space="preserve">
+    <value>报告</value>
+  </data>
+  <data name="DumpLabel" xml:space="preserve">
+    <value>转储</value>
+  </data>
+  <data name="LogDirectory" xml:space="preserve">
+    <value>日志目录</value>
+  </data>
+  <data name="TimeLabel" xml:space="preserve">
+    <value>时间</value>
+  </data>
 </root>

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using Microsoft.Win32.SafeHandles;
+using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Config;
 using UniversalConvert.Core.Diagnostics;
@@ -231,9 +232,9 @@ namespace UniversalConvert.App
         private static void ShowReport(Exception ex, string info, string crashLogPath, string dumpPath)
         {
             var summary =
-                "异常: " + ex.Message + "\n" +
-                "报告: " + crashLogPath +
-                (dumpPath != null ? "\n转储: " + dumpPath : "");
+                Strings.ExceptionLabel + ": " + ex.Message + "\n" +
+                Strings.ReportLabel + ": " + crashLogPath +
+                (dumpPath != null ? "\n" + Strings.DumpLabel + ": " + dumpPath : "");
 
             var logText = ReadCurrentLog();
 
