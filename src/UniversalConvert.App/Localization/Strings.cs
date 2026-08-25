@@ -151,6 +151,7 @@ namespace UniversalConvert.App.Localization
         public static string Update => Get("Update");
         public static string Uninstall => Get("Uninstall");
         public static string InstalledVersionColumn => Get("InstalledVersionColumn");
+        public static string SizeColumn => Get("SizeColumn");
         public static string InstalledVersionFormat => Get("InstalledVersionFormat");
         public static string NotInstalled => Get("NotInstalled");
         public static string InstallDone => Get("InstallDone");

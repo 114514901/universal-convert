@@ -25,6 +25,9 @@ namespace UniversalConvert.App
         public string MaxAppVersion { get; set; }
         public string Homepage { get; set; }
         public string DownloadUrl { get; set; }
+
+        /// <summary>扩展包体积（字节）；未知为 null。</summary>
+        public long? Size { get; set; }
     }
 
     /// <summary>安装/卸载结果：Installed 已直接生效；StagedForRestart 已暂存、重启后生效；Failed 失败。</summary>
@@ -63,6 +66,7 @@ namespace UniversalConvert.App
 
             foreach (var item in array)
             {
+                var sizeToken = item["size"];
                 result.Add(new ExtensionInfo
                 {
                     Id = (string)item["id"],
@@ -73,7 +77,10 @@ namespace UniversalConvert.App
                     MinAppVersion = (string)item["minAppVersion"],
                     MaxAppVersion = (string)item["maxAppVersion"],
                     Homepage = (string)item["homepage"],
-                    DownloadUrl = (string)item["downloadUrl"]
+                    DownloadUrl = (string)item["downloadUrl"],
+                    Size = sizeToken != null && sizeToken.Type != JTokenType.Null
+                        ? (long?)sizeToken.ToObject<long>()
+                        : null
                 });
             }
             return result;

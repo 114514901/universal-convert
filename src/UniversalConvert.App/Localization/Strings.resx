@@ -471,6 +471,9 @@
   <data name="InstalledVersionColumn" xml:space="preserve">
     <value>已安装版本</value>
   </data>
+  <data name="SizeColumn" xml:space="preserve">
+    <value>体积</value>
+  </data>
   <data name="InstalledVersionFormat" xml:space="preserve">
     <value>已安装 {0}</value>
   </data>

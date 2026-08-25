@@ -24,6 +24,8 @@
                                     DisplayMemberBinding="{Binding Version}"/>
                     <GridViewColumn Header="{x:Static loc:Strings.InstalledVersionColumn}" Width="110"
                                     DisplayMemberBinding="{Binding InstalledText}"/>
+                    <GridViewColumn Header="{x:Static loc:Strings.SizeColumn}" Width="70"
+                                    DisplayMemberBinding="{Binding SizeText}"/>
                     <GridViewColumn Header="{x:Static loc:Strings.StatusColumn}" Width="260"
                                     DisplayMemberBinding="{Binding CompatibilityText}"/>
                 </GridView>

@@ -61,9 +61,21 @@ namespace UniversalConvert.App
                 InstalledText = installedVersion == null
                     ? Strings.NotInstalled
                     : string.Format(Strings.InstalledVersionFormat, installedVersion),
-                CompatibilityText = GetCompatibilityText(info)
+                CompatibilityText = GetCompatibilityText(info),
+                SizeText = FormatSize(info.Size)
             };
             return row;
+        }
+
+        /// <summary>把字节数格式化为人类可读体积（未知则留空）。</summary>
+        private static string FormatSize(long? bytes)
+        {
+            if (bytes == null || bytes <= 0) return string.Empty;
+            const long kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024;
+            if (bytes >= gb) return (bytes.Value / (double)gb).ToString("0.0") + " GB";
+            if (bytes >= mb) return (bytes.Value / (double)mb).ToString("0") + " MB";
+            if (bytes >= kb) return (bytes.Value / (double)kb).ToString("0") + " KB";
+            return bytes + " B";
         }
 
         private static string GetCompatibilityText(ExtensionInfo info)
@@ -166,5 +178,6 @@ namespace UniversalConvert.App
         public string Version => Info.Version;
         public string InstalledText { get; set; }
         public string CompatibilityText { get; set; }
+        public string SizeText { get; set; }
     }
 }

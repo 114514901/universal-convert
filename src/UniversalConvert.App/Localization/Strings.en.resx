@@ -471,6 +471,9 @@
   <data name="InstalledVersionColumn" xml:space="preserve">
     <value>Installed version</value>
   </data>
+  <data name="SizeColumn" xml:space="preserve">
+    <value>Size</value>
+  </data>
   <data name="InstalledVersionFormat" xml:space="preserve">
     <value>Installed {0}</value>
   </data>
