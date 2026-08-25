@@ -28,6 +28,9 @@ namespace UniversalConvert.App
 
         /// <summary>扩展包体积（字节）；未知为 null。</summary>
         public long? Size { get; set; }
+
+        /// <summary>扩展包 SHA256（十六进制）；未知为 null（下载时跳过校验）。</summary>
+        public string Sha256 { get; set; }
     }
 
     /// <summary>安装/卸载结果：Installed 已直接生效；StagedForRestart 已暂存、重启后生效；Failed 失败。</summary>
@@ -80,10 +83,20 @@ namespace UniversalConvert.App
                     DownloadUrl = (string)item["downloadUrl"],
                     Size = sizeToken != null && sizeToken.Type != JTokenType.Null
                         ? (long?)sizeToken.ToObject<long>()
-                        : null
+                        : null,
+                    Sha256 = NormalizeSha256((string)item["sha256"])
                 });
             }
             return result;
+        }
+
+        /// <summary>把 "sha256:xxxx" 或裸 hex 规范化为 64 位小写十六进制；无效返回 null。</summary>
+        private static string NormalizeSha256(string digest)
+        {
+            if (string.IsNullOrEmpty(digest)) return null;
+            var d = digest.Trim();
+            if (d.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase)) d = d.Substring(7);
+            return d.Length == 64 ? d.ToLowerInvariant() : null;
         }
 
         public static string GetInstallDirectory(ExtensionInfo info)
@@ -113,7 +126,7 @@ namespace UniversalConvert.App
             Log.Info($"安装扩展 {info.Id} {info.Version}...");
             try
             {
-                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct).ConfigureAwait(false);
+                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct, info.Sha256).ConfigureAwait(false);
                 return ExtractOrStage(temp, GetInstallDirectory(info), info.Name);
             }
             catch (Exception ex)

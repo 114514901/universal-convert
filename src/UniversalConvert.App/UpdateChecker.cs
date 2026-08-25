@@ -18,6 +18,9 @@ namespace UniversalConvert.App
         public string DownloadUrl { get; set; }
         public string Body { get; set; }
         public bool IsPrerelease { get; set; }
+
+        /// <summary>安装包 SHA256（十六进制，不含前缀）；未知为 null。</summary>
+        public string Sha256 { get; set; }
     }
 
     /// <summary>
@@ -61,13 +64,16 @@ namespace UniversalConvert.App
                     if (latest == null || latest.CompareTo(current) <= 0) return null;
 
                     Log.Info($"发现新版本 {tag}" + (obj["prerelease"] != null && (bool)obj["prerelease"] ? " (预发布)" : ""));
+                    string sha256;
+                    var downloadUrl = FindDownloadUrl(obj, out sha256);
                     return new UpdateInfo
                     {
                         Version = tag,
                         Url = htmlUrl,
-                        DownloadUrl = FindDownloadUrl(obj),
+                        DownloadUrl = downloadUrl,
                         Body = (string)obj["body"],
-                        IsPrerelease = obj["prerelease"] != null && (bool)obj["prerelease"]
+                        IsPrerelease = obj["prerelease"] != null && (bool)obj["prerelease"],
+                        Sha256 = sha256
                     };
                 }
             }
@@ -80,7 +86,7 @@ namespace UniversalConvert.App
 
         private const int DownloadThreads = 8;
 
-        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct)
+        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null)
         {
             Log.Info($"开始下载更新: {downloadUrl}");
             long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
@@ -90,38 +96,65 @@ namespace UniversalConvert.App
                 // 拿不到文件大小（或服务器不支持），回退单线程
                 Log.Info("服务器不支持分段下载，回退单线程");
                 await DownloadSequentialAsync(downloadUrl, destPath, progress, ct).ConfigureAwait(false);
-                return;
             }
-
-            // 预分配文件，各线程写到自己的区间
-            using (var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.Write))
+            else
             {
-                fs.SetLength(total);
-            }
-
-            long chunkSize = (total + DownloadThreads - 1) / DownloadThreads;
-            long done = 0;
-            var doneLock = new object();
-
-            var tasks = new List<Task>();
-            for (int i = 0; i < DownloadThreads; i++)
-            {
-                long start = (long)i * chunkSize;
-                if (start >= total) break;
-                long end = Math.Min(total - 1, start + chunkSize - 1);
-
-                tasks.Add(DownloadRangeAsync(downloadUrl, destPath, start, end, n =>
+                // 预分配文件，各线程写到自己的区间
+                using (var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.Write))
                 {
-                    lock (doneLock)
+                    fs.SetLength(total);
+                }
+
+                long chunkSize = (total + DownloadThreads - 1) / DownloadThreads;
+                long done = 0;
+                var doneLock = new object();
+
+                var tasks = new List<Task>();
+                for (int i = 0; i < DownloadThreads; i++)
+                {
+                    long start = (long)i * chunkSize;
+                    if (start >= total) break;
+                    long end = Math.Min(total - 1, start + chunkSize - 1);
+
+                    tasks.Add(DownloadRangeAsync(downloadUrl, destPath, start, end, n =>
                     {
-                        done += n;
-                        progress?.Report((double)done / total * 100.0);
-                    }
-                }, ct));
+                        lock (doneLock)
+                        {
+                            done += n;
+                            progress?.Report((double)done / total * 100.0);
+                        }
+                    }, ct));
+                }
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            Log.Info("更新下载完成");
+            // 下载完成后统一做 SHA256 校验（防下载损坏/被篡改）
+            VerifySha256(destPath, expectedSha256);
+            Log.Info("更新下载完成" + (string.IsNullOrEmpty(expectedSha256) ? "" : "（SHA256 校验通过）"));
+        }
+
+        /// <summary>计算文件 SHA256（十六进制小写）。</summary>
+        public static string ComputeSha256(string filePath)
+        {
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var hash = sha.ComputeHash(fs);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+        }
+
+        /// <summary>校验文件 SHA256；期望值为空时跳过；不匹配抛异常。</summary>
+        private static void VerifySha256(string filePath, string expectedSha256)
+        {
+            if (string.IsNullOrEmpty(expectedSha256)) return;
+            var actual = ComputeSha256(filePath);
+            if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException(
+                    "SHA256 校验失败（期望 " + expectedSha256 + "，实际 " + actual + "）");
+            }
         }
 
         private static async Task<long> GetContentLengthAsync(string url, CancellationToken ct)
@@ -226,8 +259,9 @@ namespace UniversalConvert.App
             }
         }
 
-        private static string FindDownloadUrl(JObject obj)
+        private static string FindDownloadUrl(JObject obj, out string sha256)
         {
+            sha256 = null;
             var assets = obj["assets"] as JArray;
             if (assets != null)
             {
@@ -236,19 +270,29 @@ namespace UniversalConvert.App
                     var name = (string)asset["name"];
                     if (name != null && name.EndsWith(AssetSuffix, StringComparison.OrdinalIgnoreCase))
                     {
+                        sha256 = NormalizeSha256((string)asset["digest"]);
                         return (string)asset["browser_download_url"];
                     }
                 }
             }
 
             // 资产列表为空（release 刚创建、CI 上传尚未完成）时，按固定命名规则构造下载地址兜底，
-            // 否则会出现「发现新版本但下载更新按钮不出现」的竞态
+            // 否则会出现「发现新版本但下载更新按钮不出现」的竞态（此场景拿不到 digest，跳过校验）
             var tag = (string)obj["tag_name"];
             if (!string.IsNullOrEmpty(tag))
             {
                 return "https://github.com/114514901/universal-convert/releases/download/" + tag + "/" + AssetName;
             }
             return null;
+        }
+
+        /// <summary>把 GitHub 的 digest（"sha256:xxxx"）规范化为裸十六进制；无效返回 null。</summary>
+        private static string NormalizeSha256(string digest)
+        {
+            if (string.IsNullOrEmpty(digest)) return null;
+            var d = digest.Trim();
+            if (d.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase)) d = d.Substring(7);
+            return d.Length == 64 ? d.ToLowerInvariant() : null;
         }
     }
 }

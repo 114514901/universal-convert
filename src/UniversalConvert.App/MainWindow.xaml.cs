@@ -118,7 +118,7 @@ namespace UniversalConvert.App
 
             try
             {
-                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None);
+                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None, _updateInfo.Sha256);
 
                 UpdateProgressBar.Value = 100;
                 UpdateStatusText.Text = Strings.DownloadComplete;
