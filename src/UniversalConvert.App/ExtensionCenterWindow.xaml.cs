@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -121,45 +120,11 @@ namespace UniversalConvert.App
             var row = ExtensionList.SelectedItem as ExtensionRow;
             if (row == null) return;
 
-            SetBusy(true);
-            try
-            {
-                var progress = new Progress<double>(p =>
-                {
-                    Progress.Value = p;
-                    StatusText.Text = string.Format(Strings.Downloading, (int)p);
-                });
-
-                StatusText.Text = Strings.Installing;
-                var result = await ExtensionCenter.InstallAsync(row.Info, progress, CancellationToken.None);
-
-                if (result == ExtensionInstallResult.StagedForRestart)
-                {
-                    // 更新已加载插件：已暂存，重启后生效
-                    StatusText.Text = string.Format(Strings.UpdatedRestart, row.Info.Name);
-                    await RefreshAsync();
-                    AppRestart.PromptAndRestart();
-                }
-                else if (result == ExtensionInstallResult.Installed)
-                {
-                    StatusText.Text = Strings.InstallDone;
-                    await RefreshAsync();
-                    // 新安装的扩展也要重启才会被应用加载，同样询问是否立即重启
-                    AppRestart.PromptAndRestart();
-                }
-                else
-                {
-                    StatusText.Text = Strings.ExtensionUpdateFailed;
-                }
-            }
-            catch (Exception ex)
-            {
-                StatusText.Text = string.Format(Strings.InstallFailed, ex.Message);
-            }
-            finally
-            {
-                SetBusy(false);
-            }
+            // 安装/更新统一走进度弹窗（单行列表，风格与插件管理器更新一致）
+            var window = new ExtensionUpdateWindow(Strings.ExtensionInstallingTitle, new[] { row.Info }) { Owner = this };
+            window.ShowDialog();
+            StatusText.Text = window.Summary;
+            await RefreshAsync();
         }
 
         private void OnUninstall(object sender, RoutedEventArgs e)
@@ -186,14 +151,6 @@ namespace UniversalConvert.App
                 StatusText.Text = string.Format(Strings.Uninstalled, row.Info.Name);
                 _ = RefreshAsync();
             }
-        }
-
-        private void SetBusy(bool busy)
-        {
-            Progress.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
-            InstallButton.IsEnabled = !busy;
-            UninstallButton.IsEnabled = !busy;
-            ExtensionList.IsEnabled = !busy;
         }
 
         private void OnClose(object sender, RoutedEventArgs e)

@@ -63,6 +63,33 @@
   <data name="UpdateSkipped" xml:space="preserve">
     <value>Update skipped (you can update individually from the list)</value>
   </data>
+  <data name="ExtensionUpdatingTitle" xml:space="preserve">
+    <value>Updating Extensions</value>
+  </data>
+  <data name="ExtensionInstallingTitle" xml:space="preserve">
+    <value>Installing Extension</value>
+  </data>
+  <data name="ExtensionWaiting" xml:space="preserve">
+    <value>Waiting…</value>
+  </data>
+  <data name="ExtensionExtracting" xml:space="preserve">
+    <value>Extracting…</value>
+  </data>
+  <data name="ExtensionDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ExtensionDoneRestart" xml:space="preserve">
+    <value>Done (applies after restart)</value>
+  </data>
+  <data name="ExtensionFailedFormat" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="ExtensionAllSucceeded" xml:space="preserve">
+    <value>All done ({0})</value>
+  </data>
+  <data name="ExtensionSummaryFormat" xml:space="preserve">
+    <value>Succeeded {0}, failed {1}</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>{0} extensions have updates. Update now?</value>
   </data>

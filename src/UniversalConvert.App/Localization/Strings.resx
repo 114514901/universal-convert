@@ -63,6 +63,33 @@
   <data name="UpdateSkipped" xml:space="preserve">
     <value>已跳过更新（可在列表中单独更新）</value>
   </data>
+  <data name="ExtensionUpdatingTitle" xml:space="preserve">
+    <value>正在更新扩展</value>
+  </data>
+  <data name="ExtensionInstallingTitle" xml:space="preserve">
+    <value>正在安装扩展</value>
+  </data>
+  <data name="ExtensionWaiting" xml:space="preserve">
+    <value>等待中…</value>
+  </data>
+  <data name="ExtensionExtracting" xml:space="preserve">
+    <value>正在解压…</value>
+  </data>
+  <data name="ExtensionDone" xml:space="preserve">
+    <value>完成</value>
+  </data>
+  <data name="ExtensionDoneRestart" xml:space="preserve">
+    <value>完成（重启后生效）</value>
+  </data>
+  <data name="ExtensionFailedFormat" xml:space="preserve">
+    <value>失败：{0}</value>
+  </data>
+  <data name="ExtensionAllSucceeded" xml:space="preserve">
+    <value>全部完成（{0} 个）</value>
+  </data>
+  <data name="ExtensionSummaryFormat" xml:space="preserve">
+    <value>成功 {0} 个，失败 {1} 个</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>发现 {0} 个扩展有新版本，是否立即更新？</value>
   </data>

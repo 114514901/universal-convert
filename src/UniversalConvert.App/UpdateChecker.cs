@@ -126,12 +126,8 @@ namespace UniversalConvert.App
 
         private static async Task<long> GetContentLengthAsync(string url, CancellationToken ct)
         {
-            var req = (HttpWebRequest)WebRequest.Create(url);
-            req.UserAgent = "UniversalConvert";
-            req.AllowAutoRedirect = true;
-            req.Method = "HEAD";
-
-            using (var resp = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false))
+            var req = CreateRequest(url, "HEAD");
+            using (var resp = await GetResponseAsync(req, ct).ConfigureAwait(false))
             {
                 return resp.ContentLength;
             }
@@ -139,12 +135,10 @@ namespace UniversalConvert.App
 
         private static async Task DownloadRangeAsync(string url, string destPath, long start, long end, Action<int> onBytes, CancellationToken ct)
         {
-            var req = (HttpWebRequest)WebRequest.Create(url);
-            req.UserAgent = "UniversalConvert";
-            req.AllowAutoRedirect = true;
+            var req = CreateRequest(url, "GET");
             req.AddRange(start, end);
 
-            using (var resp = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false))
+            using (var resp = await GetResponseAsync(req, ct).ConfigureAwait(false))
             using (var stream = resp.GetResponseStream())
             using (var file = new FileStream(destPath, FileMode.Open, FileAccess.Write, FileShare.Write))
             {
@@ -160,13 +154,58 @@ namespace UniversalConvert.App
             }
         }
 
-        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct)
+        private static HttpWebRequest CreateRequest(string url, string method)
         {
             var req = (HttpWebRequest)WebRequest.Create(url);
             req.UserAgent = "UniversalConvert";
-            req.AllowAutoRedirect = true;
+            req.AllowAutoRedirect = false; // 手动跟随重定向：.NET Framework 自动重定向会丢失 Range 头，导致分段下载错乱
+            req.Method = method;
+            req.Timeout = 60000;
+            req.ReadWriteTimeout = 60000;
+            return req;
+        }
 
-            using (var resp = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false))
+        /// <summary>手动跟随 HTTP 重定向（保留 Range 头），最多 5 跳，避免下载静默卡死。</summary>
+        private static async Task<HttpWebResponse> GetResponseAsync(HttpWebRequest req, CancellationToken ct)
+        {
+            var response = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false);
+
+            for (int hop = 0; hop < 5 && IsRedirect(response.StatusCode); hop++)
+            {
+                var location = response.Headers["Location"];
+                response.Dispose();
+                if (string.IsNullOrEmpty(location)) throw new WebException("重定向缺少 Location");
+
+                var next = CreateRequest(new Uri(req.Address, location).AbsoluteUri, req.Method);
+
+                // 复制 Range 头（bytes=from-to）
+                var range = req.Headers["Range"];
+                if (!string.IsNullOrEmpty(range) && range.StartsWith("bytes="))
+                {
+                    var parts = range.Substring(6).Split('-');
+                    long from = -1, to = -1;
+                    long.TryParse(parts[0], out from);
+                    if (parts.Length > 1) long.TryParse(parts[1], out to);
+                    if (from >= 0 && to >= from) next.AddRange(from, to);
+                }
+
+                req = next;
+                response = (HttpWebResponse)await req.GetResponseAsync().ConfigureAwait(false);
+            }
+            return response;
+        }
+
+        private static bool IsRedirect(HttpStatusCode code)
+        {
+            int c = (int)code;
+            return c == 301 || c == 302 || c == 303 || c == 307 || c == 308;
+        }
+
+        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct)
+        {
+            var req = CreateRequest(url, "GET");
+
+            using (var resp = await GetResponseAsync(req, ct).ConfigureAwait(false))
             using (var stream = resp.GetResponseStream())
             using (var file = File.Create(destPath))
             {

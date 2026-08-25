@@ -30,6 +30,15 @@ namespace UniversalConvert.App.Localization
         public static string CheckUpdatePlugin => Get("CheckUpdatePlugin");
         public static string ExtensionUpToDate => Get("ExtensionUpToDate");
         public static string UpdateSkipped => Get("UpdateSkipped");
+        public static string ExtensionUpdatingTitle => Get("ExtensionUpdatingTitle");
+        public static string ExtensionInstallingTitle => Get("ExtensionInstallingTitle");
+        public static string ExtensionWaiting => Get("ExtensionWaiting");
+        public static string ExtensionExtracting => Get("ExtensionExtracting");
+        public static string ExtensionDone => Get("ExtensionDone");
+        public static string ExtensionDoneRestart => Get("ExtensionDoneRestart");
+        public static string ExtensionFailedFormat => Get("ExtensionFailedFormat");
+        public static string ExtensionAllSucceeded => Get("ExtensionAllSucceeded");
+        public static string ExtensionSummaryFormat => Get("ExtensionSummaryFormat");
         public static string ExtensionUpdatesPrompt => Get("ExtensionUpdatesPrompt");
         public static string SingleExtensionUpdatePrompt => Get("SingleExtensionUpdatePrompt");
         public static string UpdatedRestart => Get("UpdatedRestart");

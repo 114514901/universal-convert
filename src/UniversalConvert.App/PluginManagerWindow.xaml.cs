@@ -137,7 +137,13 @@ namespace UniversalConvert.App
                         "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (confirm == MessageBoxResult.Yes)
                     {
-                        await UpdateAllAsync(userRows.Where(r => r.UpdateText != null).ToList(), byId);
+                        // 弹出进度列表窗口并行更新（含下载进度与失败明细）
+                        UpdateStatusText.Text = string.Empty;
+                        var targets = userRows.Where(r => r.UpdateText != null)
+                            .Select(r => byId[r.Id]).ToList();
+                        var window = new ExtensionUpdateWindow(Strings.ExtensionUpdatingTitle, targets) { Owner = this };
+                        window.ShowDialog();
+                        UpdateStatusText.Text = window.Summary;
                     }
                     else
                     {
@@ -158,45 +164,6 @@ namespace UniversalConvert.App
             {
                 CheckUpdatesButton.IsEnabled = true;
             }
-        }
-
-        /// <summary>并行更新所有检测到新版本的扩展（已加载插件目录被锁定，走暂存、重启后应用）。</summary>
-        private async Task UpdateAllAsync(IList<PluginRow> rows, IDictionary<string, ExtensionInfo> byId)
-        {
-            var tasks = new List<Task>();
-            int succeeded = 0;
-            int stagedCount = 0;
-            foreach (var row in rows)
-            {
-                ExtensionInfo ext;
-                if (!byId.TryGetValue(row.Id, out ext)) continue;
-
-                tasks.Add(Task.Run(async () =>
-                {
-                    try
-                    {
-                        var result = await ExtensionCenter.InstallAsync(ext, null, CancellationToken.None);
-                        if (result == ExtensionInstallResult.Installed || result == ExtensionInstallResult.StagedForRestart)
-                        {
-                            row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
-                            Interlocked.Increment(ref succeeded);
-                            if (result == ExtensionInstallResult.StagedForRestart) Interlocked.Increment(ref stagedCount);
-                        }
-                    }
-                    catch
-                    {
-                        // 单个失败不影响其它
-                    }
-                }));
-            }
-            await Task.WhenAll(tasks);
-
-            UpdateStatusText.Text = succeeded > 0
-                ? string.Format(Strings.ExtensionsUpdatedRestart, succeeded)
-                : Strings.ExtensionUpdateFailed;
-            RefreshList();
-
-            if (stagedCount > 0) AppRestart.PromptAndRestart();
         }
 
         private async void OnCheckUpdateSingle(object sender, RoutedEventArgs e)
@@ -228,18 +195,12 @@ namespace UniversalConvert.App
                     return;
                 }
 
-                var result = await ExtensionCenter.InstallAsync(ext, null, CancellationToken.None);
-                if (result == ExtensionInstallResult.Failed)
-                {
-                    UpdateStatusText.Text = Strings.ExtensionUpdateFailed;
-                    return;
-                }
-
-                row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
-                UpdateStatusText.Text = row.BaseStatus;
+                // 单插件更新同样走进度弹窗
+                UpdateStatusText.Text = string.Empty;
+                var window = new ExtensionUpdateWindow(Strings.ExtensionUpdatingTitle, new[] { ext }) { Owner = this };
+                window.ShowDialog();
+                UpdateStatusText.Text = window.Summary;
                 RefreshList();
-
-                if (result == ExtensionInstallResult.StagedForRestart) AppRestart.PromptAndRestart();
             }
             catch (Exception ex)
             {

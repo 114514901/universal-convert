@@ -2,8 +2,8 @@
   <!-- 全局统一版本源。AssemblyVersion 保持稳定（1.0.0.0），保证外部插件二进制兼容；
        实际版本看 Version（=InformationalVersion）与 FileVersion。 -->
   <PropertyGroup>
-    <Version>2.0.2</Version>
+    <Version>2.1.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.2.0</FileVersion>
+    <FileVersion>2.1.0.0</FileVersion>
   </PropertyGroup>
 </Project>
