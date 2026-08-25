@@ -43,36 +43,29 @@ namespace UniversalConvert.App
 
         /// <summary>
         /// 卸载用户插件：删除其所在目录（若 DLL 直接在用户插件根目录则只删文件）。
-        /// 仅允许操作用户插件目录内的内容；成功返回 true。
+        /// 仅允许操作用户插件目录内的内容；被加载锁定时标记待重启删除。
         /// </summary>
-        public static bool UninstallUserPlugin(IConverterPlugin plugin)
+        public static ExtensionInstallResult UninstallUserPlugin(IConverterPlugin plugin)
         {
             try
             {
                 var location = plugin.GetType().Assembly.Location;
-                if (string.IsNullOrEmpty(location)) return false;
+                if (string.IsNullOrEmpty(location)) return ExtensionInstallResult.Failed;
 
                 var userDir = ConfigStore.UserPluginsDirectory;
-                if (string.IsNullOrEmpty(userDir)) return false;
-                if (!location.StartsWith(userDir, StringComparison.OrdinalIgnoreCase)) return false;
+                if (string.IsNullOrEmpty(userDir)) return ExtensionInstallResult.Failed;
+                if (!location.StartsWith(userDir, StringComparison.OrdinalIgnoreCase)) return ExtensionInstallResult.Failed;
 
                 var dir = Path.GetDirectoryName(location);
-                if (string.IsNullOrEmpty(dir)) return false;
+                if (string.IsNullOrEmpty(dir)) return ExtensionInstallResult.Failed;
 
-                if (string.Equals(dir, userDir, StringComparison.OrdinalIgnoreCase))
-                {
-                    // DLL 直接在用户插件根目录：只删该文件
-                    if (File.Exists(location)) File.Delete(location);
-                }
-                else
-                {
-                    if (Directory.Exists(dir)) Directory.Delete(dir, true);
-                }
-                return true;
+                // DLL 直接在用户插件根目录时只删该文件，否则删整个目录；被锁定则暂存待重启
+                var path = string.Equals(dir, userDir, StringComparison.OrdinalIgnoreCase) ? location : dir;
+                return ExtensionCenter.DeleteOrStage(path);
             }
             catch
             {
-                return false;
+                return ExtensionInstallResult.Failed;
             }
         }
 

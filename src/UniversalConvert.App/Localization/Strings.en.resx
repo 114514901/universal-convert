@@ -75,6 +75,12 @@
   <data name="ExtensionUpdateFailed" xml:space="preserve">
     <value>Failed to update extensions</value>
   </data>
+  <data name="ExtensionRestartPrompt" xml:space="preserve">
+    <value>Extension changes require a restart to take effect. Restart now?</value>
+  </data>
+  <data name="Uninstalled" xml:space="preserve">
+    <value>Uninstalled "{0}"</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>

@@ -181,25 +181,11 @@ namespace UniversalConvert.App
                     MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    RestartApp();
+                    AppRestart.Restart();
                 }
             }
 
             Close();
-        }
-
-        private static void RestartApp()
-        {
-            try
-            {
-                var exePath = System.Reflection.Assembly.GetEntryAssembly().Location;
-                System.Diagnostics.Process.Start(exePath);
-                Application.Current.Shutdown();
-            }
-            catch
-            {
-                // 重启失败则仅关闭
-            }
         }
 
         private FrameworkElement BuildUpdateActions()

@@ -54,6 +54,8 @@ namespace UniversalConvert.App
 
             // 应用暂存的扩展更新（重启后生效的在线更新），须在插件加载前执行
             ExtensionCenter.ApplyPendingUpdates();
+            // 删除标记为待卸载的扩展（重启后生效的卸载）
+            ExtensionCenter.ApplyPendingUninstalls();
 
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
             _settingsManager = new SettingsManager(config, _host.Plugins);

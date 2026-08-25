@@ -131,10 +131,24 @@ namespace UniversalConvert.App
                 });
 
                 StatusText.Text = Strings.Installing;
-                await ExtensionCenter.InstallAsync(row.Info, progress, CancellationToken.None);
+                var result = await ExtensionCenter.InstallAsync(row.Info, progress, CancellationToken.None);
 
-                StatusText.Text = Strings.InstallDone;
-                await RefreshAsync();
+                if (result == ExtensionInstallResult.StagedForRestart)
+                {
+                    // 更新已加载插件：已暂存，重启后生效
+                    StatusText.Text = string.Format(Strings.UpdatedRestart, row.Info.Name);
+                    await RefreshAsync();
+                    AppRestart.PromptAndRestart();
+                }
+                else if (result == ExtensionInstallResult.Installed)
+                {
+                    StatusText.Text = Strings.InstallDone;
+                    await RefreshAsync();
+                }
+                else
+                {
+                    StatusText.Text = Strings.ExtensionUpdateFailed;
+                }
             }
             catch (Exception ex)
             {
@@ -157,9 +171,19 @@ namespace UniversalConvert.App
 
             if (confirm != MessageBoxResult.Yes) return;
 
-            ExtensionCenter.Uninstall(row.Info);
-            StatusText.Text = Strings.InstallDone;
-            _ = RefreshAsync();
+            var result = ExtensionCenter.Uninstall(row.Info);
+            if (result == ExtensionInstallResult.StagedForRestart)
+            {
+                // 插件已加载、目录被锁定：已标记待卸载，重启后删除
+                StatusText.Text = string.Format(Strings.UninstalledRestart, row.Info.Name);
+                _ = RefreshAsync();
+                AppRestart.PromptAndRestart();
+            }
+            else if (result == ExtensionInstallResult.Installed)
+            {
+                StatusText.Text = string.Format(Strings.Uninstalled, row.Info.Name);
+                _ = RefreshAsync();
+            }
         }
 
         private void SetBusy(bool busy)

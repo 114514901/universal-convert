@@ -34,6 +34,8 @@ namespace UniversalConvert.App.Localization
         public static string UpdatedRestart => Get("UpdatedRestart");
         public static string ExtensionsUpdatedRestart => Get("ExtensionsUpdatedRestart");
         public static string ExtensionUpdateFailed => Get("ExtensionUpdateFailed");
+        public static string ExtensionRestartPrompt => Get("ExtensionRestartPrompt");
+        public static string Uninstalled => Get("Uninstalled");
         public static string Customize => Get("Customize");
         public static string Convert => Get("Convert");
         public static string SelectFileDialogTitle => Get("SelectFileDialogTitle");

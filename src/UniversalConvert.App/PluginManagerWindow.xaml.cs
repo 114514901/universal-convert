@@ -92,13 +92,18 @@ namespace UniversalConvert.App
             var plugin = _host.Plugins.FirstOrDefault(p => p.Id == row.Id);
             if (plugin == null) return;
 
-            if (PluginManager.UninstallUserPlugin(plugin))
-            {
-                UpdateStatusText.Text = string.Format(Strings.UninstalledRestart, row.Name);
-                row.BaseStatus = Strings.UninstalledRestart; // 目录已删，重启后即消失
-                RefreshList();
-                UninstallButton.IsEnabled = false;
-            }
+            var result = PluginManager.UninstallUserPlugin(plugin);
+            if (result == ExtensionInstallResult.Failed) return;
+
+            var staged = result == ExtensionInstallResult.StagedForRestart;
+            row.BaseStatus = staged
+                ? string.Format(Strings.UninstalledRestart, row.Name)
+                : string.Format(Strings.Uninstalled, row.Name);
+            UpdateStatusText.Text = row.BaseStatus;
+            RefreshList();
+            UninstallButton.IsEnabled = false;
+
+            if (staged) AppRestart.PromptAndRestart();
         }
 
         private async void OnCheckUpdates(object sender, RoutedEventArgs e)
@@ -145,11 +150,12 @@ namespace UniversalConvert.App
             }
         }
 
-        /// <summary>并行暂存所有检测到新版本的扩展（已加载插件目录被锁定，重启后应用）。</summary>
+        /// <summary>并行更新所有检测到新版本的扩展（已加载插件目录被锁定，走暂存、重启后应用）。</summary>
         private async Task UpdateAllAsync(IList<PluginRow> rows, IDictionary<string, ExtensionInfo> byId)
         {
             var tasks = new List<Task>();
             int succeeded = 0;
+            int stagedCount = 0;
             foreach (var row in rows)
             {
                 ExtensionInfo ext;
@@ -159,9 +165,13 @@ namespace UniversalConvert.App
                 {
                     try
                     {
-                        await ExtensionCenter.StageUpdateAsync(ext, null, CancellationToken.None);
-                        row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
-                        Interlocked.Increment(ref succeeded);
+                        var result = await ExtensionCenter.InstallAsync(ext, null, CancellationToken.None);
+                        if (result == ExtensionInstallResult.Installed || result == ExtensionInstallResult.StagedForRestart)
+                        {
+                            row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
+                            Interlocked.Increment(ref succeeded);
+                            if (result == ExtensionInstallResult.StagedForRestart) Interlocked.Increment(ref stagedCount);
+                        }
                     }
                     catch
                     {
@@ -175,6 +185,8 @@ namespace UniversalConvert.App
                 ? string.Format(Strings.ExtensionsUpdatedRestart, succeeded)
                 : Strings.ExtensionUpdateFailed;
             RefreshList();
+
+            if (stagedCount > 0) AppRestart.PromptAndRestart();
         }
 
         private async void OnCheckUpdateSingle(object sender, RoutedEventArgs e)
@@ -202,10 +214,18 @@ namespace UniversalConvert.App
                     "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (confirm != MessageBoxResult.Yes) return;
 
-                await ExtensionCenter.StageUpdateAsync(ext, null, CancellationToken.None);
+                var result = await ExtensionCenter.InstallAsync(ext, null, CancellationToken.None);
+                if (result == ExtensionInstallResult.Failed)
+                {
+                    UpdateStatusText.Text = Strings.ExtensionUpdateFailed;
+                    return;
+                }
+
                 row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
-                UpdateStatusText.Text = string.Format(Strings.UpdatedRestart, row.Name);
+                UpdateStatusText.Text = row.BaseStatus;
                 RefreshList();
+
+                if (result == ExtensionInstallResult.StagedForRestart) AppRestart.PromptAndRestart();
             }
             catch (Exception ex)
             {

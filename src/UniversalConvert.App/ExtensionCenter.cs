@@ -86,20 +86,32 @@ namespace UniversalConvert.App
             return manifest?.Version;
         }
 
-        public static async Task InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct)
+        /// <summary>安装/卸载结果：Installed 已直接生效；StagedForRestart 已暂存、重启后生效；Failed 失败。</summary>
+        public enum ExtensionInstallResult
         {
-            var dir = GetInstallDirectory(info);
+            Installed,
+            StagedForRestart,
+            Failed
+        }
+
+        /// <summary>待应用更新目录：%AppData%\UniversalConvert\pending。</summary>
+        public static string PendingUpdatesDirectory => Path.Combine(ConfigStore.ConfigDirectory, "pending");
+
+        /// <summary>安装扩展；目标目录被锁定（插件已加载、更新场景）时自动暂存到 pending，重启后应用。</summary>
+        public static async Task<ExtensionInstallResult> InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct)
+        {
             var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
 
             Log.Info($"安装扩展 {info.Id} {info.Version}...");
             try
             {
                 await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct).ConfigureAwait(false);
-
-                if (Directory.Exists(dir)) Directory.Delete(dir, true);
-                Directory.CreateDirectory(dir);
-                PluginPackage.Extract(temp, dir);
-                Log.Info($"扩展 {info.Id} 安装完成: {dir}");
+                return ExtractOrStage(temp, GetInstallDirectory(info), info.Name);
+            }
+            catch (Exception ex)
+            {
+                Log.Error("扩展安装失败: " + ex.Message);
+                return ExtensionInstallResult.Failed;
             }
             finally
             {
@@ -107,38 +119,52 @@ namespace UniversalConvert.App
             }
         }
 
-        public static void Uninstall(ExtensionInfo info)
+        /// <summary>解压到目标目录；目标被锁定（插件 DLL 已加载）时暂存到 pending 目录并返回 StagedForRestart。</summary>
+        private static ExtensionInstallResult ExtractOrStage(string zipPath, string targetDir, string name)
+        {
+            try
+            {
+                if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+                Directory.CreateDirectory(targetDir);
+                PluginPackage.Extract(zipPath, targetDir);
+                return ExtensionInstallResult.Installed;
+            }
+            catch (IOException)
+            {
+                var pendingDir = Path.Combine(PendingUpdatesDirectory, name);
+                if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true);
+                Directory.CreateDirectory(pendingDir);
+                PluginPackage.Extract(zipPath, pendingDir);
+                Log.Info($"扩展 {name} 更新已暂存（重启后生效）: {pendingDir}");
+                return ExtensionInstallResult.StagedForRestart;
+            }
+        }
+
+        /// <summary>卸载扩展；目录被锁定（插件已加载）时记录到 pending-uninstall，重启时删除。</summary>
+        public static ExtensionInstallResult Uninstall(ExtensionInfo info)
         {
             var dir = GetInstallDirectory(info);
             Log.Info($"卸载扩展 {info.Id}: {dir}");
-            if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            return DeleteOrStage(dir);
         }
 
-        /// <summary>待应用更新目录：%AppData%\UniversalConvert\pending。</summary>
-        public static string PendingUpdatesDirectory => Path.Combine(ConfigStore.ConfigDirectory, "pending");
-
-        /// <summary>
-        /// 暂存扩展更新：已加载的插件 DLL 被当前进程锁定、无法直接替换，
-        /// 因此下载后解压到 pending 目录，由下次启动时 ApplyPendingUpdates 搬入用户插件目录。
-        /// </summary>
-        public static async Task StageUpdateAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct)
+        /// <summary>删除目录（或顶层文件）；被锁定（已加载 DLL）时记录待重启删除。</summary>
+        public static ExtensionInstallResult DeleteOrStage(string path)
         {
-            var pendingDir = Path.Combine(PendingUpdatesDirectory, info.Name);
-            var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
-
-            Log.Info($"暂存扩展更新 {info.Id} {info.Version}...");
             try
             {
-                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct).ConfigureAwait(false);
-
-                if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true);
-                Directory.CreateDirectory(pendingDir);
-                PluginPackage.Extract(temp, pendingDir);
-                Log.Info($"扩展 {info.Id} 更新已暂存: {pendingDir}");
+                if (Directory.Exists(path)) Directory.Delete(path, true);
+                else if (File.Exists(path)) File.Delete(path);
+                return ExtensionInstallResult.Installed;
             }
-            finally
+            catch (IOException)
             {
-                try { if (File.Exists(temp)) File.Delete(temp); } catch { }
+                var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
+                Directory.CreateDirectory(markerRoot);
+                var marker = Path.Combine(markerRoot, Guid.NewGuid().ToString("N") + ".txt");
+                File.WriteAllText(marker, path);
+                Log.Info($"卸载暂存（重启后生效）: {path}");
+                return ExtensionInstallResult.StagedForRestart;
             }
         }
 
@@ -163,6 +189,37 @@ namespace UniversalConvert.App
             catch (Exception ex)
             {
                 Log.Warn("应用扩展更新失败: " + ex.Message);
+            }
+        }
+
+        /// <summary>启动时删除标记为待卸载的扩展目录（须在插件加载前调用）。</summary>
+        public static void ApplyPendingUninstalls()
+        {
+            try
+            {
+                var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
+                if (!Directory.Exists(markerRoot)) return;
+
+                foreach (var marker in Directory.GetFiles(markerRoot, "*.txt"))
+                {
+                    try
+                    {
+                        var target = File.ReadAllText(marker);
+                        if (Directory.Exists(target)) Directory.Delete(target, true);
+                        else if (File.Exists(target)) File.Delete(target);
+                        File.Delete(marker);
+                        Log.Info($"已应用扩展卸载: {target}");
+                    }
+                    catch
+                    {
+                        // 单个失败不影响其它
+                    }
+                }
+                try { Directory.Delete(markerRoot, true); } catch { }
+            }
+            catch
+            {
+                // 忽略
             }
         }
     }
