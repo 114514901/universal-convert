@@ -81,6 +81,9 @@
   <data name="Uninstalled" xml:space="preserve">
     <value>Uninstalled "{0}"</value>
   </data>
+  <data name="ExtensionUninstallFailed" xml:space="preserve">
+    <value>Failed to uninstall extension</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>

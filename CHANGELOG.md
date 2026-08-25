@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.5] - 2026-08-25
+
+### 修复
+- 扩展更新/卸载在重启后未生效：旧进程可能仍持有插件 DLL 句柄导致启动时应用失败——现在启动应用带重试
+- 卸载/更新只捕获 IOException，权限类异常会导致静默失败——改为统一暂存待重启并记录日志；卸载失败时弹窗提示
+
 ## [2.0.2-dev.4] - 2026-08-25
 
 ### 修复
@@ -284,6 +290,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.2-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.5
 [2.0.2-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.4
 [2.0.2-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.3
 [2.0.2-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.2

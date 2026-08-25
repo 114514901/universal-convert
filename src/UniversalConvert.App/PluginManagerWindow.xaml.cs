@@ -93,7 +93,12 @@ namespace UniversalConvert.App
             if (plugin == null) return;
 
             var result = PluginManager.UninstallUserPlugin(plugin);
-            if (result == ExtensionInstallResult.Failed) return;
+            if (result == ExtensionInstallResult.Failed)
+            {
+                MessageBox.Show(Strings.ExtensionUninstallFailed, "UniversalConvert",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             var staged = result == ExtensionInstallResult.StagedForRestart;
             row.BaseStatus = staged

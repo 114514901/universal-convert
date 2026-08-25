@@ -81,6 +81,9 @@
   <data name="Uninstalled" xml:space="preserve">
     <value>已卸载「{0}」</value>
   </data>
+  <data name="ExtensionUninstallFailed" xml:space="preserve">
+    <value>扩展卸载失败</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>自定义...</value>
   </data>

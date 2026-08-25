@@ -119,7 +119,7 @@ namespace UniversalConvert.App
             }
         }
 
-        /// <summary>解压到目标目录；目标被锁定（插件 DLL 已加载）时暂存到 pending 目录并返回 StagedForRestart。</summary>
+        /// <summary>解压到目标目录；目标被占用/失败时暂存到 pending 目录并返回 StagedForRestart。</summary>
         private static ExtensionInstallResult ExtractOrStage(string zipPath, string targetDir, string name)
         {
             try
@@ -129,14 +129,24 @@ namespace UniversalConvert.App
                 PluginPackage.Extract(zipPath, targetDir);
                 return ExtensionInstallResult.Installed;
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                var pendingDir = Path.Combine(PendingUpdatesDirectory, name);
-                if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true);
-                Directory.CreateDirectory(pendingDir);
-                PluginPackage.Extract(zipPath, pendingDir);
-                Log.Info($"扩展 {name} 更新已暂存（重启后生效）: {pendingDir}");
-                return ExtensionInstallResult.StagedForRestart;
+                // 被占用（IOException，已加载 DLL）或权限问题等都暂存到 pending，重启后应用
+                Log.Warn($"目标目录被占用/失败，暂存更新待重启: {targetDir} ({ex.Message})");
+                try
+                {
+                    var pendingDir = Path.Combine(PendingUpdatesDirectory, name);
+                    if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true);
+                    Directory.CreateDirectory(pendingDir);
+                    PluginPackage.Extract(zipPath, pendingDir);
+                    Log.Info($"扩展 {name} 更新已暂存（重启后生效）: {pendingDir}");
+                    return ExtensionInstallResult.StagedForRestart;
+                }
+                catch (Exception ex2)
+                {
+                    Log.Error("扩展暂存失败: " + ex2.Message);
+                    return ExtensionInstallResult.Failed;
+                }
             }
         }
 
@@ -148,7 +158,7 @@ namespace UniversalConvert.App
             return DeleteOrStage(dir);
         }
 
-        /// <summary>删除目录（或顶层文件）；被锁定（已加载 DLL）时记录待重启删除。</summary>
+        /// <summary>删除目录（或顶层文件）；被占用/失败时记录待重启删除。</summary>
         public static ExtensionInstallResult DeleteOrStage(string path)
         {
             try
@@ -157,52 +167,71 @@ namespace UniversalConvert.App
                 else if (File.Exists(path)) File.Delete(path);
                 return ExtensionInstallResult.Installed;
             }
-            catch (IOException)
-            {
-                var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
-                Directory.CreateDirectory(markerRoot);
-                var marker = Path.Combine(markerRoot, Guid.NewGuid().ToString("N") + ".txt");
-                File.WriteAllText(marker, path);
-                Log.Info($"卸载暂存（重启后生效）: {path}");
-                return ExtensionInstallResult.StagedForRestart;
-            }
-        }
-
-        /// <summary>启动时应用暂存的扩展更新（把 pending 下的目录搬进用户插件目录，须在插件加载前调用）。</summary>
-        public static void ApplyPendingUpdates()
-        {
-            try
-            {
-                if (!Directory.Exists(PendingUpdatesDirectory)) return;
-
-                foreach (var dir in Directory.GetDirectories(PendingUpdatesDirectory))
-                {
-                    var name = Path.GetFileName(dir);
-                    var target = Path.Combine(ConfigStore.UserPluginsDirectory, name);
-                    if (Directory.Exists(target)) Directory.Delete(target, true);
-                    Directory.CreateDirectory(ConfigStore.UserPluginsDirectory);
-                    Directory.Move(dir, target);
-                    Log.Info($"已应用扩展更新: {name}");
-                }
-                Directory.Delete(PendingUpdatesDirectory, true);
-            }
             catch (Exception ex)
             {
-                Log.Warn("应用扩展更新失败: " + ex.Message);
+                // 被占用（IOException，已加载 DLL 锁定）或权限问题（UnauthorizedAccess）都按「暂存待重启」处理
+                Log.Warn($"删除被占用/失败，暂存待重启: {path} ({ex.Message})");
+                try
+                {
+                    var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
+                    Directory.CreateDirectory(markerRoot);
+                    var marker = Path.Combine(markerRoot, Guid.NewGuid().ToString("N") + ".txt");
+                    File.WriteAllText(marker, path);
+                    return ExtensionInstallResult.StagedForRestart;
+                }
+                catch
+                {
+                    return ExtensionInstallResult.Failed;
+                }
             }
         }
 
-        /// <summary>启动时删除标记为待卸载的扩展目录（须在插件加载前调用）。</summary>
+        /// <summary>启动时应用暂存的扩展更新（把 pending 下的目录搬进用户插件目录，须在插件加载前调用）。
+        /// 旧进程可能尚未释放 DLL 句柄，失败时短暂重试。</summary>
+        public static void ApplyPendingUpdates()
+        {
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    if (!Directory.Exists(PendingUpdatesDirectory)) return;
+
+                    foreach (var dir in Directory.GetDirectories(PendingUpdatesDirectory))
+                    {
+                        var name = Path.GetFileName(dir);
+                        var target = Path.Combine(ConfigStore.UserPluginsDirectory, name);
+                        if (Directory.Exists(target)) Directory.Delete(target, true);
+                        Directory.CreateDirectory(ConfigStore.UserPluginsDirectory);
+                        Directory.Move(dir, target);
+                        Log.Info($"已应用扩展更新: {name}");
+                    }
+                    Directory.Delete(PendingUpdatesDirectory, true);
+                    return;
+                }
+                catch (IOException)
+                {
+                    // 旧进程可能还持有 DLL 句柄，稍等重试
+                    Thread.Sleep(500);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("应用扩展更新失败: " + ex.Message);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>启动时删除标记为待卸载的扩展目录（须在插件加载前调用）。旧进程可能尚未释放句柄，失败时短暂重试。</summary>
         public static void ApplyPendingUninstalls()
         {
-            try
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
-                if (!Directory.Exists(markerRoot)) return;
-
-                foreach (var marker in Directory.GetFiles(markerRoot, "*.txt"))
+                try
                 {
-                    try
+                    var markerRoot = Path.Combine(ConfigStore.ConfigDirectory, "pending-uninstall");
+                    if (!Directory.Exists(markerRoot)) return;
+
+                    foreach (var marker in Directory.GetFiles(markerRoot, "*.txt"))
                     {
                         var target = File.ReadAllText(marker);
                         if (Directory.Exists(target)) Directory.Delete(target, true);
@@ -210,16 +239,17 @@ namespace UniversalConvert.App
                         File.Delete(marker);
                         Log.Info($"已应用扩展卸载: {target}");
                     }
-                    catch
-                    {
-                        // 单个失败不影响其它
-                    }
+                    Directory.Delete(markerRoot, true);
+                    return;
                 }
-                try { Directory.Delete(markerRoot, true); } catch { }
-            }
-            catch
-            {
-                // 忽略
+                catch (IOException)
+                {
+                    Thread.Sleep(500);
+                }
+                catch
+                {
+                    return;
+                }
             }
         }
     }

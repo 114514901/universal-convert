@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Config;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
@@ -59,12 +60,13 @@ namespace UniversalConvert.App
                 var dir = Path.GetDirectoryName(location);
                 if (string.IsNullOrEmpty(dir)) return ExtensionInstallResult.Failed;
 
-                // DLL 直接在用户插件根目录时只删该文件，否则删整个目录；被锁定则暂存待重启
+                // DLL 直接在用户插件根目录时只删该文件，否则删整个目录；被占用则暂存待重启
                 var path = string.Equals(dir, userDir, StringComparison.OrdinalIgnoreCase) ? location : dir;
                 return ExtensionCenter.DeleteOrStage(path);
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Error("卸载用户插件失败: " + ex.Message);
                 return ExtensionInstallResult.Failed;
             }
         }
