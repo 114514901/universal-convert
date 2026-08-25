@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.2] - 2026-08-25
+
+### 改进
+- 扩展检查更新：只检查用户扩展、并行比对；发现更新后弹窗确认是否立即更新
+- 扩展更新改为「暂存 + 重启后生效」（已加载插件 DLL 被进程锁定无法直接替换），启动时自动应用
+
 ## [2.0.2-dev.1] - 2026-08-25
 
 ### 新增
@@ -267,6 +273,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.2-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.2
 [2.0.2-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.1
 [2.0.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
