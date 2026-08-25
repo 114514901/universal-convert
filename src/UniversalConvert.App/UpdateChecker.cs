@@ -30,6 +30,9 @@ namespace UniversalConvert.App
         private const string ApiBase = "https://api.github.com/repos/114514901/universal-convert/releases";
         private const string AssetSuffix = "Setup.exe";
 
+        /// <summary>安装包资产名，与 CI 打包/Inno Setup 输出保持一致（packaging/UniversalConvert.iss）。</summary>
+        private const string AssetName = "UniversalConvert-Setup.exe";
+
         public static async Task<UpdateInfo> CheckAsync(string channel = "auto")
         {
             try
@@ -187,15 +190,24 @@ namespace UniversalConvert.App
         private static string FindDownloadUrl(JObject obj)
         {
             var assets = obj["assets"] as JArray;
-            if (assets == null) return null;
-
-            foreach (var asset in assets)
+            if (assets != null)
             {
-                var name = (string)asset["name"];
-                if (name != null && name.EndsWith(AssetSuffix, StringComparison.OrdinalIgnoreCase))
+                foreach (var asset in assets)
                 {
-                    return (string)asset["browser_download_url"];
+                    var name = (string)asset["name"];
+                    if (name != null && name.EndsWith(AssetSuffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return (string)asset["browser_download_url"];
+                    }
                 }
+            }
+
+            // 资产列表为空（release 刚创建、CI 上传尚未完成）时，按固定命名规则构造下载地址兜底，
+            // 否则会出现「发现新版本但下载更新按钮不出现」的竞态
+            var tag = (string)obj["tag_name"];
+            if (!string.IsNullOrEmpty(tag))
+            {
+                return "https://github.com/114514901/universal-convert/releases/download/" + tag + "/" + AssetName;
             }
             return null;
         }
