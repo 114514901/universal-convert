@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.1-dev.2] - 2026-08-24
+
+### 修复
+- 自定义参数保存后重新打开表单未回填（加载默认值）：现在会回填上次保存的参数并恢复预设选择
+
 ## [2.0.1-dev.1] - 2026-08-24
 
 ### 新增
@@ -311,6 +316,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.1-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.2
 [2.0.1-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.1
 [2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
 [2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8

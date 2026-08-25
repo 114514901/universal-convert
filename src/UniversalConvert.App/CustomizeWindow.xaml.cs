@@ -29,7 +29,8 @@ namespace UniversalConvert.App
         private bool _collectMode;
         private CustomizeResult _collected;
 
-        public CustomizeWindow(ConversionEngine engine, string inputPath, ConversionEntry entry)
+        public CustomizeWindow(ConversionEngine engine, string inputPath, ConversionEntry entry,
+            IDictionary<string, string> previousOptions = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
@@ -42,13 +43,21 @@ namespace UniversalConvert.App
 
             BuildPresetCombo();
             BuildOptionControls();
-            ApplyPresetValues(null);
+            if (previousOptions != null)
+            {
+                ApplySavedOptions(previousOptions);
+            }
+            else
+            {
+                ApplyPresetValues(null);
+            }
         }
 
-        /// <summary>弹出参数表单收集结果（不执行转换）；取消返回 null。</summary>
-        public static CustomizeResult Collect(Window owner, ConversionEntry entry, string inputPath)
+        /// <summary>弹出参数表单收集结果（不执行转换）；取消返回 null。previousOptions 为上次保存的参数，用于回填。</summary>
+        public static CustomizeResult Collect(Window owner, ConversionEntry entry, string inputPath,
+            IDictionary<string, string> previousOptions = null)
         {
-            var window = new CustomizeWindow(null, inputPath, entry) { Owner = owner };
+            var window = new CustomizeWindow(null, inputPath, entry, previousOptions) { Owner = owner };
             window._collectMode = true;
             window.ConvertButton.Content = Strings.Save;
             var ok = window.ShowDialog() == true;
@@ -208,6 +217,105 @@ namespace UniversalConvert.App
                 if (preset.Name == name) return preset;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 用上次保存的参数回填表单，并恢复预设选择（默认 / 命中命名预设 / 自定义）。
+        /// saved 是合并后的最终参数字典（空值已被剔除）：键存在 → 控件取该值；键不存在 → 空（等价「原始」）。
+        /// </summary>
+        private void ApplySavedOptions(IDictionary<string, string> saved)
+        {
+            _suppressPresetChanged = true;
+            _suppressOptionChanged = true;
+            try
+            {
+                foreach (var option in _entry.Options)
+                {
+                    string value;
+                    var hasValue = saved.TryGetValue(option.Key, out value);
+                    if (_setters.TryGetValue(option.Key, out var setter))
+                    {
+                        setter(hasValue ? value : string.Empty);
+                    }
+                }
+
+                // 恢复预设选择（抑制期内设置，避免 OnPresetChanged 用默认值覆盖回填值）
+                if (MatchesDefault(saved))
+                {
+                    PresetCombo.SelectedIndex = 0;
+                }
+                else
+                {
+                    int idx = FindMatchingPresetIndex(saved);
+                    PresetCombo.SelectedIndex = idx >= 0 ? idx + 1 : CustomIndex;
+                }
+            }
+            finally
+            {
+                _suppressPresetChanged = false;
+                _suppressOptionChanged = false;
+            }
+        }
+
+        /// <summary>保存的参数是否等于「默认（推荐）」语义：空 DefaultValue 的键应不存在，非空的应等于 DefaultValue。</summary>
+        private bool MatchesDefault(IDictionary<string, string> saved)
+        {
+            foreach (var option in _entry.Options)
+            {
+                var defaultValue = option.DefaultValue ?? string.Empty;
+                string savedValue;
+                var hasSaved = saved.TryGetValue(option.Key, out savedValue);
+
+                if (string.IsNullOrEmpty(defaultValue))
+                {
+                    if (hasSaved) return false;
+                }
+                else
+                {
+                    if (!hasSaved || !string.Equals(savedValue, defaultValue, StringComparison.Ordinal)) return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>保存的参数是否完全匹配某个命名预设（预设覆盖的键值一致、未覆盖的键保持默认语义）；不匹配返回 -1。</summary>
+        private int FindMatchingPresetIndex(IDictionary<string, string> saved)
+        {
+            for (int i = 0; i < _entry.Presets.Count; i++)
+            {
+                var preset = _entry.Presets[i];
+                bool match = true;
+
+                foreach (var kv in preset.Options)
+                {
+                    string savedValue;
+                    if (!saved.TryGetValue(kv.Key, out savedValue)
+                        || !string.Equals(savedValue, kv.Value, StringComparison.Ordinal))
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (!match) continue;
+
+                foreach (var option in _entry.Options)
+                {
+                    if (preset.Options.ContainsKey(option.Key)) continue;
+                    var defaultValue = option.DefaultValue ?? string.Empty;
+                    string savedValue;
+                    var hasSaved = saved.TryGetValue(option.Key, out savedValue);
+                    if (string.IsNullOrEmpty(defaultValue))
+                    {
+                        if (hasSaved) { match = false; break; }
+                    }
+                    else
+                    {
+                        if (!hasSaved || !string.Equals(savedValue, defaultValue, StringComparison.Ordinal)) { match = false; break; }
+                    }
+                }
+                if (match) return i;
+            }
+            return -1;
         }
 
         private IDictionary<string, string> BuildOptions()

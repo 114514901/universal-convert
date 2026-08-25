@@ -364,7 +364,7 @@ namespace UniversalConvert.App
                 return;
             }
 
-            var result = CustomizeWindow.Collect(this, entry, row.Path);
+            var result = CustomizeWindow.Collect(this, entry, row.Path, row.Options);
             if (result != null)
             {
                 row.Options = result.Options;
