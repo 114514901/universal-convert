@@ -2,107 +2,31 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
-## [2.0.1-dev.6] - 2026-08-25
-
-### 改进
-- 关于窗口「支持的格式」列表加卡片式边框，与主界面风格一致
-
-## [2.0.1-dev.5] - 2026-08-25
-
-### 修复
-- 音频播放完毕后拖动进度条：恢复播放但进度条不走、按钮不切回「暂停」——现在会同步播放状态与按钮
-
-## [2.0.1-dev.4] - 2026-08-24
+## [2.0.1] - 2026-08-25
 
 ### 新增
+- 全新现代 UI：引入 ModernWpf（Fluent 设计），主界面/设置/关于窗口卡片式重排，支持主题色个性化
+- 主界面文件列表三列（文件 / 转换参数 / 格式），支持每个文件单独自定义参数、右键菜单与快捷键
+- 主界面新增「输出位置」输入框（默认音乐文件夹），批量转换输出到指定目录
+- 看护进程（watchdog）：后台心跳 + IsHungAppWindow 双通道检测主程序卡死（约 15 秒阈值），命中后结束进程并弹出卡死报告；崩溃报告窗口新增「重启」按钮
+- 设置新增「更新」选项卡（检查更新 / 查看更新内容 / 下载更新）与「高级」选项卡（日志、崩溃转储、崩溃测试、测试卡死）
+- 关于窗口新增「支持的格式」列表：从格式注册表动态汇总，标注来源插件，内置与用户扩展自动收录
+- FFmpeg 插件新增 HEIC/HEIF 与 AVIF 图片格式支持（与 jpg/png/webp 等互转）
 - 处理线程数设置新增「自动」选项：按逻辑核心数 × 75%（四舍五入）计算，低于 4 核的设备用 1 线程
 - 音频预览支持 Opus 格式：系统解码失败时自动用随包 ffmpeg 转码播放
 
-## [2.0.1-dev.3] - 2026-08-24
-
-### 新增
-- 关于窗口新增「支持的格式」列表：从格式注册表动态汇总（输入+输出去重），标注来源插件，内置与用户扩展自动收录
-
-## [2.0.1-dev.2] - 2026-08-24
-
 ### 修复
-- 自定义参数保存后重新打开表单未回填（加载默认值）：现在会回填上次保存的参数并恢复预设选择
-
-## [2.0.1-dev.1] - 2026-08-24
-
-### 新增
-- FFmpeg 插件新增 HEIC/HEIF 与 AVIF 图片格式支持（与 jpg/png/webp 等互转）
-
-### 修复
-- mp4→gif 转换失败（音频流被错误映射进 GIF 导致 Encoder not found）：GIF 输出现在只取视频流
-- 自定义表单「默认」预设无视插件 DefaultValue：改为使用 DefaultValue（如 gif 帧率默认 10fps，与右键菜单一致）
-
-## [2.0.0-dev.9] - 2026-08-24
-
-### 修复
-- 设置「更新」手动检查到新版本后补上「查看更新内容」与「下载更新」按钮（此前只显示文本提示）
-
-## [2.0.0-dev.8] - 2026-08-24
-
-### 修复
-- 看护进程超时（卡死）报告在英文设置下仍显示系统语言：报告模式现在也应用用户选择的语言
-
-## [2.0.0-dev.7] - 2026-08-24
-
-### 修复
-- 自定义参数表单的参数名与「原始」选项本地化（插件元数据经 @资源键 + Strings.L 渲染，此前硬编码中文）
-
-## [2.0.0-dev.6] - 2026-08-24
-
-### 修复
-- 崩溃报告窗口摘要文本与卡死报告标签本地化（此前硬编码中文）
-
-## [2.0.0-dev.5] - 2026-08-24
-
-### 新增
-- 看护进程（watchdog）：后台心跳 + IsHungAppWindow 双通道检测主程序卡死（阈值约 15 秒），命中后结束进程并弹出卡死报告
-- 崩溃报告窗口新增「重启」按钮：任何崩溃/卡死都可由用户手动重启
-- 设置「高级」选项卡新增「测试卡死」按钮（真实阻塞 UI 线程用于测试看护功能）
-
-## [2.0.0-dev.4] - 2026-08-24
-
-### 修复
-- 关于窗口高度过小、底部「关闭」按钮被裁切：调大窗口高度
-
-## [2.0.0-dev.3] - 2026-08-24
+- mp4→gif 转换失败（音频流被错误映射进 GIF）：GIF 输出现在只取视频流
+- 自定义表单「默认」预设改用插件声明的 DefaultValue（如 gif 帧率默认 10fps），与右键菜单行为一致
+- 自定义参数保存后重新打开表单回填上次保存的参数并恢复预设选择
+- 自定义参数表单的参数名与「原始」选项本地化（@资源键 + Strings.L）
+- 崩溃报告窗口摘要、卡死报告标签本地化；报告模式遵循用户选择的语言
+- 设置「更新」手动检查到新版本后显示「查看更新内容」与「下载更新」按钮
+- 音频播放完毕后再拖动进度条：同步播放状态与按钮（进度条恢复走动）
+- 启动不再被更新检查卡住：改为后台异步检查，网络/代理问题不影响界面加载
 
 ### 变更
-- 移除亚克力背景功能（设置项、AcrylicHelper 与本地化文案）
-- 移除自定义标题栏（最小化/最大化/关闭按钮与拖动），窗口恢复系统原生边框与标题栏；「设置/插件/关于」改为顶部工具栏
-
-## [2.0.0-dev.2] - 2026-08-24
-
-### 修复
-- 启动不再被更新检查卡住：改为后台异步检查，网络/代理问题不影响界面加载
-- 无边框窗口改用自定义标题栏（含最小化/最大化/关闭按钮），修复 WindowChrome 导致按钮被挡、窗口直角的问题
-- 亚克力背景在部分 Win11 上失效：加 BLURBEHIND 降级兜底
-
-### 新增
-- 设置「更新」选项卡新增「检查更新」按钮，显示检查状态与结果
-
-## [2.0.0-dev.1] - 2026-08-24
-
-### 新增
-- 全新现代 UI：引入 ModernWpf（Fluent 设计），主界面/设置/关于窗口卡片式重排
-- 个性化设置：主题色（预设色）、亚克力背景（含不透明度调节）
-
-## [1.9.0-dev.2] - 2026-08-24
-
-### 修复
-- 视频编码（videoCodec）补上「原始」选项并默认值改为「原始」，修复上一版「默认→空」导致视频编码为空、无法转换的问题
-
-## [1.9.0-dev.1] - 2026-08-24
-
-### 新增
-- 主界面文件列表改为三列（文件 / 转换参数 / 格式），支持每个文件单独自定义参数
-- 文件列表右键菜单（自定义 / 预览 / 移除）与快捷键（Ctrl+A 全选、Del 删除）
-- 自定义页面：预设「默认」等价于全部参数「原始」（不重编码），手改参数自动切「自定义」
-- 主界面新增「输出位置」输入框（默认音乐文件夹），批量转换输出到指定目录；右键菜单仍保持源目录输出
+- 视频编码（videoCodec）默认值为「原始」（不重编码）
 
 ## [1.8.2] - 2026-08-24
 
@@ -337,23 +261,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
-[2.0.1-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.6
-[2.0.1-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.5
-[2.0.1-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.4
-[2.0.1-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.3
-[2.0.1-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.2
-[2.0.1-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.1
-[2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
-[2.0.0-dev.8]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.8
-[2.0.0-dev.7]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.7
-[2.0.0-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.6
-[2.0.0-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.5
-[2.0.0-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.4
-[2.0.0-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.3
-[2.0.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.2
-[2.0.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.1
-[1.9.0-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.2
-[1.9.0-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v1.9.0-dev.1
+[2.0.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
 [1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1
 [1.8.0]: https://github.com/114514901/universal-convert/releases/tag/v1.8.0
