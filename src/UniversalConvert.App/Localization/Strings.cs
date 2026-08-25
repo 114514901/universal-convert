@@ -29,6 +29,7 @@ namespace UniversalConvert.App.Localization
         public static string ExtensionUpdateFormat => Get("ExtensionUpdateFormat");
         public static string CheckUpdatePlugin => Get("CheckUpdatePlugin");
         public static string ExtensionUpToDate => Get("ExtensionUpToDate");
+        public static string UpdateSkipped => Get("UpdateSkipped");
         public static string ExtensionUpdatesPrompt => Get("ExtensionUpdatesPrompt");
         public static string SingleExtensionUpdatePrompt => Get("SingleExtensionUpdatePrompt");
         public static string UpdatedRestart => Get("UpdatedRestart");

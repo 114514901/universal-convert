@@ -60,6 +60,9 @@
   <data name="ExtensionUpToDate" xml:space="preserve">
     <value>{0} 已是最新版本</value>
   </data>
+  <data name="UpdateSkipped" xml:space="preserve">
+    <value>已跳过更新（可在列表中单独更新）</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>发现 {0} 个扩展有新版本，是否立即更新？</value>
   </data>

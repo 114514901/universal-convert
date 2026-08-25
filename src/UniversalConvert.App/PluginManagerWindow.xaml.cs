@@ -139,6 +139,11 @@ namespace UniversalConvert.App
                     {
                         await UpdateAllAsync(userRows.Where(r => r.UpdateText != null).ToList(), byId);
                     }
+                    else
+                    {
+                        // 选「否」：保留行内「发现新版本」提示，状态栏不再停留「正在检查」
+                        UpdateStatusText.Text = Strings.UpdateSkipped;
+                    }
                 }
                 else
                 {
@@ -217,7 +222,11 @@ namespace UniversalConvert.App
                 var confirm = MessageBox.Show(
                     string.Format(Strings.SingleExtensionUpdatePrompt, ext.Version),
                     "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (confirm != MessageBoxResult.Yes) return;
+                if (confirm != MessageBoxResult.Yes)
+                {
+                    UpdateStatusText.Text = Strings.UpdateSkipped;
+                    return;
+                }
 
                 var result = await ExtensionCenter.InstallAsync(ext, null, CancellationToken.None);
                 if (result == ExtensionInstallResult.Failed)

@@ -60,6 +60,9 @@
   <data name="ExtensionUpToDate" xml:space="preserve">
     <value>{0} is up to date</value>
   </data>
+  <data name="UpdateSkipped" xml:space="preserve">
+    <value>Update skipped (you can update individually from the list)</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>{0} extensions have updates. Update now?</value>
   </data>
