@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.1] - 2026-08-25
+
+### 新增
+- 插件管理器：可卸载非内置（用户安装）的扩展，删除用户插件目录后重启生效
+- 插件管理器：新增「检查扩展更新」，批量比对扩展仓库，列出所有可更新扩展
+
 ## [2.0.1] - 2026-08-25
 
 ### 新增
@@ -261,6 +267,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.2-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.1
 [2.0.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1
 [1.8.2]: https://github.com/114514901/universal-convert/releases/tag/v1.8.2
 [1.8.1]: https://github.com/114514901/universal-convert/releases/tag/v1.8.1

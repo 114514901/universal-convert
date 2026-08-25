@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using UniversalConvert.Core;
+using UniversalConvert.Core.Config;
 using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
@@ -21,6 +24,58 @@ namespace UniversalConvert.App
     /// <summary>根据插件的版本约束（Min/MaxAppVersion）判断与当前应用的兼容性。</summary>
     public static class PluginManager
     {
+        /// <summary>插件 DLL 是否位于用户插件目录（%AppData%\UniversalConvert\plugins，即非内置、在线安装的扩展）。</summary>
+        public static bool IsUserPlugin(IConverterPlugin plugin)
+        {
+            try
+            {
+                var location = plugin.GetType().Assembly.Location;
+                if (string.IsNullOrEmpty(location)) return false;
+                var userDir = ConfigStore.UserPluginsDirectory;
+                return !string.IsNullOrEmpty(userDir)
+                    && location.StartsWith(userDir, StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 卸载用户插件：删除其所在目录（若 DLL 直接在用户插件根目录则只删文件）。
+        /// 仅允许操作用户插件目录内的内容；成功返回 true。
+        /// </summary>
+        public static bool UninstallUserPlugin(IConverterPlugin plugin)
+        {
+            try
+            {
+                var location = plugin.GetType().Assembly.Location;
+                if (string.IsNullOrEmpty(location)) return false;
+
+                var userDir = ConfigStore.UserPluginsDirectory;
+                if (string.IsNullOrEmpty(userDir)) return false;
+                if (!location.StartsWith(userDir, StringComparison.OrdinalIgnoreCase)) return false;
+
+                var dir = Path.GetDirectoryName(location);
+                if (string.IsNullOrEmpty(dir)) return false;
+
+                if (string.Equals(dir, userDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    // DLL 直接在用户插件根目录：只删该文件
+                    if (File.Exists(location)) File.Delete(location);
+                }
+                else
+                {
+                    if (Directory.Exists(dir)) Directory.Delete(dir, true);
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>根据 min/max 应用版本判断与当前应用的兼容性（供已加载插件与扩展中心共用）。</summary>
         public static PluginCompatibility CheckCompatibility(string minAppVersion, string maxAppVersion)
         {

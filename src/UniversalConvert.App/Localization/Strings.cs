@@ -19,6 +19,17 @@ namespace UniversalConvert.App.Localization
         public static string WorkerThreadsAuto => Get("WorkerThreadsAuto");
         public static string SupportedFormatsTitle => Get("SupportedFormatsTitle");
         public static string SourceColumn => Get("SourceColumn");
+        public static string BuiltIn => Get("BuiltIn");
+        public static string Extension => Get("Extension");
+        public static string Uninstall => Get("Uninstall");
+        public static string CheckUpdates => Get("CheckUpdates");
+        public static string UninstalledRestart => Get("UninstalledRestart");
+        public static string CheckingExtensionUpdates => Get("CheckingExtensionUpdates");
+        public static string NoExtensionUpdates => Get("NoExtensionUpdates");
+        public static string ExtensionUpdatesFound => Get("ExtensionUpdatesFound");
+        public static string ExtensionUpdateFormat => Get("ExtensionUpdateFormat");
+        public static string CheckUpdatePlugin => Get("CheckUpdatePlugin");
+        public static string ExtensionUpToDate => Get("ExtensionUpToDate");
         public static string Customize => Get("Customize");
         public static string Convert => Get("Convert");
         public static string SelectFileDialogTitle => Get("SelectFileDialogTitle");

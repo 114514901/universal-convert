@@ -10,31 +10,48 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="{x:Static loc:Strings.Plugins}" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-        <ListView x:Name="PluginList" Grid.Row="1">
+        <ListView x:Name="PluginList" Grid.Row="1" SelectionChanged="OnSelectionChanged"
+                  MouseRightButtonUp="OnListMouseRightButtonUp">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="ContextUninstall" Header="{x:Static loc:Strings.Uninstall}" Click="OnUninstall"/>
+                    <MenuItem x:Name="ContextCheckUpdate" Header="{x:Static loc:Strings.CheckUpdatePlugin}" Click="OnCheckUpdateSingle"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="{x:Static loc:Strings.PluginNameColumn}" Width="220"
+                    <GridViewColumn Header="{x:Static loc:Strings.PluginNameColumn}" Width="200"
                                     DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="{x:Static loc:Strings.VersionColumn}" Width="90"
+                    <GridViewColumn Header="{x:Static loc:Strings.VersionColumn}" Width="70"
                                     DisplayMemberBinding="{Binding Version}"/>
-                    <GridViewColumn Header="{x:Static loc:Strings.StatusColumn}" Width="260"
+                    <GridViewColumn Header="{x:Static loc:Strings.SourceColumn}" Width="60"
+                                    DisplayMemberBinding="{Binding SourceText}"/>
+                    <GridViewColumn Header="{x:Static loc:Strings.StatusColumn}" Width="240"
                                     DisplayMemberBinding="{Binding Status}"/>
                 </GridView>
             </ListView.View>
         </ListView>
 
-        <Expander x:Name="ErrorExpander" Grid.Row="2" Margin="0,8,0,0"
+        <TextBlock x:Name="UpdateStatusText" Grid.Row="2" Margin="0,8,0,0" TextWrapping="Wrap"
+                   Foreground="#666666"/>
+
+        <Expander x:Name="ErrorExpander" Grid.Row="3" Margin="0,8,0,0"
                   Header="{x:Static loc:Strings.ErrorsLabel}" Visibility="Collapsed">
             <TextBox x:Name="ErrorBox" IsReadOnly="True" TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto" Height="90"
                      FontFamily="Consolas" FontSize="12"/>
         </Expander>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="CheckUpdatesButton" Content="{x:Static loc:Strings.CheckUpdates}"
+                    Padding="14,6" Click="OnCheckUpdates" Margin="0,0,8,0"/>
+            <Button x:Name="UninstallButton" Content="{x:Static loc:Strings.Uninstall}"
+                    Padding="14,6" Click="OnUninstall" IsEnabled="False" Margin="0,0,8,0"/>
             <Button Content="{x:Static loc:Strings.ExtensionsCenter}" Padding="14,6" Click="OnOpenExtensions" Margin="0,0,8,0"/>
             <Button Content="{x:Static loc:Strings.Close}" Padding="16,6" Click="OnClose"/>
         </StackPanel>

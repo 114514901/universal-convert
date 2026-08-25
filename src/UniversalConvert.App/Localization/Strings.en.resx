@@ -30,6 +30,39 @@
   <data name="SourceColumn" xml:space="preserve">
     <value>Source</value>
   </data>
+  <data name="BuiltIn" xml:space="preserve">
+    <value>Built-in</value>
+  </data>
+  <data name="Extension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="Uninstall" xml:space="preserve">
+    <value>Uninstall</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Check extension updates</value>
+  </data>
+  <data name="UninstalledRestart" xml:space="preserve">
+    <value>Uninstalled "{0}", takes effect after restart</value>
+  </data>
+  <data name="CheckingExtensionUpdates" xml:space="preserve">
+    <value>Checking for extension updates...</value>
+  </data>
+  <data name="NoExtensionUpdates" xml:space="preserve">
+    <value>All extensions are up to date</value>
+  </data>
+  <data name="ExtensionUpdatesFound" xml:space="preserve">
+    <value>{0} extensions have updates (see list)</value>
+  </data>
+  <data name="ExtensionUpdateFormat" xml:space="preserve">
+    <value>New version {0} available</value>
+  </data>
+  <data name="CheckUpdatePlugin" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="ExtensionUpToDate" xml:space="preserve">
+    <value>{0} is up to date</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>
