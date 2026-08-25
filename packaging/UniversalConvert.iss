@@ -28,7 +28,9 @@ AppId=UniversalConvert
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+; 默认装到用户目录（无权限保护），避免 shell 扩展从 Program Files 加载的已知权限/信任问题；
+; 仍支持用户自定义路径（如 Program Files），但右键菜单在受保护目录下可能无法加载。
+DefaultDirName={localappdata}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=..\output
@@ -93,7 +95,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 ; 文件复制完后，调用我们的注册器写 HKLM 右键菜单（继承安装包的管理员权限）
 Filename: "{app}\UniversalConvert.Installer.exe"; Parameters: "install"; \
-    Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"; Tasks: contextmenu
+    Flags: runhidden; StatusMsg: "{cm:RegisteringContextMenu}"; Tasks: contextmenu; AfterInstall: RefreshShell
 ; 手动安装：完成页勾选「立即运行」（postinstall + skipifsilent 使静默安装时不显示/不执行）
 Filename: "{app}\UniversalConvert.App.exe"; Description: "{cm:RunAfterInstall}"; \
     Flags: nowait postinstall skipifsilent; Tasks: runapp
@@ -138,6 +140,17 @@ begin
     Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     ExplorerKilled := True;
   end;
+end;
+
+procedure RefreshShell();
+var
+  ResultCode: Integer;
+begin
+  // 右键菜单注册完成后调用：若 explorer 还活着（文件相同被 Inno 跳过拷贝时 KillExplorer 不会触发），
+  // 强制结束它并置标志，由 ssPostInstall 的 RestartExplorer 统一重启，确保菜单立即生效。
+  if ExplorerKilled then Exit;
+  Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  ExplorerKilled := True;
 end;
 
 procedure Sleep(dwMilliseconds: LongWord);

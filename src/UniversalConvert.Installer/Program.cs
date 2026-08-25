@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Principal;
+using Microsoft.Win32;
 using SharpShell.Helpers;
 using SharpShell.ServerRegistration;
 using UniversalConvert.ContextMenu;
@@ -17,6 +18,12 @@ namespace UniversalConvert.Installer
     internal static class Program
     {
         private static readonly string LogPath = Path.Combine(ConfigStore.ConfigDirectory, "install.log");
+
+        /// <summary>主程序集固定 AssemblyVersion（与 Directory.Build.props 保持一致）。</summary>
+        private const string CurrentAssemblyVersion = "1.0.0.0";
+
+        private static readonly string ClsidRoot =
+            @"Software\Classes\CLSID\{C1000000-0000-0000-0000-000000000001}";
 
         private static int Main(string[] args)
         {
@@ -45,6 +52,10 @@ namespace UniversalConvert.Installer
             try
             {
                 Log("=== 开始注册右键菜单 ===");
+
+                // 0. 清理历史版本注册残留：geek/手动卸载常留 InprocServer32\<旧AssemblyVersion> 子键，
+                //    其 CodeBase 指向早已不存在的旧安装路径，可能导致 explorer 加载到错误程序集而菜单失效。
+                CleanupStaleClsidVersions();
 
                 // 1. 写入安装目录，供右键菜单/主程序定位插件
                 var config = new ConfigStore().Load();
@@ -75,6 +86,36 @@ namespace UniversalConvert.Installer
                 Log("注册失败: " + ex);
                 Console.Error.WriteLine("注册失败：" + ex.Message + "（详见 " + LogPath + "）");
                 return 1;
+            }
+        }
+
+        /// <summary>清理 CLSID\InprocServer32 下非当前程序集版本的历史子键（保留当前版本）。</summary>
+        private static void CleanupStaleClsidVersions()
+        {
+            try
+            {
+                var inprocPath = ClsidRoot + @"\InprocServer32";
+                using (var inproc = Registry.LocalMachine.OpenSubKey(inprocPath, writable: true))
+                {
+                    if (inproc == null) return;
+                    foreach (var name in inproc.GetSubKeyNames())
+                    {
+                        if (string.Equals(name, CurrentAssemblyVersion, StringComparison.OrdinalIgnoreCase)) continue;
+                        try
+                        {
+                            inproc.DeleteSubKeyTree(name);
+                            Log("已清理历史版本注册残留: InprocServer32\\" + name);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log("清理残留 " + name + " 失败: " + ex.Message);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("清理历史版本注册残留失败: " + ex.Message);
             }
         }
 

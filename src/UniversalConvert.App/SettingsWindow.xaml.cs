@@ -283,7 +283,9 @@ namespace UniversalConvert.App
             var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
             var psi = new System.Diagnostics.ProcessStartInfo(installerPath)
             {
-                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp /DIR=\"" + installDir + "\"",
+                // 自动更新必须保持右键菜单：/MERGETASKS 额外勾选 contextmenu 强制注册，
+                // 避免受安装器任务「记忆状态」（用户曾在手动安装中取消过勾选）影响而静默丢失右键菜单
+                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp,contextmenu /DIR=\"" + installDir + "\"",
                 UseShellExecute = true,
                 Verb = "runas"
             };
