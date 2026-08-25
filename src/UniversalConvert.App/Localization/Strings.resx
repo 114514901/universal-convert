@@ -24,6 +24,12 @@
   <data name="OutputFormats" xml:space="preserve">
     <value>可转换的目标格式</value>
   </data>
+  <data name="SupportedFormatsTitle" xml:space="preserve">
+    <value>支持的格式</value>
+  </data>
+  <data name="SourceColumn" xml:space="preserve">
+    <value>来源</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>自定义...</value>
   </data>

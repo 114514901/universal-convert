@@ -24,6 +24,12 @@
   <data name="OutputFormats" xml:space="preserve">
     <value>Available output formats</value>
   </data>
+  <data name="SupportedFormatsTitle" xml:space="preserve">
+    <value>Supported formats</value>
+  </data>
+  <data name="SourceColumn" xml:space="preserve">
+    <value>Source</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>

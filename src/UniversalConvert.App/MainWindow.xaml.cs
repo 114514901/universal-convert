@@ -79,7 +79,7 @@ namespace UniversalConvert.App
 
         private void OnOpenAbout(object sender, RoutedEventArgs e)
         {
-            var window = new AboutWindow { Owner = this };
+            var window = new AboutWindow(_host) { Owner = this };
             window.ShowDialog();
         }
 

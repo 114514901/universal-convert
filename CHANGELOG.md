@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.1-dev.3] - 2026-08-24
+
+### 新增
+- 关于窗口新增「支持的格式」列表：从格式注册表动态汇总（输入+输出去重），标注来源插件，内置与用户扩展自动收录
+
 ## [2.0.1-dev.2] - 2026-08-24
 
 ### 修复
@@ -316,6 +321,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.1-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.3
 [2.0.1-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.2
 [2.0.1-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.1
 [2.0.0-dev.9]: https://github.com/114514901/universal-convert/releases/tag/v2.0.0-dev.9
