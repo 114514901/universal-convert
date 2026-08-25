@@ -20,6 +20,7 @@ namespace UniversalConvert.App
     {
         private CoreHost _host;
         private SettingsManager _settingsManager;
+        private EventWaitHandle _exitSignal;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -244,9 +245,27 @@ namespace UniversalConvert.App
 
                 var appPath = System.Reflection.Assembly.GetEntryAssembly().Location;
                 var logsDir = Path.Combine(ConfigStore.ConfigDirectory, "logs");
+                var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+
+                // 正常退出信号：进程退出前 Set，看护进程收到后立即退出（不再靠轮询发现，最多延迟 3 秒）
+                try
+                {
+                    _exitSignal = new EventWaitHandle(false, EventResetMode.AutoReset, "UniversalConvert.Exit." + pid);
+                    AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+                    {
+                        try { if (_exitSignal != null) _exitSignal.Set(); } catch { }
+                    };
+                    Log.Info("已创建看护退出信号: UniversalConvert.Exit." + pid);
+                }
+                catch (Exception ex)
+                {
+                    _exitSignal = null;
+                    Log.Warn("创建看护退出信号失败，退回轮询检测: " + ex.Message);
+                }
+
                 var args = string.Format(
                     "--pid {0} --heartbeat \"{1}\" --app \"{2}\" --logs \"{3}\"",
-                    System.Diagnostics.Process.GetCurrentProcess().Id,
+                    pid,
                     heartbeatPath,
                     appPath,
                     logsDir);

@@ -19,6 +19,9 @@ namespace UniversalConvert.Watchdog
         private const long HangThresholdTicks = 15L * TimeSpan.TicksPerSecond; // 15 秒
         private const int PollIntervalMs = 3000;
 
+        /// <summary>主程序正常退出信号的事件名前缀（完整名：UniversalConvert.Exit.{pid}）。</summary>
+        private const string ExitSignalPrefix = "UniversalConvert.Exit.";
+
         [DllImport("user32.dll")]
         private static extern bool IsHungAppWindow(IntPtr hWnd);
 
@@ -80,12 +83,25 @@ namespace UniversalConvert.Watchdog
             long lastBeat = DateTime.UtcNow.Ticks;
             DateTime? hungSince = null;
 
+            // 主程序正常退出信号（命名事件，主程序退出前 Set）。拿不到则退回轮询 HasExited。
+            EventWaitHandle exitSignal = null;
+            try
+            {
+                exitSignal = EventWaitHandle.OpenExisting(ExitSignalPrefix + target.Id);
+                Log("已接入退出信号: " + ExitSignalPrefix + target.Id);
+            }
+            catch
+            {
+                Log("退出信号不可用，退回轮询检测");
+            }
+
             while (true)
             {
                 try
                 {
                     if (target.HasExited)
                     {
+                        Log("主程序已退出");
                         return; // 主程序正常/异常退出；崩溃报告由主程序进程内处理
                     }
 
@@ -122,7 +138,19 @@ namespace UniversalConvert.Watchdog
                     // 进程可能已退出，下一轮 HasExited 会捕获
                 }
 
-                Thread.Sleep(PollIntervalMs);
+                // 等待退出信号（主程序正常退出时立即返回），否则按轮询间隔继续
+                if (exitSignal != null)
+                {
+                    if (exitSignal.WaitOne(PollIntervalMs))
+                    {
+                        Log("收到主程序正常退出信号");
+                        return;
+                    }
+                }
+                else
+                {
+                    Thread.Sleep(PollIntervalMs);
+                }
             }
         }
 
