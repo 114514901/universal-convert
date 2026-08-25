@@ -465,6 +465,9 @@
   <data name="Install" xml:space="preserve">
     <value>Install</value>
   </data>
+  <data name="InstallUpdate" xml:space="preserve">
+    <value>Install/Update</value>
+  </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>
   </data>

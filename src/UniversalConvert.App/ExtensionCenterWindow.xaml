@@ -15,7 +15,8 @@
 
         <TextBlock x:Name="DescText" Grid.Row="0" TextWrapping="Wrap" Foreground="#666666" Margin="0,0,0,8"/>
 
-        <ListView x:Name="ExtensionList" Grid.Row="1" SelectionChanged="OnSelectionChanged">
+        <ListView x:Name="ExtensionList" Grid.Row="1" SelectionChanged="OnSelectionChanged"
+                  SelectionMode="Extended">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="{x:Static loc:Strings.PluginNameColumn}" Width="160"

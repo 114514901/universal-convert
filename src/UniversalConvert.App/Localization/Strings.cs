@@ -149,6 +149,7 @@ namespace UniversalConvert.App.Localization
         public static string ExtensionsCenter => Get("ExtensionsCenter");
         public static string Refresh => Get("Refresh");
         public static string Install => Get("Install");
+        public static string InstallUpdate => Get("InstallUpdate");
         public static string Update => Get("Update");
         public static string Uninstall => Get("Uninstall");
         public static string InstalledVersionColumn => Get("InstalledVersionColumn");

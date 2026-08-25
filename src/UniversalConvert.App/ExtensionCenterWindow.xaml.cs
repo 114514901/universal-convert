@@ -93,47 +93,56 @@ namespace UniversalConvert.App
 
         private void OnSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            var rows = ExtensionList.SelectedItems.Cast<ExtensionRow>().ToList();
+            DescText.Text = rows.Count > 0 ? rows[0].Info.Description : string.Empty;
+
+            // 卸载仍针对当前选中行（SelectedItem）
             var row = ExtensionList.SelectedItem as ExtensionRow;
-            DescText.Text = row?.Info?.Description ?? string.Empty;
-
-            if (row == null)
-            {
-                InstallButton.IsEnabled = false;
-                UninstallButton.IsEnabled = false;
-                return;
-            }
-
-            var installedVersion = ExtensionCenter.GetInstalledVersion(row.Info);
+            var installedVersion = row != null ? ExtensionCenter.GetInstalledVersion(row.Info) : null;
             UninstallButton.IsEnabled = installedVersion != null;
 
-            if (installedVersion == null)
+            // 安装/更新：多选时统计所有可操作的项，按状态显示按钮文字
+            var actionable = rows.Where(CanInstallOrUpdate).ToList();
+            InstallButton.IsEnabled = actionable.Count > 0;
+            if (actionable.Count == 0)
             {
-                InstallButton.IsEnabled = true;
+                InstallButton.Content = Strings.Install;
+            }
+            else if (actionable.All(r => ExtensionCenter.GetInstalledVersion(r.Info) != null))
+            {
+                InstallButton.Content = Strings.Update;
+            }
+            else if (actionable.All(r => ExtensionCenter.GetInstalledVersion(r.Info) == null))
+            {
                 InstallButton.Content = Strings.Install;
             }
             else
             {
-                var newer = SemVersion.Parse(row.Info.Version)?.CompareTo(SemVersion.Parse(installedVersion)) > 0;
-                if (newer == true)
-                {
-                    InstallButton.IsEnabled = true;
-                    InstallButton.Content = Strings.Update;
-                }
-                else
-                {
-                    InstallButton.IsEnabled = false;
-                    InstallButton.Content = Strings.Install;
-                }
+                InstallButton.Content = Strings.InstallUpdate;
             }
+        }
+
+        /// <summary>该扩展当前可安装（未安装）或可更新（有新版本）。</summary>
+        private static bool CanInstallOrUpdate(ExtensionRow row)
+        {
+            var installed = ExtensionCenter.GetInstalledVersion(row.Info);
+            if (installed == null) return true;
+            var newer = SemVersion.Parse(row.Info.Version)?.CompareTo(SemVersion.Parse(installed)) > 0;
+            return newer == true;
         }
 
         private async void OnInstall(object sender, RoutedEventArgs e)
         {
-            var row = ExtensionList.SelectedItem as ExtensionRow;
-            if (row == null) return;
+            // 多选批量安装/更新：复用进度列表弹窗（并行下载）
+            var rows = ExtensionList.SelectedItems.Cast<ExtensionRow>()
+                .Where(CanInstallOrUpdate)
+                .ToList();
+            if (rows.Count == 0) return;
 
-            // 安装/更新统一走进度弹窗（单行列表，风格与插件管理器更新一致）
-            var window = new ExtensionUpdateWindow(Strings.ExtensionInstallingTitle, new[] { row.Info }) { Owner = this };
+            var allUpdates = rows.All(r => ExtensionCenter.GetInstalledVersion(r.Info) != null);
+            var title = allUpdates ? Strings.ExtensionUpdatingTitle : Strings.ExtensionInstallingTitle;
+
+            var window = new ExtensionUpdateWindow(title, rows.Select(r => r.Info)) { Owner = this };
             window.ShowDialog();
             StatusText.Text = window.Summary;
             await RefreshAsync();
