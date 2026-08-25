@@ -57,6 +57,12 @@ namespace UniversalConvert.Core.Process
             {
                 psi.WorkingDirectory = workingDirectory;
             }
+            else
+            {
+                // 默认用系统临时目录作为工作目录：主程序可能从不可写目录（如 Program Files）启动，
+                // 外部工具（ffmpeg/markitdown 等）会在当前工作目录创建临时文件，继承只读 CWD 会直接失败
+                try { psi.WorkingDirectory = Path.GetTempPath(); } catch { }
+            }
 
             using (var process = new System.Diagnostics.Process { StartInfo = psi, EnableRaisingEvents = true })
             {
