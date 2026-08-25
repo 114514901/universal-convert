@@ -213,7 +213,7 @@ namespace UniversalConvert.App
         }
 
         private static readonly string[] PlayableAudioExtensions =
-            { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma" };
+            { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma", ".opus" };
 
         private static bool IsPlayableAudio(string path)
         {
@@ -402,11 +402,7 @@ namespace UniversalConvert.App
             }
 
             var targetExt = _commonTargets[OutputCombo.SelectedIndex].OutputExtension;
-            int workerThreads;
-            if (!int.TryParse(_settingsManager.Get("workerThreads"), out workerThreads))
-            {
-                workerThreads = 2;
-            }
+            var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
 
             var perFileOptions = new Dictionary<string, IDictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
             foreach (var row in _files)
@@ -418,6 +414,19 @@ namespace UniversalConvert.App
             var outputDir = OutputDirText.Text?.Trim();
             var window = new BatchConvertWindow(_host, files, targetExt, workerThreads, perFileOptions, outputDir) { Owner = this };
             window.ShowDialog();
+        }
+
+        /// <summary>解析处理线程数设置；"auto" 按逻辑核心数 × 75%（四舍五入），低于 4 核用 1。</summary>
+        private static int ResolveWorkerThreads(string setting)
+        {
+            if (string.Equals(setting, "auto", StringComparison.OrdinalIgnoreCase))
+            {
+                int cores = Environment.ProcessorCount;
+                if (cores < 4) return 1;
+                return Math.Max(1, (int)Math.Round(cores * 0.75, MidpointRounding.AwayFromZero));
+            }
+            int parsed;
+            return int.TryParse(setting, out parsed) ? Math.Max(1, parsed) : 2;
         }
 
         private static bool IsAdministrator()

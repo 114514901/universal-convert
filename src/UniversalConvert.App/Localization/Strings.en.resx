@@ -304,7 +304,10 @@
     <value>Processing threads</value>
   </data>
   <data name="SettingWorkerThreadsDescription" xml:space="preserve">
-    <value>Files converted in parallel</value>
+    <value>Files converted in parallel (Auto = 75% of logical cores, 1 on systems with fewer than 4 cores)</value>
+  </data>
+  <data name="WorkerThreadsAuto" xml:space="preserve">
+    <value>Auto</value>
   </data>
   <data name="AudioPlayer" xml:space="preserve">
     <value>Audio playback</value>

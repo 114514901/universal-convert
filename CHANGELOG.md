@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.1-dev.4] - 2026-08-24
+
+### 新增
+- 处理线程数设置新增「自动」选项：按逻辑核心数 × 75%（四舍五入）计算，低于 4 核的设备用 1 线程
+- 音频预览支持 Opus 格式：系统解码失败时自动用随包 ffmpeg 转码播放
+
 ## [2.0.1-dev.3] - 2026-08-24
 
 ### 新增
@@ -321,6 +327,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.1-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.4
 [2.0.1-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.3
 [2.0.1-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.2
 [2.0.1-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.1

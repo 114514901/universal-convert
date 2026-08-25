@@ -304,7 +304,10 @@
     <value>处理线程数</value>
   </data>
   <data name="SettingWorkerThreadsDescription" xml:space="preserve">
-    <value>同时转换的文件数</value>
+    <value>同时转换的文件数（自动 = 逻辑核心数 × 75%，低于 4 核用 1）</value>
+  </data>
+  <data name="WorkerThreadsAuto" xml:space="preserve">
+    <value>自动</value>
   </data>
   <data name="AudioPlayer" xml:space="preserve">
     <value>音频播放</value>

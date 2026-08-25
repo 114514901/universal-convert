@@ -16,6 +16,7 @@ namespace UniversalConvert.App.Localization
         public static string NoFileSelected => Get("NoFileSelected");
         public static string SelectFile => Get("SelectFile");
         public static string OutputFormats => Get("OutputFormats");
+        public static string WorkerThreadsAuto => Get("WorkerThreadsAuto");
         public static string SupportedFormatsTitle => Get("SupportedFormatsTitle");
         public static string SourceColumn => Get("SourceColumn");
         public static string Customize => Get("Customize");

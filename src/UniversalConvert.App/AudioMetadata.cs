@@ -76,6 +76,21 @@ namespace UniversalConvert.App
             return null;
         }
 
+        public static string FindFfmpeg()
+        {
+            var local = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "ffmpeg.exe");
+            if (File.Exists(local)) return local;
+
+            var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            foreach (var dir in pathEnv.Split(';'))
+            {
+                if (string.IsNullOrEmpty(dir)) continue;
+                var candidate = Path.Combine(dir.Trim(), "ffmpeg.exe");
+                if (File.Exists(candidate)) return candidate;
+            }
+            return null;
+        }
+
         public static AudioStreamInfo ReadStreamInfo(string ffprobe, string input)
         {
             var json = Run(ffprobe,

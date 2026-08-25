@@ -42,7 +42,8 @@ namespace UniversalConvert.App
                     new OptionChoice { Value = "1", Label = "1" },
                     new OptionChoice { Value = "2", Label = "2" },
                     new OptionChoice { Value = "4", Label = "4" },
-                    new OptionChoice { Value = "8", Label = "8" }
+                    new OptionChoice { Value = "8", Label = "8" },
+                    new OptionChoice { Value = "auto", Label = "@WorkerThreadsAuto" }
                 }
             },
             new SettingDefinition

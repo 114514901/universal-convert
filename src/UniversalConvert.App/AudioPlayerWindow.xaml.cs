@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,7 @@ namespace UniversalConvert.App
         private readonly string _filePath;
         private bool _playing;
         private bool _updatingSlider;
+        private string _tempWavPath;
 
         private AudioStreamInfo _streamInfo;
         private BitrateTimeline _timeline;
@@ -100,6 +102,59 @@ namespace UniversalConvert.App
         }
 
         private void OnMediaFailed(object sender, ExceptionEventArgs e)
+        {
+            // Windows Media Foundation 可能不支持该格式（如 Opus）：尝试用随包的 ffmpeg 转成 wav 再播放
+            TryPlayViaFfmpegAsync();
+        }
+
+        private async void TryPlayViaFfmpegAsync()
+        {
+            var ffmpeg = AudioMetadataReader.FindFfmpeg();
+            if (string.IsNullOrEmpty(ffmpeg))
+            {
+                ShowCannotPlay();
+                return;
+            }
+
+            var wavPath = Path.Combine(Path.GetTempPath(), "UniversalConvert-play-" + Guid.NewGuid().ToString("N") + ".wav");
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = ffmpeg,
+                    Arguments = "-y -hide_banner -loglevel error -i \"" + _filePath + "\" -vn -acodec pcm_s16le \"" + wavPath + "\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                var exitCode = await Task.Run(() =>
+                {
+                    using (var process = Process.Start(psi))
+                    {
+                        if (process == null) return -1;
+                        process.WaitForExit();
+                        return process.ExitCode;
+                    }
+                });
+
+                if (exitCode == 0 && File.Exists(wavPath))
+                {
+                    _tempWavPath = wavPath;
+                    _player.Open(new Uri(wavPath));
+                    _player.Play();
+                    return;
+                }
+            }
+            catch
+            {
+                // 转码失败走下方清理
+            }
+
+            try { if (File.Exists(wavPath)) File.Delete(wavPath); } catch { }
+            ShowCannotPlay();
+        }
+
+        private void ShowCannotPlay()
         {
             _playing = false;
             PlayPauseButton.IsEnabled = false;
@@ -228,6 +283,7 @@ namespace UniversalConvert.App
         {
             _timer.Stop();
             _player.Stop();
+            try { if (!string.IsNullOrEmpty(_tempWavPath) && File.Exists(_tempWavPath)) File.Delete(_tempWavPath); } catch { }
         }
     }
 }
