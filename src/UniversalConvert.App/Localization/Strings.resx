@@ -36,9 +36,6 @@
   <data name="Extension" xml:space="preserve">
     <value>扩展</value>
   </data>
-  <data name="Uninstall" xml:space="preserve">
-    <value>卸载</value>
-  </data>
   <data name="CheckUpdates" xml:space="preserve">
     <value>检查扩展更新</value>
   </data>

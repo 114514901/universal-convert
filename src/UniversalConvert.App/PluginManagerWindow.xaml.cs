@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 
@@ -168,7 +167,7 @@ namespace UniversalConvert.App
             return false;
         }
 
-        private void OnListMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        private void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             // 右键点击的行选中它，并据此启用/禁用右键菜单项
             var item = ItemsControl.ContainerFromElement(
@@ -181,8 +180,13 @@ namespace UniversalConvert.App
 
             var row = PluginList.SelectedItem as PluginRow;
             bool isUser = row != null && row.IsUserPlugin;
-            ContextUninstall.IsEnabled = isUser;
-            ContextCheckUpdate.IsEnabled = isUser;
+            if (PluginList.ContextMenu != null)
+            {
+                foreach (var menuItem in PluginList.ContextMenu.Items.OfType<MenuItem>())
+                {
+                    menuItem.IsEnabled = isUser;
+                }
+            }
         }
 
         private void RefreshList()

@@ -16,11 +16,11 @@
         <TextBlock Grid.Row="0" Text="{x:Static loc:Strings.Plugins}" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
         <ListView x:Name="PluginList" Grid.Row="1" SelectionChanged="OnSelectionChanged"
-                  MouseRightButtonUp="OnListMouseRightButtonUp">
+                  ContextMenuOpening="OnContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem x:Name="ContextUninstall" Header="{x:Static loc:Strings.Uninstall}" Click="OnUninstall"/>
-                    <MenuItem x:Name="ContextCheckUpdate" Header="{x:Static loc:Strings.CheckUpdatePlugin}" Click="OnCheckUpdateSingle"/>
+                    <MenuItem Header="{x:Static loc:Strings.Uninstall}" Click="OnUninstall"/>
+                    <MenuItem Header="{x:Static loc:Strings.CheckUpdatePlugin}" Click="OnCheckUpdateSingle"/>
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>

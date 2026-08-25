@@ -21,7 +21,6 @@ namespace UniversalConvert.App.Localization
         public static string SourceColumn => Get("SourceColumn");
         public static string BuiltIn => Get("BuiltIn");
         public static string Extension => Get("Extension");
-        public static string Uninstall => Get("Uninstall");
         public static string CheckUpdates => Get("CheckUpdates");
         public static string UninstalledRestart => Get("UninstalledRestart");
         public static string CheckingExtensionUpdates => Get("CheckingExtensionUpdates");
