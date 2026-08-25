@@ -90,6 +90,9 @@
   <data name="ExtensionSummaryFormat" xml:space="preserve">
     <value>成功 {0} 个，失败 {1} 个</value>
   </data>
+  <data name="PendingChangesNotApplied" xml:space="preserve">
+    <value>有扩展更新/卸载未能应用（文件被占用）。请关闭占用程序（如重启资源管理器）后重启应用，暂存的内容会在下次启动时再次尝试应用。</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>发现 {0} 个扩展有新版本，是否立即更新？</value>
   </data>

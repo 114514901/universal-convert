@@ -39,6 +39,7 @@ namespace UniversalConvert.App.Localization
         public static string ExtensionFailedFormat => Get("ExtensionFailedFormat");
         public static string ExtensionAllSucceeded => Get("ExtensionAllSucceeded");
         public static string ExtensionSummaryFormat => Get("ExtensionSummaryFormat");
+        public static string PendingChangesNotApplied => Get("PendingChangesNotApplied");
         public static string ExtensionUpdatesPrompt => Get("ExtensionUpdatesPrompt");
         public static string SingleExtensionUpdatePrompt => Get("SingleExtensionUpdatePrompt");
         public static string UpdatedRestart => Get("UpdatedRestart");

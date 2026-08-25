@@ -90,6 +90,9 @@
   <data name="ExtensionSummaryFormat" xml:space="preserve">
     <value>Succeeded {0}, failed {1}</value>
   </data>
+  <data name="PendingChangesNotApplied" xml:space="preserve">
+    <value>Some extension updates/uninstalls could not be applied (files are in use). Close the locking programs (e.g. restart Explorer) and restart the app; pending changes will be retried on next startup.</value>
+  </data>
   <data name="ExtensionUpdatesPrompt" xml:space="preserve">
     <value>{0} extensions have updates. Update now?</value>
   </data>

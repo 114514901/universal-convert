@@ -81,6 +81,14 @@ namespace UniversalConvert.App
                 var main = new MainWindow(_host, _settingsManager, parsed.ExtraFiles);
                 MainWindow = main;
                 main.Show();
+
+                // 扩展更新/卸载在重启时未能应用（文件仍被占用，如资源管理器锁着右键菜单加载的插件 DLL）：
+                // 明确提示，避免用户以为没更新
+                if (ExtensionCenter.HasPendingUpdates() || ExtensionCenter.HasPendingUninstalls())
+                {
+                    MessageBox.Show(Strings.PendingChangesNotApplied,
+                        "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
