@@ -36,7 +36,7 @@ namespace UniversalConvert.App
             _settingsManager = settingsManager;
 
             FileList.ItemsSource = _files;
-            OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             if (initialFiles != null)
             {
