@@ -18,6 +18,7 @@ namespace UniversalConvert.App
         private readonly string _filePath;
         private bool _playing;
         private bool _updatingSlider;
+        private bool _ended;
         private string _tempWavPath;
 
         private AudioStreamInfo _streamInfo;
@@ -69,6 +70,7 @@ namespace UniversalConvert.App
 
         private void OnMediaOpened(object sender, EventArgs e)
         {
+            _ended = false;
             _playing = true;
             PlayPauseButton.IsEnabled = true;
             PlayPauseButton.Content = Strings.Pause;
@@ -96,6 +98,7 @@ namespace UniversalConvert.App
 
         private void OnMediaEnded(object sender, EventArgs e)
         {
+            _ended = true;
             _playing = false;
             PlayPauseButton.Content = Strings.Play;
             UpdateTimeDisplay();
@@ -186,6 +189,15 @@ namespace UniversalConvert.App
             var target = TimeSpan.FromMilliseconds(duration.TotalMilliseconds * ProgressSlider.Value / 100.0);
             _player.Position = target;
             UpdateTimeText(target, duration);
+
+            // 媒体已播完后拖动进度条会恢复播放（WPF 行为），需同步状态与按钮，
+            // 否则定时器不再更新进度条、按钮仍显示「播放」
+            if (_ended)
+            {
+                _ended = false;
+                _playing = true;
+                PlayPauseButton.Content = Strings.Pause;
+            }
         }
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -256,6 +268,7 @@ namespace UniversalConvert.App
             }
             else
             {
+                _ended = false;
                 _player.Play();
                 _playing = true;
                 PlayPauseButton.Content = Strings.Pause;
@@ -264,6 +277,7 @@ namespace UniversalConvert.App
 
         private void OnStop(object sender, RoutedEventArgs e)
         {
+            _ended = false;
             _player.Stop();
             _playing = false;
             PlayPauseButton.Content = Strings.Play;
