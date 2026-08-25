@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using UniversalConvert.App.Localization;
+using UniversalConvert.Core.Diagnostics;
 
 namespace UniversalConvert.App
 {
@@ -54,7 +55,9 @@ namespace UniversalConvert.App
                 {
                     // Progress<T> 在 UI 线程构造，回调回到 UI 线程，可直接更新绑定属性
                     var progress = new Progress<double>(p => item.SetDownloadProgress(p));
+                    Log.Info($"开始安装/更新扩展: {item.Info.Id} {item.Info.Version} (下载: {item.Info.DownloadUrl})");
                     var result = await ExtensionCenter.InstallAsync(item.Info, progress, CancellationToken.None);
+                    Log.Info($"扩展 {item.Info.Id} 安装/更新结果: {result}");
 
                     if (result == ExtensionInstallResult.Installed)
                     {
@@ -74,6 +77,7 @@ namespace UniversalConvert.App
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"扩展 {item.Info.Id} 安装/更新异常: {ex}");
                     item.SetFailed(string.Format(Strings.ExtensionFailedFormat, ex.Message));
                     Interlocked.Increment(ref failed);
                 }

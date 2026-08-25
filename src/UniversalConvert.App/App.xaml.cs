@@ -53,9 +53,11 @@ namespace UniversalConvert.App
             Log.Info("=== UniversalConvert 启动，版本 " + (AppVersion.Current?.ToString() ?? "?") + " ===");
 
             // 应用暂存的扩展更新（重启后生效的在线更新），须在插件加载前执行
-            ExtensionCenter.ApplyPendingUpdates();
+            var updatesApplied = ExtensionCenter.ApplyPendingUpdates();
+            Log.Info($"启动：暂存扩展更新应用结果 = {updatesApplied}");
             // 删除标记为待卸载的扩展（重启后生效的卸载）
-            ExtensionCenter.ApplyPendingUninstalls();
+            var uninstallsApplied = ExtensionCenter.ApplyPendingUninstalls();
+            Log.Info($"启动：暂存扩展卸载应用结果 = {uninstallsApplied}");
 
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
             _settingsManager = new SettingsManager(config, _host.Plugins);

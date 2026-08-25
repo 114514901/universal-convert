@@ -123,17 +123,24 @@ namespace UniversalConvert.App
         /// <summary>解压到目标目录；目标被占用/失败时暂存到 pending 目录并返回 StagedForRestart。</summary>
         private static ExtensionInstallResult ExtractOrStage(string zipPath, string targetDir, string name)
         {
+            Log.Info($"ExtractOrStage 开始: zip={zipPath}, 目标={targetDir}");
             try
             {
-                if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+                if (Directory.Exists(targetDir))
+                {
+                    Log.Info($"  删除旧目录（若 DLL 已加载此处会失败）: {targetDir}");
+                    Directory.Delete(targetDir, true);
+                    Log.Info($"  旧目录删除成功（说明插件当前未被进程锁定）: {targetDir}");
+                }
                 Directory.CreateDirectory(targetDir);
                 PluginPackage.Extract(zipPath, targetDir);
+                Log.Info($"直接安装成功（未暂存）: {targetDir}");
                 return ExtensionInstallResult.Installed;
             }
             catch (Exception ex)
             {
                 // 被占用（IOException，已加载 DLL）或权限问题等都暂存到 pending，重启后应用
-                Log.Warn($"目标目录被占用/失败，暂存更新待重启: {targetDir} ({ex.Message})");
+                Log.Warn($"目标目录被占用/失败，暂存更新待重启: {targetDir} ({ex.GetType().Name}: {ex.Message})");
                 try
                 {
                     var pendingDir = Path.Combine(PendingUpdatesDirectory, name);
@@ -143,17 +150,22 @@ namespace UniversalConvert.App
                     // 记录暂存进程 PID：重启后新进程先等旧进程完全退出（释放 DLL 句柄）再应用
                     try
                     {
+                        var pid = Process.GetCurrentProcess().Id;
                         File.WriteAllText(
                             Path.Combine(PendingUpdatesDirectory, name + ".pid"),
-                            Process.GetCurrentProcess().Id.ToString());
+                            pid.ToString());
+                        Log.Info($"已写入暂存 PID 文件: {name}.pid = {pid}");
                     }
-                    catch { }
+                    catch (Exception pidEx)
+                    {
+                        Log.Warn("写入暂存 PID 文件失败: " + pidEx.Message);
+                    }
                     Log.Info($"扩展 {name} 更新已暂存（重启后生效）: {pendingDir}");
                     return ExtensionInstallResult.StagedForRestart;
                 }
                 catch (Exception ex2)
                 {
-                    Log.Error("扩展暂存失败: " + ex2.Message);
+                    Log.Error($"扩展暂存失败（解压到 pending 也失败）: {ex2.GetType().Name}: {ex2.Message}");
                     return ExtensionInstallResult.Failed;
                 }
             }
@@ -203,15 +215,23 @@ namespace UniversalConvert.App
         {
             try
             {
-                if (!Directory.Exists(PendingUpdatesDirectory)) return true;
+                if (!Directory.Exists(PendingUpdatesDirectory))
+                {
+                    Log.Info("启动：无暂存扩展更新");
+                    return true;
+                }
+
+                var pendingDirs = Directory.GetDirectories(PendingUpdatesDirectory);
+                Log.Info($"启动：发现 {pendingDirs.Length} 个暂存扩展更新: {string.Join(", ", pendingDirs)}");
 
                 bool allApplied = true;
-                foreach (var dir in Directory.GetDirectories(PendingUpdatesDirectory))
+                foreach (var dir in pendingDirs)
                 {
                     var name = Path.GetFileName(dir);
                     var pidFile = Path.Combine(PendingUpdatesDirectory, name + ".pid");
                     string pidText = null;
                     try { if (File.Exists(pidFile)) pidText = File.ReadAllText(pidFile).Trim(); } catch { }
+                    Log.Info($"  处理暂存更新 '{name}'，暂存进程 PID: {pidText ?? "(无)"}");
                     WaitForStagingProcessExit(pidText);
 
                     if (!ApplyOnePendingUpdate(dir, name)) allApplied = false;
@@ -221,6 +241,11 @@ namespace UniversalConvert.App
                 if (allApplied)
                 {
                     try { Directory.Delete(PendingUpdatesDirectory, true); } catch { }
+                    Log.Info("启动：全部暂存扩展更新已应用");
+                }
+                else
+                {
+                    Log.Warn("启动：部分暂存扩展更新未应用（文件被占用），将在下次启动重试");
                 }
                 return allApplied;
             }
@@ -238,20 +263,25 @@ namespace UniversalConvert.App
                 try
                 {
                     var target = Path.Combine(ConfigStore.UserPluginsDirectory, name);
-                    if (Directory.Exists(target)) Directory.Delete(target, true);
+                    if (Directory.Exists(target))
+                    {
+                        Directory.Delete(target, true);
+                        Log.Info($"  已删除旧插件目录: {target}");
+                    }
                     Directory.CreateDirectory(ConfigStore.UserPluginsDirectory);
                     Directory.Move(pendingDir, target);
-                    Log.Info($"已应用扩展更新: {name}");
+                    Log.Info($"已应用扩展更新: {name} -> {target}");
                     return true;
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
                     // 旧进程可能还持有 DLL 句柄，稍等重试
+                    Log.Warn($"  应用 '{name}' 第 {attempt + 1} 次尝试被占用: {ex.Message}");
                     Thread.Sleep(500);
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"应用扩展更新失败 '{name}': {ex.Message}");
+                    Log.Warn($"应用扩展更新失败 '{name}': {ex.GetType().Name}: {ex.Message}");
                     return false;
                 }
             }
