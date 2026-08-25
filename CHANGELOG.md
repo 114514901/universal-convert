@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.1-dev.6] - 2026-08-25
+
+### 改进
+- 关于窗口「支持的格式」列表加卡片式边框，与主界面风格一致
+
 ## [2.0.1-dev.5] - 2026-08-25
 
 ### 修复
@@ -332,6 +337,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.1-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.6
 [2.0.1-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.5
 [2.0.1-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.4
 [2.0.1-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.1-dev.3

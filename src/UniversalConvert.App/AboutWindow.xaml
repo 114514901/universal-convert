@@ -25,16 +25,19 @@
                 <TextBlock Text="{x:Static loc:Strings.SupportedFormatsTitle}" FontWeight="SemiBold"
                            Margin="0,14,0,0" HorizontalAlignment="Left" Width="380"/>
 
-                <ListView x:Name="FormatsList" Height="170" Margin="0,6,0,0" Width="380">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="{x:Static loc:Strings.FormatColumn}" Width="220"
-                                            DisplayMemberBinding="{Binding Format}"/>
-                            <GridViewColumn Header="{x:Static loc:Strings.SourceColumn}" Width="130"
-                                            DisplayMemberBinding="{Binding Sources}"/>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                <Border Background="White" CornerRadius="8" BorderBrush="#E5E5E5" BorderThickness="1"
+                        Width="380" Margin="0,6,0,0">
+                    <ListView x:Name="FormatsList" Height="170" BorderThickness="0">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="{x:Static loc:Strings.FormatColumn}" Width="220"
+                                                DisplayMemberBinding="{Binding Format}"/>
+                                <GridViewColumn Header="{x:Static loc:Strings.SourceColumn}" Width="130"
+                                                DisplayMemberBinding="{Binding Sources}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
 
                 <Button Content="{x:Static loc:Strings.OpenProject}" Margin="0,18,0,0" Padding="16,6"
                         Click="OnOpenProject" HorizontalAlignment="Center"/>
