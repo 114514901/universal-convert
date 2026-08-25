@@ -35,3 +35,4 @@ SetupOutput/
 .DS_Store
 Thumbs.db
 changelog_entry.md
+.ssh_known_hosts
