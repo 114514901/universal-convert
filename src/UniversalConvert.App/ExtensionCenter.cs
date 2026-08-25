@@ -26,6 +26,14 @@ namespace UniversalConvert.App
         public string DownloadUrl { get; set; }
     }
 
+    /// <summary>安装/卸载结果：Installed 已直接生效；StagedForRestart 已暂存、重启后生效；Failed 失败。</summary>
+    public enum ExtensionInstallResult
+    {
+        Installed,
+        StagedForRestart,
+        Failed
+    }
+
     /// <summary>扩展中心：从扩展仓库拉取 index.json，安装/卸载扩展（到用户插件目录）。</summary>
     public static class ExtensionCenter
     {
@@ -84,14 +92,6 @@ namespace UniversalConvert.App
         {
             var manifest = PluginPackage.ReadManifest(GetInstallDirectory(info));
             return manifest?.Version;
-        }
-
-        /// <summary>安装/卸载结果：Installed 已直接生效；StagedForRestart 已暂存、重启后生效；Failed 失败。</summary>
-        public enum ExtensionInstallResult
-        {
-            Installed,
-            StagedForRestart,
-            Failed
         }
 
         /// <summary>待应用更新目录：%AppData%\UniversalConvert\pending。</summary>
