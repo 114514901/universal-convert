@@ -60,6 +60,21 @@
   <data name="ExtensionUpToDate" xml:space="preserve">
     <value>{0} is up to date</value>
   </data>
+  <data name="ExtensionUpdatesPrompt" xml:space="preserve">
+    <value>{0} extensions have updates. Update now?</value>
+  </data>
+  <data name="SingleExtensionUpdatePrompt" xml:space="preserve">
+    <value>New version {0} found. Update now?</value>
+  </data>
+  <data name="UpdatedRestart" xml:space="preserve">
+    <value>Updated "{0}", takes effect after restart</value>
+  </data>
+  <data name="ExtensionsUpdatedRestart" xml:space="preserve">
+    <value>{0} extensions updated, takes effect after restart</value>
+  </data>
+  <data name="ExtensionUpdateFailed" xml:space="preserve">
+    <value>Failed to update extensions</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>

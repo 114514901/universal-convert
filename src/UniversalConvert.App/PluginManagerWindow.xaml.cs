@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -109,16 +110,30 @@ namespace UniversalConvert.App
                 var available = await ExtensionCenter.GetAvailableAsync();
                 var byId = available.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
+                // 只检查用户扩展（内置插件不在扩展仓库）；并行比对
+                foreach (var row in _rows) row.UpdateText = null;
+                var userRows = _rows.Where(r => r.IsUserPlugin).ToList();
                 int updated = 0;
-                foreach (var row in _rows)
+                Parallel.ForEach(userRows, row =>
                 {
-                    if (CheckUpdateForRow(row, byId)) updated++;
-                }
-
-                UpdateStatusText.Text = updated > 0
-                    ? string.Format(Strings.ExtensionUpdatesFound, updated)
-                    : Strings.NoExtensionUpdates;
+                    if (CheckUpdateForRow(row, byId)) Interlocked.Increment(ref updated);
+                });
                 RefreshList();
+
+                if (updated > 0)
+                {
+                    var confirm = MessageBox.Show(
+                        string.Format(Strings.ExtensionUpdatesPrompt, updated),
+                        "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (confirm == MessageBoxResult.Yes)
+                    {
+                        await UpdateAllAsync(userRows.Where(r => r.UpdateText != null).ToList(), byId);
+                    }
+                }
+                else
+                {
+                    UpdateStatusText.Text = Strings.NoExtensionUpdates;
+                }
             }
             catch (Exception ex)
             {
@@ -128,6 +143,38 @@ namespace UniversalConvert.App
             {
                 CheckUpdatesButton.IsEnabled = true;
             }
+        }
+
+        /// <summary>并行暂存所有检测到新版本的扩展（已加载插件目录被锁定，重启后应用）。</summary>
+        private async Task UpdateAllAsync(IList<PluginRow> rows, IDictionary<string, ExtensionInfo> byId)
+        {
+            var tasks = new List<Task>();
+            int succeeded = 0;
+            foreach (var row in rows)
+            {
+                ExtensionInfo ext;
+                if (!byId.TryGetValue(row.Id, out ext)) continue;
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ExtensionCenter.StageUpdateAsync(ext, null, CancellationToken.None);
+                        row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
+                        Interlocked.Increment(ref succeeded);
+                    }
+                    catch
+                    {
+                        // 单个失败不影响其它
+                    }
+                }));
+            }
+            await Task.WhenAll(tasks);
+
+            UpdateStatusText.Text = succeeded > 0
+                ? string.Format(Strings.ExtensionsUpdatedRestart, succeeded)
+                : Strings.ExtensionUpdateFailed;
+            RefreshList();
         }
 
         private async void OnCheckUpdateSingle(object sender, RoutedEventArgs e)
@@ -141,9 +188,23 @@ namespace UniversalConvert.App
                 var available = await ExtensionCenter.GetAvailableAsync();
                 var byId = available.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-                UpdateStatusText.Text = CheckUpdateForRow(row, byId)
-                    ? row.Name + "：" + row.UpdateText
-                    : string.Format(Strings.ExtensionUpToDate, row.Name);
+                if (!CheckUpdateForRow(row, byId))
+                {
+                    UpdateStatusText.Text = string.Format(Strings.ExtensionUpToDate, row.Name);
+                    return;
+                }
+
+                ExtensionInfo ext;
+                if (!byId.TryGetValue(row.Id, out ext)) return;
+
+                var confirm = MessageBox.Show(
+                    string.Format(Strings.SingleExtensionUpdatePrompt, ext.Version),
+                    "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (confirm != MessageBoxResult.Yes) return;
+
+                await ExtensionCenter.StageUpdateAsync(ext, null, CancellationToken.None);
+                row.BaseStatus = string.Format(Strings.UpdatedRestart, row.Name);
+                UpdateStatusText.Text = string.Format(Strings.UpdatedRestart, row.Name);
                 RefreshList();
             }
             catch (Exception ex)

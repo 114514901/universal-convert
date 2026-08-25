@@ -113,5 +113,57 @@ namespace UniversalConvert.App
             Log.Info($"卸载扩展 {info.Id}: {dir}");
             if (Directory.Exists(dir)) Directory.Delete(dir, true);
         }
+
+        /// <summary>待应用更新目录：%AppData%\UniversalConvert\pending。</summary>
+        public static string PendingUpdatesDirectory => Path.Combine(ConfigStore.ConfigDirectory, "pending");
+
+        /// <summary>
+        /// 暂存扩展更新：已加载的插件 DLL 被当前进程锁定、无法直接替换，
+        /// 因此下载后解压到 pending 目录，由下次启动时 ApplyPendingUpdates 搬入用户插件目录。
+        /// </summary>
+        public static async Task StageUpdateAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct)
+        {
+            var pendingDir = Path.Combine(PendingUpdatesDirectory, info.Name);
+            var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
+
+            Log.Info($"暂存扩展更新 {info.Id} {info.Version}...");
+            try
+            {
+                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct).ConfigureAwait(false);
+
+                if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true);
+                Directory.CreateDirectory(pendingDir);
+                PluginPackage.Extract(temp, pendingDir);
+                Log.Info($"扩展 {info.Id} 更新已暂存: {pendingDir}");
+            }
+            finally
+            {
+                try { if (File.Exists(temp)) File.Delete(temp); } catch { }
+            }
+        }
+
+        /// <summary>启动时应用暂存的扩展更新（把 pending 下的目录搬进用户插件目录，须在插件加载前调用）。</summary>
+        public static void ApplyPendingUpdates()
+        {
+            try
+            {
+                if (!Directory.Exists(PendingUpdatesDirectory)) return;
+
+                foreach (var dir in Directory.GetDirectories(PendingUpdatesDirectory))
+                {
+                    var name = Path.GetFileName(dir);
+                    var target = Path.Combine(ConfigStore.UserPluginsDirectory, name);
+                    if (Directory.Exists(target)) Directory.Delete(target, true);
+                    Directory.CreateDirectory(ConfigStore.UserPluginsDirectory);
+                    Directory.Move(dir, target);
+                    Log.Info($"已应用扩展更新: {name}");
+                }
+                Directory.Delete(PendingUpdatesDirectory, true);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("应用扩展更新失败: " + ex.Message);
+            }
+        }
     }
 }

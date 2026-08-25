@@ -52,6 +52,9 @@ namespace UniversalConvert.App
             Log.Configure(AppLogPath, Log.ParseLevel(GetConfigValue(config, "logLevel")));
             Log.Info("=== UniversalConvert 启动，版本 " + (AppVersion.Current?.ToString() ?? "?") + " ===");
 
+            // 应用暂存的扩展更新（重启后生效的在线更新），须在插件加载前执行
+            ExtensionCenter.ApplyPendingUpdates();
+
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
             _settingsManager = new SettingsManager(config, _host.Plugins);
 
