@@ -304,9 +304,13 @@ namespace UniversalConvert.App
 
             var baseEntries = _host.Registry.GetConversionsFor(_files[0].Format).ToList();
             var result = new List<ConversionEntry>();
+            var seenOutputs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var entry in baseEntries)
             {
+                // 同一方向被多个插件注册时只显示一次（具体用哪个在转换时由 FormatResolver 决定）
+                if (!seenOutputs.Add(entry.OutputExtension)) continue;
+
                 bool supportedByAll = true;
                 for (int i = 1; i < _files.Count; i++)
                 {
@@ -412,7 +416,7 @@ namespace UniversalConvert.App
 
             var files = _files.Select(r => r.Path).ToArray();
             var outputDir = OutputDirText.Text?.Trim();
-            var window = new BatchConvertWindow(_host, files, targetExt, workerThreads, perFileOptions, outputDir) { Owner = this };
+            var window = new BatchConvertWindow(_host, _settingsManager, files, targetExt, workerThreads, perFileOptions, outputDir) { Owner = this };
             window.ShowDialog();
         }
 

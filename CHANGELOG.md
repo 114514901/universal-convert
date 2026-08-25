@@ -2,6 +2,13 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.6] - 2026-08-25
+
+### 新增
+- 同一「输入→输出」方向被多个扩展注册时，转换前询问用户选择用哪个，可勾选「不再提醒」记住选择
+- 设置「高级」新增「清除格式选择记忆」；记住的插件被卸载后自动回退并重新询问
+- 主界面/右键菜单对同一方向的多注册条目去重显示
+
 ## [2.0.2-dev.5] - 2026-08-25
 
 ### 修复
@@ -290,6 +297,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.2-dev.6]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.6
 [2.0.2-dev.5]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.5
 [2.0.2-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.4
 [2.0.2-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.3

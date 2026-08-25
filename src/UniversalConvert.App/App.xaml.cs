@@ -95,7 +95,7 @@ namespace UniversalConvert.App
             }
 
             var inputExt = Path.GetExtension(inputPath);
-            var entry = _host.Registry.GetEntry(inputExt, parsed.OutputExtension);
+            var entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, parsed.OutputExtension);
             if (entry == null)
             {
                 MessageBox.Show(
@@ -133,7 +133,7 @@ namespace UniversalConvert.App
             }
 
             var inputExt = Path.GetExtension(inputPath);
-            var entry = _host.Registry.GetEntry(inputExt, parsed.OutputExtension);
+            var entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, parsed.OutputExtension);
             if (entry == null)
             {
                 MessageBox.Show(

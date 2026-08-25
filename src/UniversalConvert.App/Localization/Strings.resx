@@ -84,6 +84,21 @@
   <data name="ExtensionUninstallFailed" xml:space="preserve">
     <value>扩展卸载失败</value>
   </data>
+  <data name="FormatChoiceTitle" xml:space="preserve">
+    <value>选择转换扩展</value>
+  </data>
+  <data name="FormatChoicePrompt" xml:space="preserve">
+    <value>多个扩展支持 {0} → {1}，请选择使用哪个：</value>
+  </data>
+  <data name="DontAskAgain" xml:space="preserve">
+    <value>不再提醒</value>
+  </data>
+  <data name="ClearFormatChoices" xml:space="preserve">
+    <value>清除格式选择记忆</value>
+  </data>
+  <data name="FormatChoicesCleared" xml:space="preserve">
+    <value>已清除记住的格式选择</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>自定义...</value>
   </data>
@@ -110,6 +125,9 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>确定</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>关闭</value>

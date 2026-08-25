@@ -58,6 +58,19 @@ namespace UniversalConvert.App
             _config.Settings[key] = value;
         }
 
+        /// <summary>删除所有以指定前缀开头的设置键（如 formatChoice.*）。</summary>
+        public void ClearKeysWithPrefix(string prefix)
+        {
+            if (_config.Settings == null) return;
+            var keys = _config.Settings.Keys
+                .Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (var key in keys)
+            {
+                _config.Settings.Remove(key);
+            }
+        }
+
         public void Save()
         {
             _store.Save(_config);

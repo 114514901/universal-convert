@@ -306,11 +306,23 @@ namespace UniversalConvert.App
             var testHang = new Button { Content = Strings.TestHang, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
             testHang.Click += OnTestHang;
 
+            var clearChoices = new Button { Content = Strings.ClearFormatChoices, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 8, 0, 0) };
+            clearChoices.Click += OnClearFormatChoices;
+
             panel.Children.Add(viewLog);
             panel.Children.Add(clearLog);
             panel.Children.Add(crashTest);
             panel.Children.Add(testHang);
+            panel.Children.Add(clearChoices);
             return panel;
+        }
+
+        private void OnClearFormatChoices(object sender, RoutedEventArgs e)
+        {
+            FormatResolver.ClearAllChoices(_manager);
+            _manager.Save();
+            MessageBox.Show(Strings.FormatChoicesCleared, "UniversalConvert",
+                MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void OnViewLog(object sender, RoutedEventArgs e)

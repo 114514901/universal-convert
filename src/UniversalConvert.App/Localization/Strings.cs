@@ -37,6 +37,11 @@ namespace UniversalConvert.App.Localization
         public static string ExtensionRestartPrompt => Get("ExtensionRestartPrompt");
         public static string Uninstalled => Get("Uninstalled");
         public static string ExtensionUninstallFailed => Get("ExtensionUninstallFailed");
+        public static string FormatChoiceTitle => Get("FormatChoiceTitle");
+        public static string FormatChoicePrompt => Get("FormatChoicePrompt");
+        public static string DontAskAgain => Get("DontAskAgain");
+        public static string ClearFormatChoices => Get("ClearFormatChoices");
+        public static string FormatChoicesCleared => Get("FormatChoicesCleared");
         public static string Customize => Get("Customize");
         public static string Convert => Get("Convert");
         public static string SelectFileDialogTitle => Get("SelectFileDialogTitle");
@@ -46,6 +51,7 @@ namespace UniversalConvert.App.Localization
         public static string Preparing => Get("Preparing");
         public static string ConvertingTitle => Get("ConvertingTitle");
         public static string Cancel => Get("Cancel");
+        public static string OK => Get("OK");
         public static string Close => Get("Close");
         public static string OpenOutputFolder => Get("OpenOutputFolder");
         public static string Done => Get("Done");

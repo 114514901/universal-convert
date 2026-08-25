@@ -84,6 +84,21 @@
   <data name="ExtensionUninstallFailed" xml:space="preserve">
     <value>Failed to uninstall extension</value>
   </data>
+  <data name="FormatChoiceTitle" xml:space="preserve">
+    <value>Choose conversion extension</value>
+  </data>
+  <data name="FormatChoicePrompt" xml:space="preserve">
+    <value>Multiple extensions support {0} → {1}. Choose one:</value>
+  </data>
+  <data name="DontAskAgain" xml:space="preserve">
+    <value>Don't ask again</value>
+  </data>
+  <data name="ClearFormatChoices" xml:space="preserve">
+    <value>Clear format choice memory</value>
+  </data>
+  <data name="FormatChoicesCleared" xml:space="preserve">
+    <value>Format choices cleared</value>
+  </data>
   <data name="Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>
@@ -110,6 +125,9 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>

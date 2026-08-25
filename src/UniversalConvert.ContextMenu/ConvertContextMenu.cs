@@ -107,7 +107,11 @@ namespace UniversalConvert.ContextMenu
         private void BuildSingleFileMenu(ContextMenuStrip menu, CoreHost host, string file)
         {
             var ext = Path.GetExtension(file);
-            var conversions = host.Registry.GetConversionsFor(ext).ToList();
+            // 同一「输入→输出」方向被多个插件注册时只显示一次（具体用哪个在 App 端由 FormatResolver 决定）
+            var conversions = host.Registry.GetConversionsFor(ext)
+                .GroupBy(e => e.OutputExtension, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .ToList();
 
             var root = new ToolStripMenuItem("使用 UniversalConvert 转换为");
             root.Image = MenuIcon.Value;

@@ -22,6 +22,7 @@ namespace UniversalConvert.App
     public partial class BatchConvertWindow : Window
     {
         private readonly CoreHost _host;
+        private readonly SettingsManager _settingsManager;
         private readonly string[] _files;
         private readonly string _targetExt;
         private readonly int _workerThreads;
@@ -31,17 +32,20 @@ namespace UniversalConvert.App
         private readonly StringBuilder _errorLog = new StringBuilder();
         private readonly Dispatcher _dispatcher;
         private readonly object _outputLock = new object();
+        private readonly Dictionary<string, ConversionEntry> _entryCache =
+            new Dictionary<string, ConversionEntry>(StringComparer.OrdinalIgnoreCase);
 
         private double[] _progressByIndex;
         private int _doneCount;
         private int _failedCount;
 
-        public BatchConvertWindow(CoreHost host, string[] files, string targetExt, int workerThreads,
+        public BatchConvertWindow(CoreHost host, SettingsManager settingsManager, string[] files, string targetExt, int workerThreads,
             IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
             _host = host;
+            _settingsManager = settingsManager;
             _files = files;
             _targetExt = targetExt;
             _workerThreads = Math.Max(1, workerThreads);
@@ -103,7 +107,7 @@ namespace UniversalConvert.App
             var file = _files[index];
             var item = _items[index];
 
-            var entry = _host.Registry.GetEntry(Path.GetExtension(file), _targetExt);
+            var entry = ResolveEntry(Path.GetExtension(file));
             if (entry == null)
             {
                 RunOnUi(() => item.Status = Strings.StatusSkipped);
@@ -179,6 +183,19 @@ namespace UniversalConvert.App
             {
                 semaphore.Release();
             }
+        }
+
+        /// <summary>解析该文件应使用的转换条目（同一方向多插件注册时由 FormatResolver 决定），带缓存避免批量中重复询问。</summary>
+        private ConversionEntry ResolveEntry(string inputExt)
+        {
+            var key = FormatRegistry.Normalize(inputExt) + "." + FormatRegistry.Normalize(_targetExt);
+            ConversionEntry entry;
+            if (!_entryCache.TryGetValue(key, out entry))
+            {
+                entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, _targetExt);
+                _entryCache[key] = entry;
+            }
+            return entry;
         }
 
         /// <summary>指定输出目录则输出到该目录（文件名不变、换扩展名），否则返回 null 走插件默认（源目录）。</summary>
