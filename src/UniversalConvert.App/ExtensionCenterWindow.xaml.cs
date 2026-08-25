@@ -144,6 +144,8 @@ namespace UniversalConvert.App
                 {
                     StatusText.Text = Strings.InstallDone;
                     await RefreshAsync();
+                    // 新安装的扩展也要重启才会被应用加载，同样询问是否立即重启
+                    AppRestart.PromptAndRestart();
                 }
                 else
                 {

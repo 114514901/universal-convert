@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.4] - 2026-08-25
+
+### 修复
+- 扩展中心新装扩展后未询问重启（新扩展需重启才会被应用加载）：现在安装完成后同样提示「是否立即重启」
+
 ## [2.0.2-dev.3] - 2026-08-25
 
 ### 改进
@@ -279,6 +284,7 @@
 - 安装/注册器（注册/卸载右键菜单）
 - CI 自动编译 + Inno Setup 打包 + 打 tag 自动发 GitHub Release
 
+[2.0.2-dev.4]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.4
 [2.0.2-dev.3]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.3
 [2.0.2-dev.2]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.2
 [2.0.2-dev.1]: https://github.com/114514901/universal-convert/releases/tag/v2.0.2-dev.1
