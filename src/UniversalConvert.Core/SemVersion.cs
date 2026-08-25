@@ -1,6 +1,6 @@
 using System;
 
-namespace UniversalConvert.App
+namespace UniversalConvert.Core
 {
     /// <summary>
     /// 简化版语义化版本（SemVer）比较，支持 prerelease（如 1.4.0-dev.1）。

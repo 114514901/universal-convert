@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UniversalConvert.App.Localization;
+using UniversalConvert.Core;
+using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
 {
@@ -16,6 +20,7 @@ namespace UniversalConvert.App
         private readonly MediaPlayer _player = new MediaPlayer();
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private readonly string _filePath;
+        private string _playbackPath;
         private bool _playing;
         private bool _updatingSlider;
         private bool _ended;
@@ -25,12 +30,13 @@ namespace UniversalConvert.App
         private BitrateTimeline _timeline;
         private int _averageBitrate;
 
-        public AudioPlayerWindow(string filePath)
+        public AudioPlayerWindow(string filePath, CoreHost host)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
 
             _filePath = filePath;
+            _playbackPath = filePath;
             TitleText.Text = Path.GetFileName(filePath);
 
             _timer.Interval = TimeSpan.FromMilliseconds(500);
@@ -41,10 +47,64 @@ namespace UniversalConvert.App
             _player.MediaEnded += OnMediaEnded;
             _player.MediaFailed += OnMediaFailed;
 
-            _player.Open(new Uri(filePath));
-            _player.Play();
+            // 提供者优先：若某插件声明支持该格式的预览（如 MIDI 合成），先渲染再播放
+            var provider = FindPreviewProvider(host, filePath);
+            if (provider != null)
+            {
+                RenderAndPlayAsync(provider);
+            }
+            else
+            {
+                _player.Open(new Uri(filePath));
+                _player.Play();
+            }
 
             LoadMetadataAsync();
+        }
+
+        /// <summary>按插件顺序查找第一个支持该扩展名的预览提供者。</summary>
+        private static IPreviewProvider FindPreviewProvider(CoreHost host, string filePath)
+        {
+            if (host == null || host.Plugins == null) return null;
+
+            string ext;
+            try { ext = Path.GetExtension(filePath); }
+            catch { return null; }
+
+            return host.Plugins.OfType<IPreviewProvider>()
+                .FirstOrDefault(p => p.SupportedPreviewExtensions != null
+                    && p.SupportedPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase));
+        }
+
+        private async void RenderAndPlayAsync(IPreviewProvider provider)
+        {
+            TimeText.Text = Strings.PreviewRendering;
+
+            string rendered = null;
+            try
+            {
+                rendered = await Task.Run(() => provider.RenderPreviewAsync(_filePath, CancellationToken.None));
+            }
+            catch
+            {
+                rendered = null; // 渲染失败回退直接打开
+            }
+
+            if (!string.IsNullOrEmpty(rendered) && File.Exists(rendered))
+            {
+                _playbackPath = rendered;
+                _tempWavPath = rendered; // 复用关闭时清理逻辑
+                _player.Open(new Uri(rendered));
+                _player.Play();
+                LoadMetadataAsync(); // 重新读取渲染产物的元数据
+                return;
+            }
+
+            // 渲染失败：清掉提示，回退到播放器直接打开（仍可走 ffmpeg 兜底）
+            TimeText.Text = string.Empty;
+            try { if (!string.IsNullOrEmpty(rendered) && File.Exists(rendered)) File.Delete(rendered); } catch { }
+            _player.Open(new Uri(_filePath));
+            _player.Play();
         }
 
         private async void LoadMetadataAsync()
@@ -54,8 +114,9 @@ namespace UniversalConvert.App
 
             try
             {
-                var streamTask = Task.Run(() => AudioMetadataReader.ReadStreamInfo(ffprobe, _filePath));
-                var timelineTask = Task.Run(() => AudioMetadataReader.ReadBitrateTimeline(ffprobe, _filePath));
+                var path = _playbackPath;
+                var streamTask = Task.Run(() => AudioMetadataReader.ReadStreamInfo(ffprobe, path));
+                var timelineTask = Task.Run(() => AudioMetadataReader.ReadBitrateTimeline(ffprobe, path));
                 await Task.WhenAll(streamTask, timelineTask);
 
                 _streamInfo = streamTask.Result;
@@ -81,7 +142,7 @@ namespace UniversalConvert.App
                 var duration = _player.NaturalDuration.TimeSpan;
                 try
                 {
-                    var fileSize = new FileInfo(_filePath).Length;
+                    var fileSize = new FileInfo(_playbackPath).Length;
                     if (duration.TotalSeconds > 0)
                     {
                         _averageBitrate = (int)(fileSize * 8.0 / duration.TotalSeconds / 1000.0);
@@ -125,7 +186,7 @@ namespace UniversalConvert.App
                 var psi = new ProcessStartInfo
                 {
                     FileName = ffmpeg,
-                    Arguments = "-y -hide_banner -loglevel error -i \"" + _filePath + "\" -vn -acodec pcm_s16le \"" + wavPath + "\"",
+                    Arguments = "-y -hide_banner -loglevel error -i \"" + _playbackPath + "\" -vn -acodec pcm_s16le \"" + wavPath + "\"",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };

@@ -254,7 +254,7 @@ namespace UniversalConvert.App
             if (item == null || string.IsNullOrEmpty(item.OutputPath)) return;
             if (!File.Exists(item.OutputPath)) return;
 
-            var window = new AudioPlayerWindow(item.OutputPath) { Owner = this };
+            var window = new AudioPlayerWindow(item.OutputPath, _host) { Owner = this };
             window.Show();
         }
 

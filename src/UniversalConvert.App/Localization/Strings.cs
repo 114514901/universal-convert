@@ -126,6 +126,7 @@ namespace UniversalConvert.App.Localization
         public static string Pause => Get("Pause");
         public static string Stop => Get("Stop");
         public static string CannotPlay => Get("CannotPlay");
+        public static string PreviewRendering => Get("PreviewRendering");
         public static string PlaybackDone => Get("PlaybackDone");
         public static string Playing => Get("Playing");
         public static string PlayingSimple => Get("PlayingSimple");

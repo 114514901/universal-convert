@@ -16,6 +16,7 @@ using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
+using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
 {
@@ -215,18 +216,30 @@ namespace UniversalConvert.App
         private static readonly string[] PlayableAudioExtensions =
             { ".mp3", ".wav", ".flac", ".m4a", ".aac", ".wma", ".opus" };
 
-        private static bool IsPlayableAudio(string path)
+        /// <summary>
+        /// 是否可用内置播放器预览：原生可播格式，或某插件（IPreviewProvider）声明支持该扩展名
+        /// （如 .mid/.midi 由 MIDI 扩展渲染预览）。
+        /// </summary>
+        private bool CanPreviewAudio(string path)
         {
             var ext = Path.GetExtension(path);
-            return PlayableAudioExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
+            if (PlayableAudioExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase)) return true;
+
+            if (_host?.Plugins != null)
+            {
+                return _host.Plugins.OfType<IPreviewProvider>().Any(p =>
+                    p.SupportedPreviewExtensions != null
+                    && p.SupportedPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase));
+            }
+            return false;
         }
 
         private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var row = FileList.SelectedItem as FileRow;
-            if (row == null || !IsPlayableAudio(row.Path)) return;
+            if (row == null || !CanPreviewAudio(row.Path)) return;
 
-            var window = new AudioPlayerWindow(row.Path) { Owner = this };
+            var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
             window.Show();
         }
 
@@ -259,9 +272,9 @@ namespace UniversalConvert.App
             var row = FileList.SelectedItem as FileRow;
             if (row == null || !File.Exists(row.Path)) return;
 
-            if (IsPlayableAudio(row.Path))
+            if (CanPreviewAudio(row.Path))
             {
-                var window = new AudioPlayerWindow(row.Path) { Owner = this };
+                var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
                 window.Show();
             }
             else

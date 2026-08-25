@@ -396,6 +396,9 @@
   <data name="CannotPlay" xml:space="preserve">
     <value>Cannot play this file</value>
   </data>
+  <data name="PreviewRendering" xml:space="preserve">
+    <value>Rendering preview…</value>
+  </data>
   <data name="PlaybackDone" xml:space="preserve">
     <value>Playback finished</value>
   </data>

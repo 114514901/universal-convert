@@ -2,6 +2,17 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.0.2-dev.7] - 2026-08-25
+
+### 新增
+- 插件可选接口 `IPreviewProvider`：扩展可声明支持某些扩展名的文件预览（如 MIDI 合成），主程序预览窗口按「提供者优先」策略先渲染再播放
+- 插件加载时强制校验 `MinAppVersion`：应用版本低于插件要求时跳过加载，并在扩展管理器显示友好提示（不再等到功能运行时报反射错误）
+- 音频预览支持 MIDI（.mid/.midi）：由 MIDI 扩展（FluidSynth + GeneralUser GS 音色库）渲染成 wav 后播放
+
+### 改进
+- `SemVersion` 移入 Core，供加载器做版本比较
+- 重写《扩展开发指南》：补充扩展中心/在线安装与更新卸载/重启暂存、FormatResolver 格式选择记忆、`@资源键` 本地化、IPreviewProvider、MinAppVersion 加载校验等
+
 ## [2.0.2-dev.6] - 2026-08-25
 
 ### 新增

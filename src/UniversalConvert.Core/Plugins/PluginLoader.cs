@@ -15,10 +15,31 @@ namespace UniversalConvert.Core.Plugins
     {
         private readonly Action<string> _log;
         private readonly List<PluginLoadError> _errors = new List<PluginLoadError>();
+        private readonly SemVersion _appVersion;
 
-        public PluginLoader(Action<string> log = null)
+        /// <summary>
+        /// appVersion：当前应用版本（SemVer）。不传时尝试从本程序集读取
+        /// InformationalVersion（仓库统一由 Directory.Build.props 注入，与 App 一致）。
+        /// 用于在加载时强制校验插件的 MinAppVersion。
+        /// </summary>
+        public PluginLoader(Action<string> log = null, string appVersion = null)
         {
             _log = log ?? (_ => { });
+            _appVersion = SemVersion.Parse(appVersion ?? ReadInformationalVersion());
+        }
+
+        private static string ReadInformationalVersion()
+        {
+            try
+            {
+                return Assembly.GetExecutingAssembly()
+                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                    ?.InformationalVersion;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>本次加载过程中收集到的错误（程序集/类型加载失败）。</summary>
@@ -90,6 +111,22 @@ namespace UniversalConvert.Core.Plugins
 
                 Log.Debug($"已加载插件 '{plugin.Id}' ({dllPath})");
                 _log($"Loaded plugin '{plugin.Id}' from '{dllPath}'");
+
+                // 加载时强制校验 MinAppVersion：应用版本低于插件要求时跳过加载，
+                // 记录友好错误（而不是等插件功能运行时报反射/接口错误）。
+                if (_appVersion != null && !string.IsNullOrEmpty(plugin.MinAppVersion))
+                {
+                    var min = SemVersion.Parse(plugin.MinAppVersion);
+                    if (min != null && _appVersion.CompareTo(min) < 0)
+                    {
+                        var message = $"插件要求应用版本 >= {min}，当前应用版本 {_appVersion}，已跳过加载";
+                        Log.Error($"插件 '{plugin.Id}' 要求应用版本 >= {min}，当前 {_appVersion}，已跳过");
+                        _log($"Plugin '{plugin.Id}' requires app >= {min}, current {_appVersion}; skipped");
+                        _errors.Add(new PluginLoadError { File = plugin.Id, Message = message });
+                        continue;
+                    }
+                }
+
                 yield return plugin;
             }
         }
