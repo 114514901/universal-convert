@@ -38,6 +38,9 @@ namespace UniversalConvert.App
         private double[] _progressByIndex;
         private int _doneCount;
         private int _failedCount;
+        private bool _paused;
+        private readonly ManualResetEventSlim _pauseSignal = new ManualResetEventSlim(false);
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         public BatchConvertWindow(CoreHost host, SettingsManager settingsManager, string[] files, string targetExt, int workerThreads,
             IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null)
@@ -92,6 +95,9 @@ namespace UniversalConvert.App
             OverallProgress.Value = 100;
             SummaryText.Text = string.Format(Strings.BatchSummary, _doneCount, _files.Length, _failedCount);
             CloseButton.IsEnabled = true;
+            PauseButton.IsEnabled = false;
+            CancelButton.IsEnabled = false;
+            _pauseSignal.Reset();
 
             if (_outputPaths.Count > 0) OpenFolderButton.Visibility = Visibility.Visible;
             if (_failedCount > 0)
@@ -106,6 +112,13 @@ namespace UniversalConvert.App
         {
             var file = _files[index];
             var item = _items[index];
+
+            // 已取消：尚未开始的任务直接跳过，不计入失败
+            if (_cts.IsCancellationRequested)
+            {
+                RunOnUi(() => item.Status = Strings.StatusSkipped);
+                return;
+            }
 
             var entry = ResolveEntry(Path.GetExtension(file));
             if (entry == null)
@@ -127,7 +140,8 @@ namespace UniversalConvert.App
                     OutputPath = ResolveOutputPath(file),
                     InputExtension = Path.GetExtension(file),
                     OutputExtension = "." + _targetExt,
-                    Options = options
+                    Options = options,
+                    PauseSignal = _pauseSignal
                 };
 
                 var progress = new Progress<ConversionProgress>(p =>
@@ -143,7 +157,7 @@ namespace UniversalConvert.App
                     }
                 });
 
-                var result = await _host.Engine.ConvertAsync(request, progress, CancellationToken.None);
+                var result = await _host.Engine.ConvertAsync(request, progress, _cts.Token);
 
                 if (result.Success)
                 {
@@ -256,6 +270,35 @@ namespace UniversalConvert.App
 
             var window = new AudioPlayerWindow(item.OutputPath, _host) { Owner = this };
             window.Show();
+        }
+
+        private void OnPause(object sender, RoutedEventArgs e)
+        {
+            _paused = !_paused;
+            if (_paused)
+            {
+                _pauseSignal.Set();
+                PauseButton.Content = Strings.Resume;
+            }
+            else
+            {
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
+            }
+        }
+
+        private void OnCancel(object sender, RoutedEventArgs e)
+        {
+            // 取消：终止正在运行的进程（引擎/ProcessRunner 响应令牌），未开始的任务跳过
+            _cts.Cancel();
+            CancelButton.IsEnabled = false;
+            PauseButton.IsEnabled = false;
+            if (_paused)
+            {
+                _paused = false;
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
+            }
         }
 
         private void OnClose(object sender, RoutedEventArgs e)

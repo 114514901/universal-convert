@@ -48,6 +48,10 @@
                     Visibility="Collapsed" Click="OnCopyError" Margin="0,0,8,0"/>
             <Button x:Name="OpenFolderButton" Content="{x:Static loc:Strings.OpenOutputFolder}" Padding="12,6"
                     Visibility="Collapsed" Click="OnOpenFolder" Margin="0,0,8,0"/>
+            <Button x:Name="PauseButton" Content="{x:Static loc:Strings.Pause}" Padding="12,6"
+                    Click="OnPause" Margin="0,0,8,0"/>
+            <Button x:Name="CancelButton" Content="{x:Static loc:Strings.Cancel}" Padding="12,6"
+                    Click="OnCancel" Margin="0,0,8,0"/>
             <Button x:Name="CloseButton" Content="{x:Static loc:Strings.Close}" Padding="12,6"
                     IsEnabled="False" Click="OnClose"/>
         </StackPanel>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -22,6 +23,13 @@ namespace UniversalConvert.Core.Process
     /// </summary>
     public static class ProcessRunner
     {
+        // 暂停外部进程（未文档化 API，被主流工具广泛使用；挂起/恢复是安全的）
+        [DllImport("ntdll.dll")]
+        private static extern int NtSuspendProcess(IntPtr processHandle);
+
+        [DllImport("ntdll.dll")]
+        private static extern int NtResumeProcess(IntPtr processHandle);
+
         /// <summary>
         /// 运行外部工具。
         /// </summary>
@@ -30,12 +38,14 @@ namespace UniversalConvert.Core.Process
         /// <param name="cancellationToken">取消令牌，触发时终止进程。</param>
         /// <param name="onOutputLine">每读到一行 stderr/stdout 时的回调，用于进度解析。</param>
         /// <param name="workingDirectory">工作目录。</param>
+        /// <param name="pauseSignal">暂停信号：置位期间挂起进程，复位后恢复；null 表示不支持暂停。</param>
         public static ProcessRunResult Run(
             string executable,
             string arguments,
             CancellationToken cancellationToken,
             Action<string> onOutputLine = null,
-            string workingDirectory = null)
+            string workingDirectory = null,
+            ManualResetEventSlim pauseSignal = null)
         {
             var result = new ProcessRunResult();
             var output = new StringBuilder();
@@ -88,7 +98,22 @@ namespace UniversalConvert.Core.Process
 
                 using (cancellationToken.Register(() => TryKill(process)))
                 {
-                    process.WaitForExit();
+                    // 轮询等待：暂停信号置位期间挂起进程，复位后恢复
+                    while (!process.WaitForExit(300))
+                    {
+                        if (pauseSignal != null && pauseSignal.IsSet)
+                        {
+                            SuspendProcess(process);
+                            try
+                            {
+                                pauseSignal.Wait(); // 阻塞直到恢复（取消时 TryKill 会终止挂起的进程）
+                            }
+                            finally
+                            {
+                                ResumeProcess(process);
+                            }
+                        }
+                    }
                 }
 
                 outputDone.Wait(2000);
@@ -115,6 +140,16 @@ namespace UniversalConvert.Core.Process
             {
                 // 进程可能已退出
             }
+        }
+
+        private static void SuspendProcess(System.Diagnostics.Process process)
+        {
+            try { NtSuspendProcess(process.Handle); } catch { }
+        }
+
+        private static void ResumeProcess(System.Diagnostics.Process process)
+        {
+            try { NtResumeProcess(process.Handle); } catch { }
         }
 
         /// <summary>把单个参数按命令行规则加引号（含空格或引号时）。</summary>

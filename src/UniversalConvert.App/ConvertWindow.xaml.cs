@@ -17,6 +17,8 @@ namespace UniversalConvert.App
         private CancellationTokenSource _cts;
         private ConversionResult _result;
         private string _fullErrorText;
+        private bool _paused;
+        private readonly ManualResetEventSlim _pauseSignal = new ManualResetEventSlim(false);
 
         public ConvertWindow(ConversionEngine engine, ConversionRequest request)
         {
@@ -45,6 +47,7 @@ namespace UniversalConvert.App
 
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
+            _request.PauseSignal = _pauseSignal;
 
             var progress = new Progress<ConversionProgress>(p =>
             {
@@ -73,14 +76,23 @@ namespace UniversalConvert.App
             CopyErrorButton.Visibility = Visibility.Collapsed;
             OpenFolderButton.Visibility = Visibility.Collapsed;
             CancelButton.Visibility = Visibility.Visible;
+            CancelButton.IsEnabled = true;
+            PauseButton.Visibility = Visibility.Visible;
+            PauseButton.IsEnabled = true;
             CloseButton.Visibility = Visibility.Collapsed;
             ProgressBar.IsIndeterminate = true;
             ProgressBar.Value = 0;
+
+            // 重试时复位暂停状态
+            _paused = false;
+            _pauseSignal.Reset();
+            PauseButton.Content = Strings.Pause;
         }
 
         private void ShowResult()
         {
             CancelButton.Visibility = Visibility.Collapsed;
+            PauseButton.Visibility = Visibility.Collapsed;
             CloseButton.Visibility = Visibility.Visible;
 
             if (_result.Success)
@@ -133,6 +145,29 @@ namespace UniversalConvert.App
         private void OnCancel(object sender, RoutedEventArgs e)
         {
             _cts?.Cancel();
+            CancelButton.IsEnabled = false;
+            // 取消时若处于暂停，恢复信号以便进程能被终止
+            if (_paused)
+            {
+                _paused = false;
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
+            }
+        }
+
+        private void OnPause(object sender, RoutedEventArgs e)
+        {
+            _paused = !_paused;
+            if (_paused)
+            {
+                _pauseSignal.Set();
+                PauseButton.Content = Strings.Resume;
+            }
+            else
+            {
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
+            }
         }
 
         private void OnClose(object sender, RoutedEventArgs e)

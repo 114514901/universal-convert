@@ -47,6 +47,20 @@ namespace UniversalConvert.Core.Engine
             progress?.Report(new ConversionProgress(ConversionStage.Starting, 0, "准备转换..."));
             Log.Info($"转换开始: {request.InputPath} -> .{request.OutputExtension} (插件 {request.PluginId})");
 
+            // 暂停中：未启动的任务在入口等待（响应取消），运行中的由 ProcessRunner 挂起进程
+            var pause = request.PauseSignal;
+            if (pause != null)
+            {
+                while (pause.IsSet)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return ConversionResult.Failed("转换已取消", Elapsed(started));
+                    }
+                    pause.Wait(200);
+                }
+            }
+
             var plugin = GetPlugin(request.PluginId);
             if (plugin == null)
             {

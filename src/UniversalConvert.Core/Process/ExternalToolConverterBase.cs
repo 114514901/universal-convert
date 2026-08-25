@@ -96,7 +96,9 @@ namespace UniversalConvert.Core.Process
                 tool,
                 args,
                 cancellationToken,
-                line => OnOutputLine(line, request, progress)
+                line => OnOutputLine(line, request, progress),
+                null,
+                request.PauseSignal
             ), cancellationToken).ConfigureAwait(false);
 
             var elapsed = DateTime.UtcNow - started;

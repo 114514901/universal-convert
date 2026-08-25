@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace UniversalConvert.Core.Models
 {
@@ -23,6 +24,12 @@ namespace UniversalConvert.Core.Models
 
         /// <summary>覆盖参数（预设合并结果），插件自定义语义。</summary>
         public IDictionary<string, string> Options { get; set; }
+
+        /// <summary>
+        /// 暂停信号（批量转换共享）：置位期间挂起正在运行的外部进程、未启动的任务在引擎入口等待；
+        /// null 表示本次转换不支持暂停。
+        /// </summary>
+        public ManualResetEventSlim PauseSignal { get; set; }
 
         public ConversionRequest()
         {
