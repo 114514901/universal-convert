@@ -71,7 +71,10 @@ namespace UniversalConvert.App
 
             StartHeartbeatAndWatchdog();
 
-            if (parsed.IsConvertMode && !string.IsNullOrEmpty(parsed.InputPath))
+            // convert 模式：输入可以是 --convert 后的单个文件（InputPath）或多文件批量（ExtraFiles）
+            var hasConvertInput = !string.IsNullOrEmpty(parsed.InputPath)
+                || (parsed.ExtraFiles != null && parsed.ExtraFiles.Length > 0);
+            if (parsed.IsConvertMode && hasConvertInput)
             {
                 RunHeadlessConversion(parsed);
             }
