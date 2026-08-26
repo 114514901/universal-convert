@@ -113,11 +113,11 @@ namespace UniversalConvert.App
             {
                 // 多文件：打开批量转换窗口（含进度/暂停/取消），输出到输入目录
                 var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
-                var window = new BatchConvertWindow(
+                var batchWindow = new BatchConvertWindow(
                     _host, _settingsManager, files, "." + parsed.OutputExtension, workerThreads,
                     perFileOptions: null, outputDir: null, presetName: parsed.PresetName);
-                MainWindow = window;
-                window.Show();
+                MainWindow = batchWindow;
+                batchWindow.Show();
                 return;
             }
 
