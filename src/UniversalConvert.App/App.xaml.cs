@@ -97,7 +97,31 @@ namespace UniversalConvert.App
 
         private void RunHeadlessConversion(CommandLineContract.ParsedArguments parsed)
         {
-            var inputPath = parsed.InputPath;
+            // convert 模式的输入文件：--convert 后的全部裸参数（支持右键多选批量）
+            var files = parsed.ExtraFiles != null && parsed.ExtraFiles.Length > 0
+                ? parsed.ExtraFiles
+                : (string.IsNullOrEmpty(parsed.InputPath) ? new string[0] : new[] { parsed.InputPath });
+
+            if (files.Length == 0)
+            {
+                MessageBox.Show(Strings.InputFileMissing, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(1);
+                return;
+            }
+
+            if (files.Length > 1)
+            {
+                // 多文件：打开批量转换窗口（含进度/暂停/取消），输出到输入目录
+                var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
+                var window = new BatchConvertWindow(
+                    _host, _settingsManager, files, "." + parsed.OutputExtension, workerThreads,
+                    perFileOptions: null, outputDir: null, presetName: parsed.PresetName);
+                MainWindow = window;
+                window.Show();
+                return;
+            }
+
+            var inputPath = files[0];
             if (!File.Exists(inputPath))
             {
                 MessageBox.Show(Strings.InputFileMissing + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -316,6 +340,19 @@ namespace UniversalConvert.App
         {
             string value;
             return config.Settings != null && config.Settings.TryGetValue(key, out value) ? value : null;
+        }
+
+        /// <summary>解析转换线程数设置：auto → 逻辑核心数 × 75%（低于 4 核用 1）。</summary>
+        private static int ResolveWorkerThreads(string setting)
+        {
+            if (string.Equals(setting, "auto", StringComparison.OrdinalIgnoreCase))
+            {
+                int cores = Environment.ProcessorCount;
+                if (cores < 4) return 1;
+                return Math.Max(1, (int)Math.Round(cores * 0.75, MidpointRounding.AwayFromZero));
+            }
+            int parsed;
+            return int.TryParse(setting, out parsed) ? Math.Max(1, parsed) : 2;
         }
 
         private static bool IsDumpEnabled(AppConfig config)

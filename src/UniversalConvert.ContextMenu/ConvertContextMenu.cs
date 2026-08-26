@@ -98,7 +98,7 @@ namespace UniversalConvert.ContextMenu
             }
             else
             {
-                BuildMultiFileMenu(menu, files);
+                BuildMultiFileMenu(menu, host, files);
             }
 
             return menu;
@@ -106,7 +106,45 @@ namespace UniversalConvert.ContextMenu
 
         private void BuildSingleFileMenu(ContextMenuStrip menu, CoreHost host, string file)
         {
-            var ext = Path.GetExtension(file);
+            var root = BuildConversionRoot(host, new[] { file }, singleFile: true);
+            if (root != null)
+            {
+                menu.Items.Add(root);
+                menu.Items.Add(new ToolStripSeparator());
+            }
+
+            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
+            open.Image = MenuIcon.Value;
+            open.Click += (s, e) => LaunchOpen(new[] { file });
+            menu.Items.Add(open);
+        }
+
+        private void BuildMultiFileMenu(ContextMenuStrip menu, CoreHost host, IList<string> files)
+        {
+            // 全部选中文件扩展名一致时提供批量转换菜单（同格式多选转换）
+            var exts = files.Select(Path.GetExtension)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            if (exts.Count == 1 && host.Registry.Supports(exts[0]))
+            {
+                var root = BuildConversionRoot(host, files, singleFile: false);
+                if (root != null)
+                {
+                    menu.Items.Add(root);
+                    menu.Items.Add(new ToolStripSeparator());
+                }
+            }
+
+            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
+            open.Image = MenuIcon.Value;
+            open.Click += (s, e) => LaunchOpen(files.ToArray());
+            menu.Items.Add(open);
+        }
+
+        /// <summary>构建"使用 UniversalConvert 转换为"级联菜单（单选或多选同格式共用）。</summary>
+        private ToolStripMenuItem BuildConversionRoot(CoreHost host, IList<string> files, bool singleFile)
+        {
+            var ext = Path.GetExtension(files[0]);
             // 同一「输入→输出」方向被多个插件注册时只显示一次（具体用哪个在 App 端由 FormatResolver 决定）
             var conversions = host.Registry.GetConversionsFor(ext)
                 .GroupBy(e => e.OutputExtension, StringComparer.OrdinalIgnoreCase)
@@ -118,8 +156,7 @@ namespace UniversalConvert.ContextMenu
             if (conversions.Count == 0)
             {
                 root.Enabled = false;
-                menu.Items.Add(root);
-                return;
+                return root;
             }
 
             foreach (var conversion in conversions)
@@ -130,26 +167,29 @@ namespace UniversalConvert.ContextMenu
 
                 if (conversion.HasCustomizableOptions)
                 {
-                    // 有预设/参数 → 子菜单：默认（推荐）+ 各预设 + 更多设置
+                    // 有预设/参数 → 子菜单：默认（推荐）+ 各预设（多选批量时无"更多设置"）
                     var sub = new ToolStripMenuItem(label);
                     sub.Enabled = conversion.IsAvailable;
 
                     var defaultItem = new ToolStripMenuItem("默认（推荐）");
-                    defaultItem.Click += (s, e) => LaunchConvert(file, targetExt, null);
+                    defaultItem.Click += (s, e) => LaunchConvertBatch(files, targetExt, null);
                     sub.DropDownItems.Add(defaultItem);
 
                     foreach (var preset in conversion.Presets)
                     {
                         var presetName = preset.Name;
                         var presetItem = new ToolStripMenuItem(presetName);
-                        presetItem.Click += (s, e) => LaunchConvert(file, targetExt, presetName);
+                        presetItem.Click += (s, e) => LaunchConvertBatch(files, targetExt, presetName);
                         sub.DropDownItems.Add(presetItem);
                     }
 
-                    sub.DropDownItems.Add(new ToolStripSeparator());
-                    var more = new ToolStripMenuItem("更多设置...");
-                    more.Click += (s, e) => LaunchCustomize(file, targetExt);
-                    sub.DropDownItems.Add(more);
+                    if (singleFile)
+                    {
+                        sub.DropDownItems.Add(new ToolStripSeparator());
+                        var more = new ToolStripMenuItem("更多设置...");
+                        more.Click += (s, e) => LaunchCustomize(files[0], targetExt);
+                        sub.DropDownItems.Add(more);
+                    }
 
                     root.DropDownItems.Add(sub);
                 }
@@ -158,26 +198,12 @@ namespace UniversalConvert.ContextMenu
                     // 无参数 → 直接点击即转
                     var item = new ToolStripMenuItem(label);
                     item.Enabled = conversion.IsAvailable;
-                    item.Click += (s, e) => LaunchConvert(file, targetExt, null);
+                    item.Click += (s, e) => LaunchConvertBatch(files, targetExt, null);
                     root.DropDownItems.Add(item);
                 }
             }
 
-            menu.Items.Add(root);
-
-            menu.Items.Add(new ToolStripSeparator());
-            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
-            open.Image = MenuIcon.Value;
-            open.Click += (s, e) => LaunchOpen(new[] { file });
-            menu.Items.Add(open);
-        }
-
-        private void BuildMultiFileMenu(ContextMenuStrip menu, IList<string> files)
-        {
-            var open = new ToolStripMenuItem("使用 UniversalConvert 打开");
-            open.Image = MenuIcon.Value;
-            open.Click += (s, e) => LaunchOpen(files);
-            menu.Items.Add(open);
+            return root;
         }
 
         private void LaunchConvert(string file, string outputExtension, string presetName)
@@ -186,6 +212,16 @@ namespace UniversalConvert.ContextMenu
             if (!File.Exists(appExe)) return;
 
             var args = CommandLineContract.BuildConvertCommand(file, outputExtension, presetName: presetName);
+            Process.Start(appExe, args);
+        }
+
+        /// <summary>多选同格式：一次启动 App 批量转换全部选中文件（App 端打开批量转换窗口）。</summary>
+        private void LaunchConvertBatch(IList<string> files, string outputExtension, string presetName)
+        {
+            var appExe = Path.Combine(BaseDirectory, "UniversalConvert.App.exe");
+            if (!File.Exists(appExe)) return;
+
+            var args = CommandLineContract.BuildConvertCommandBatch(files, outputExtension, presetName);
             Process.Start(appExe, args);
         }
 

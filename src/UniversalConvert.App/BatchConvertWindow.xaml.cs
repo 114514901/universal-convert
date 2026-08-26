@@ -27,6 +27,7 @@ namespace UniversalConvert.App
         private readonly string _targetExt;
         private readonly int _workerThreads;
         private readonly string _outputDir;
+        private readonly string _presetName;
         private readonly ObservableCollection<BatchItem> _items = new ObservableCollection<BatchItem>();
         private readonly List<string> _outputPaths = new List<string>();
         private readonly StringBuilder _errorLog = new StringBuilder();
@@ -43,7 +44,7 @@ namespace UniversalConvert.App
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         public BatchConvertWindow(CoreHost host, SettingsManager settingsManager, string[] files, string targetExt, int workerThreads,
-            IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null)
+            IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null, string presetName = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
@@ -53,6 +54,7 @@ namespace UniversalConvert.App
             _targetExt = targetExt;
             _workerThreads = Math.Max(1, workerThreads);
             _outputDir = outputDir;
+            _presetName = presetName;
             _dispatcher = Dispatcher.CurrentDispatcher;
 
             TitleText.Text = Strings.BatchTitle + "  →  ." + targetExt;
@@ -132,7 +134,7 @@ namespace UniversalConvert.App
             {
                 RunOnUi(() => item.Status = Strings.StatusConverting);
 
-                var options = item.Options ?? PresetMerger.Merge(entry.Options, entry.Presets, null, null);
+                var options = item.Options ?? PresetMerger.Merge(entry.Options, entry.Presets, _presetName, null);
                 var request = new ConversionRequest
                 {
                     PluginId = entry.PluginId,

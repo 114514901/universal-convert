@@ -36,6 +36,25 @@ namespace UniversalConvert.Core
         }
 
         /// <summary>
+        /// 构建"多选批量转换"命令行：App.exe --convert "a.mp4" "b.mp4" --to mp3 [--preset ...]。
+        /// 输入文件全部以裸参数传递，Parse 时收进 ExtraFiles。
+        /// </summary>
+        public static string BuildConvertCommandBatch(IList<string> inputPaths, string outputExtension, string presetName = null)
+        {
+            var args = ConvertFlag;
+            foreach (var path in inputPaths)
+            {
+                args += " \"" + path + "\"";
+            }
+            args += $" {ToFlag} {outputExtension}";
+            if (!string.IsNullOrEmpty(presetName))
+            {
+                args += $" {PresetFlag} \"{presetName}\"";
+            }
+            return args;
+        }
+
+        /// <summary>
         /// 构建"更多设置"命令行：App.exe --customize "a.mp4" --to mp3。
         /// </summary>
         public static string BuildCustomizeCommand(string inputPath, string outputExtension)
@@ -73,8 +92,8 @@ namespace UniversalConvert.Core
                 switch (arg)
                 {
                     case ConvertFlag:
+                        // 输入文件不在此消费：--convert 后的所有文件作为裸参数收进 ExtraFiles（支持多文件批量）
                         result.IsConvertMode = true;
-                        if (i + 1 < args.Length) result.InputPath = args[++i];
                         break;
                     case CustomizeFlag:
                         result.IsCustomizeMode = true;

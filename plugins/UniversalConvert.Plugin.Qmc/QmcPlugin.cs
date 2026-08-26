@@ -17,7 +17,7 @@ namespace UniversalConvert.Plugin.Qmc
     /// （Anti 996 + MIT 许可证，详见同目录 LICENSE-NOTICE）。
     /// 流程：先解密成原格式（由解密后的文件头识别），目标格式不同则用 FFmpeg 转码。
     /// </summary>
-    public sealed class QmcPlugin : IConverterPlugin
+    public sealed class QmcPlugin : IConverterPlugin, IPreviewProvider
     {
         // QMC 老格式的固定密钥表（8 行 × 7 列），解密时蛇形遍历生成密钥流
         private static readonly byte[,] SeedMap = new byte[8, 7]
@@ -43,6 +43,33 @@ namespace UniversalConvert.Plugin.Qmc
         public string Version => "1.0.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
+
+
+
+        // ---------- IPreviewProvider（预览 = 临时解密后播放，关闭时由调用方清理） ----------
+
+        public IList<string> SupportedPreviewExtensions => new List<string> { ".qmc0", ".qmc3", ".qmcflac", ".qmcogg" };
+
+        public async Task<string> RenderPreviewAsync(string inputPath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var temp = Path.Combine(Path.GetTempPath(), "uc_prev_" + Guid.NewGuid().ToString("N"));
+                var fmt = DecryptTo(inputPath, temp, null, cancellationToken);
+                if (string.IsNullOrEmpty(fmt) || !File.Exists(temp))
+                {
+                    TryDelete(temp);
+                    return null;
+                }
+                var final = temp + "." + fmt.TrimStart('.');
+                File.Move(temp, final);
+                return final;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public void Initialize(IPluginContext context)
         {

@@ -18,7 +18,7 @@ namespace UniversalConvert.Plugin.Ncm
     /// 解密逻辑移植自 hkylin/ncmdumpGUI（MIT License, Copyright (c) 2018 kpali）。
     /// 流程：先解密成文件原格式（mp3/flac），若目标格式与原格式不同，再用 FFmpeg 转码。
     /// </summary>
-    public sealed class NcmPlugin : IConverterPlugin
+    public sealed class NcmPlugin : IConverterPlugin, IPreviewProvider
     {
         private static readonly byte[] Magic = { 0x43, 0x54, 0x45, 0x4E, 0x46, 0x44, 0x41, 0x4D }; // "CTENFDAM"
         private static readonly byte[] CoreKey = { 0x68, 0x7A, 0x48, 0x52, 0x41, 0x6D, 0x73, 0x6F, 0x35, 0x6B, 0x49, 0x6E, 0x62, 0x61, 0x78, 0x57 };
@@ -36,6 +36,33 @@ namespace UniversalConvert.Plugin.Ncm
         public string Version => "1.0.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
+
+
+
+        // ---------- IPreviewProvider（预览 = 临时解密后播放，关闭时由调用方清理） ----------
+
+        public IList<string> SupportedPreviewExtensions => new List<string> { ".ncm" };
+
+        public async Task<string> RenderPreviewAsync(string inputPath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var temp = Path.Combine(Path.GetTempPath(), "uc_prev_" + Guid.NewGuid().ToString("N"));
+                var fmt = DecryptTo(inputPath, temp, null, cancellationToken);
+                if (string.IsNullOrEmpty(fmt) || !File.Exists(temp))
+                {
+                    TryDelete(temp);
+                    return null;
+                }
+                var final = temp + "." + fmt.TrimStart('.');
+                File.Move(temp, final);
+                return final;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public void Initialize(IPluginContext context)
         {

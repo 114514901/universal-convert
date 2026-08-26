@@ -17,7 +17,7 @@ namespace UniversalConvert.Plugin.Kgm
     /// 解密算法移植自 ghtz08/kugou-kgm-decoder（Anti 996 License，详见同目录 LICENSE）。
     /// 流程：先解密成原格式（由解密后的文件头识别），目标格式不同则用 FFmpeg 转码。
     /// </summary>
-    public sealed class KgmPlugin : IConverterPlugin
+    public sealed class KgmPlugin : IConverterPlugin, IPreviewProvider
     {
         private const int HeaderLen = 1024;
         private const string KeyFileName = "kugou_key.dat";
@@ -67,6 +67,33 @@ namespace UniversalConvert.Plugin.Kgm
         public string Version => "1.0.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
+
+
+
+        // ---------- IPreviewProvider（预览 = 临时解密后播放，关闭时由调用方清理） ----------
+
+        public IList<string> SupportedPreviewExtensions => new List<string> { ".kgm", ".kgma" };
+
+        public async Task<string> RenderPreviewAsync(string inputPath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var temp = Path.Combine(Path.GetTempPath(), "uc_prev_" + Guid.NewGuid().ToString("N"));
+                var fmt = DecryptTo(inputPath, temp, null, cancellationToken);
+                if (string.IsNullOrEmpty(fmt) || !File.Exists(temp))
+                {
+                    TryDelete(temp);
+                    return null;
+                }
+                var final = temp + "." + fmt.TrimStart('.');
+                File.Move(temp, final);
+                return final;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public void Initialize(IPluginContext context)
         {
