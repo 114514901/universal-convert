@@ -133,7 +133,30 @@ namespace UniversalConvert.Core.Process
             {
                 if (!process.HasExited)
                 {
-                    process.Kill();
+                    // 用 taskkill /T 杀整棵进程树：PyInstaller onefile（如 whisper/markitdown/pysubs2）
+                    // 是"外壳进程 + 实际工作子进程"两级结构，只 Kill 外壳会让子进程变孤儿继续运行
+                    try
+                    {
+                        var psi = new ProcessStartInfo(
+                            "taskkill.exe",
+                            string.Format("/pid {0} /t /f", process.Id))
+                        {
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        using (var killer = Process.Start(psi))
+                        {
+                            if (killer != null) killer.WaitForExit(3000);
+                        }
+                    }
+                    catch
+                    {
+                        // taskkill 失败则回退直接 Kill
+                    }
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
                 }
             }
             catch
@@ -145,11 +168,65 @@ namespace UniversalConvert.Core.Process
         private static void SuspendProcess(System.Diagnostics.Process process)
         {
             try { NtSuspendProcess(process.Handle); } catch { }
+            foreach (var child in GetChildProcessIds(process.Id))
+            {
+                try
+                {
+                    using (var p = System.Diagnostics.Process.GetProcessById(child)) { NtSuspendProcess(p.Handle); }
+                }
+                catch { }
+            }
         }
 
         private static void ResumeProcess(System.Diagnostics.Process process)
         {
             try { NtResumeProcess(process.Handle); } catch { }
+            foreach (var child in GetChildProcessIds(process.Id))
+            {
+                try
+                {
+                    using (var p = System.Diagnostics.Process.GetProcessById(child)) { NtResumeProcess(p.Handle); }
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>枚举直接子进程 PID（tasklist 按 PPID 过滤；PyInstaller onefile 的外壳/工作进程关系）。</summary>
+        private static List<int> GetChildProcessIds(int parentId)
+        {
+            var result = new List<int>();
+            try
+            {
+                var psi = new ProcessStartInfo("tasklist.exe",
+                    string.Format("/fi \"PPID eq {0}\" /fo csv /nh", parentId))
+                {
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+                using (var p = System.Diagnostics.Process.Start(psi))
+                {
+                    var csv = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit(3000);
+                    foreach (var line in csv.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var parts = line.Split(',');
+                        if (parts.Length >= 2)
+                        {
+                            int id;
+                            if (int.TryParse(parts[1].Trim('"', ' '), out id) && id != parentId)
+                            {
+                                result.Add(id);
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 枚举失败则只挂起/恢复主进程
+            }
+            return result;
         }
 
         /// <summary>把单个参数按命令行规则加引号（含空格或引号时）。</summary>
