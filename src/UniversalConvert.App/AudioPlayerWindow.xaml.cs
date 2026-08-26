@@ -47,6 +47,10 @@ namespace UniversalConvert.App
             _player.MediaEnded += OnMediaEnded;
             _player.MediaFailed += OnMediaFailed;
 
+            // MediaPlayer.Volume 默认是 0.5（50%）而音量条初始在 100%：
+            // 显式对齐为满音量，避免「显示满格但实际只有一半、拉一下才变大」
+            _player.Volume = 1.0;
+
             // 提供者优先：若某插件声明支持该格式的预览（如 MIDI 合成），先渲染再播放
             var provider = FindPreviewProvider(host, filePath);
             if (provider != null)

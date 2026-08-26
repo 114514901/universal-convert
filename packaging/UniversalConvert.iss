@@ -128,7 +128,17 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   // 复制文件前显式关闭正在运行的实例（CloseApplications 检测不可靠，这里兜底）
   CloseRunningApp;
+  // 桌面整理类软件（iTop Easy Desktop 等）会枚举文件右键菜单，连带加载 UniversalConvert
+  // 插件 DLL 进自己的进程并锁定，导致更新时插件覆盖失败（拒绝访问）——一并结束。
+  KillKnownLockers;
   Result := '';
+end;
+
+procedure KillKnownLockers();
+var
+  ResultCode: Integer;
+begin
+  Exec('taskkill.exe', '/f /im iTopEasyDesktop.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
 procedure KillExplorer();
