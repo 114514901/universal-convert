@@ -144,7 +144,7 @@ namespace UniversalConvert.Core.Process
                             UseShellExecute = false,
                             CreateNoWindow = true
                         };
-                        using (var killer = Process.Start(psi))
+                        using (var killer = System.Diagnostics.Process.Start(psi))
                         {
                             if (killer != null) killer.WaitForExit(3000);
                         }

@@ -105,8 +105,16 @@ namespace UniversalConvert.Plugin.FFmpeg
             }
             else if (AudioOutputs.Contains(outExt))
             {
-                // 音频输出：丢弃视频流
-                sb.Append(" -vn");
+                // 音频输出：目标容器支持封面（attached pic）时保留封面（mjpeg 原样 copy），
+                // 否则丢弃视频流（封面会被当成普通视频流转码进不支持的容器导致失败，如 mp3→m4a）。
+                if (SupportsCoverArt(outExt))
+                {
+                    sb.Append(" -map 0:a? -map 0:v? -c:v copy");
+                }
+                else
+                {
+                    sb.Append(" -vn");
+                }
             }
             else
             {
@@ -129,6 +137,12 @@ namespace UniversalConvert.Plugin.FFmpeg
 
             sb.Append(' ').Append(ProcessRunner.Quote(outputPath));
             return sb.ToString();
+        }
+
+        /// <summary>目标音频容器是否支持嵌入封面（attached pic）：mp3/m4a/flac 支持，其余（ogg/opus/aac/wma 等）不支持。</summary>
+        private static bool SupportsCoverArt(string outExt)
+        {
+            return outExt == ".mp3" || outExt == ".m4a" || outExt == ".flac";
         }
 
         protected override void OnOutputLine(string line, ConversionRequest request, IProgress<ConversionProgress> progress)
