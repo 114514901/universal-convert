@@ -258,6 +258,12 @@
   <data name="ErrorNoSpaceLeftSuggestion" xml:space="preserve">
     <value>请清理磁盘空间后重试。</value>
   </data>
+  <data name="ErrorVersionMismatch" xml:space="preserve">
+    <value>扩展与主程序版本不兼容</value>
+  </data>
+  <data name="ErrorVersionMismatchSuggestion" xml:space="preserve">
+    <value>请将该扩展更新到最新版本（扩展管理器 → 检查扩展更新），或升级主程序。</value>
+  </data>
   <data name="UpdateAvailable" xml:space="preserve">
     <value>发现新版本 {0}，点击下载更新。</value>
   </data>

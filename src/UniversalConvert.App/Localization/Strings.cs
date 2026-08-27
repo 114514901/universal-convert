@@ -95,6 +95,8 @@ namespace UniversalConvert.App.Localization
         public static string ErrorInvalidInputSuggestion => Get("ErrorInvalidInputSuggestion");
         public static string ErrorNoSpaceLeft => Get("ErrorNoSpaceLeft");
         public static string ErrorNoSpaceLeftSuggestion => Get("ErrorNoSpaceLeftSuggestion");
+        public static string ErrorVersionMismatch => Get("ErrorVersionMismatch");
+        public static string ErrorVersionMismatchSuggestion => Get("ErrorVersionMismatchSuggestion");
         public static string UpdateAvailable => Get("UpdateAvailable");
         public static string DownloadUpdate => Get("DownloadUpdate");
         public static string FilesLabel => Get("FilesLabel");

@@ -258,6 +258,12 @@
   <data name="ErrorNoSpaceLeftSuggestion" xml:space="preserve">
     <value>Free up disk space and try again.</value>
   </data>
+  <data name="ErrorVersionMismatch" xml:space="preserve">
+    <value>Extension is incompatible with the current app version</value>
+  </data>
+  <data name="ErrorVersionMismatchSuggestion" xml:space="preserve">
+    <value>Update the extension to the latest version (Plugin Manager → Check for updates), or upgrade the app.</value>
+  </data>
   <data name="UpdateAvailable" xml:space="preserve">
     <value>New version {0} is available. Click to download.</value>
   </data>

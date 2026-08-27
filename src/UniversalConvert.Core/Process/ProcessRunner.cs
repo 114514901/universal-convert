@@ -47,6 +47,35 @@ namespace UniversalConvert.Core.Process
             string workingDirectory = null,
             ManualResetEventSlim pauseSignal = null)
         {
+            return RunCore(executable, arguments, cancellationToken, onOutputLine, workingDirectory, pauseSignal);
+        }
+
+        /// <summary>
+        /// 向后兼容重载：pauseSignal 加入前的旧扩展二进制只绑定了 3 参/5 参签名
+        /// （可选参数是编译期糖，旧元数据里没有 6 参签名，运行时直接 MissingMethodException），
+        /// 提供物理重载保证旧扩展不重编译也能在新 Core 下运行。
+        /// </summary>
+        public static ProcessRunResult Run(string executable, string arguments, CancellationToken cancellationToken)
+        {
+            return RunCore(executable, arguments, cancellationToken, null, null, null);
+        }
+
+        /// <summary>向后兼容重载（见 Run(string, string, CancellationToken) 的说明）。</summary>
+        public static ProcessRunResult Run(
+            string executable, string arguments, CancellationToken cancellationToken,
+            Action<string> onOutputLine, string workingDirectory)
+        {
+            return RunCore(executable, arguments, cancellationToken, onOutputLine, workingDirectory, null);
+        }
+
+        private static ProcessRunResult RunCore(
+            string executable,
+            string arguments,
+            CancellationToken cancellationToken,
+            Action<string> onOutputLine,
+            string workingDirectory,
+            ManualResetEventSlim pauseSignal)
+        {
             var result = new ProcessRunResult();
             var output = new StringBuilder();
             var error = new StringBuilder();

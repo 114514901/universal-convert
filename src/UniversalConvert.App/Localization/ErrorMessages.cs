@@ -15,6 +15,7 @@ namespace UniversalConvert.App.Localization
                 case ConversionErrorKind.UnknownEncoder: return Strings.ErrorUnknownEncoder;
                 case ConversionErrorKind.InvalidInput: return Strings.ErrorInvalidInput;
                 case ConversionErrorKind.NoSpaceLeft: return Strings.ErrorNoSpaceLeft;
+                case ConversionErrorKind.VersionMismatch: return Strings.ErrorVersionMismatch;
                 default: return Strings.ErrorUnknown;
             }
         }
@@ -29,6 +30,7 @@ namespace UniversalConvert.App.Localization
                 case ConversionErrorKind.UnknownEncoder: return Strings.ErrorUnknownEncoderSuggestion;
                 case ConversionErrorKind.InvalidInput: return Strings.ErrorInvalidInputSuggestion;
                 case ConversionErrorKind.NoSpaceLeft: return Strings.ErrorNoSpaceLeftSuggestion;
+                case ConversionErrorKind.VersionMismatch: return Strings.ErrorVersionMismatchSuggestion;
                 default: return Strings.ErrorUnknownSuggestion;
             }
         }

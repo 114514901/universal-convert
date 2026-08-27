@@ -11,7 +11,8 @@ namespace UniversalConvert.Core.Diagnostics
         PermissionDenied,
         UnknownEncoder,
         InvalidInput,
-        NoSpaceLeft
+        NoSpaceLeft,
+        VersionMismatch
     }
 
     /// <summary>错误解析结果。</summary>
@@ -35,6 +36,11 @@ namespace UniversalConvert.Core.Diagnostics
             }
 
             string text = errorText;
+
+            // 版本不兼容：旧版扩展二进制把可选参数方法编译成旧签名，新 Core 中方法签名不匹配
+            // （MissingMethodException/找不到方法等）。必须先于 ToolNotFound 判断（其文案含"找不到"）。
+            if (Regex.IsMatch(text, @"找不到方法|MissingMethodException|method not found|找不到类型|TypeLoadException|FileLoadException|违反继承安全规则|incompatible version", RegexOptions.IgnoreCase))
+                return New(ConversionErrorKind.VersionMismatch, "VersionMismatch");
 
             if (Regex.IsMatch(text, @"Unknown encoder|Unknown decoder|Unrecognized option|Unable to find a suitable output format", RegexOptions.IgnoreCase))
                 return New(ConversionErrorKind.UnknownEncoder, "UnknownEncoder");
