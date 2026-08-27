@@ -84,9 +84,13 @@ namespace UniversalConvert.App
             }
         }
 
-        private const int DownloadThreads = 8;
+        /// <summary>全局连接预算上限（同时最多 9 个 HTTP 连接）。多文件共享预算时按块动态分配。</summary>
+        private const int MaxConnections = 9;
 
-        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null, ManualResetEventSlim pause = null)
+        /// <summary>分块下载的块大小（8MB）：块级独立下载与全局预算调度，文件完成自动释放连接给剩余文件。</summary>
+        private const long ChunkSize = 8L * 1024 * 1024;
+
+        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null, ManualResetEventSlim pause = null, SemaphoreSlim sharedBudget = null)
         {
             Log.Info($"开始下载更新: {downloadUrl}");
             long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
@@ -99,33 +103,32 @@ namespace UniversalConvert.App
             }
             else
             {
-                // 预分配文件，各线程写到自己的区间
+                // 预分配文件，各块写到自己的区间
                 using (var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.Write))
                 {
                     fs.SetLength(total);
                 }
 
-                long chunkSize = (total + DownloadThreads - 1) / DownloadThreads;
+                // 共享预算（多文件并行时由调用方传入，单文件自建 9 连接预算）
+                var budget = sharedBudget ?? new SemaphoreSlim(MaxConnections);
                 long done = 0;
                 var doneLock = new object();
 
+                // 切成 8MB 块，每块申请 1 个连接预算后下载；
+                // 块全部完成后本文件不再竞争预算 → 剩余文件自动获得更多连接
                 var tasks = new List<Task>();
-                for (int i = 0; i < DownloadThreads; i++)
+                for (long start = 0; start < total; start += ChunkSize)
                 {
-                    long start = (long)i * chunkSize;
-                    if (start >= total) break;
-                    long end = Math.Min(total - 1, start + chunkSize - 1);
-
-                    // 每段独立任务，带段级重试：暂停导致的连接超时（ReadWriteTimeout）在恢复后重下该段
-                    int segment = i;
-                    tasks.Add(DownloadSegmentAsync(segment, downloadUrl, destPath, start, end, n =>
+                    long chunkStart = start;
+                    long chunkEnd = Math.Min(total - 1, start + ChunkSize - 1);
+                    tasks.Add(DownloadChunkWithBudgetAsync(downloadUrl, destPath, chunkStart, chunkEnd, n =>
                     {
                         lock (doneLock)
                         {
                             done += n;
                             progress?.Report(Math.Min(100.0, (double)done / total * 100.0));
                         }
-                    }, ct, pause));
+                    }, ct, pause, budget));
                 }
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -136,9 +139,25 @@ namespace UniversalConvert.App
             Log.Info("更新下载完成" + (string.IsNullOrEmpty(expectedSha256) ? "" : "（SHA256 校验通过）"));
         }
 
-        /// <summary>下载一个分段；暂停时等待恢复；连接被服务端掐断（暂停太久触发读超时）时重试该段。</summary>
-        private static async Task DownloadSegmentAsync(
-            int segment, string url, string destPath, long start, long end,
+        /// <summary>申请连接预算后下载一个块；块完成/失败释放预算给其它文件。</summary>
+        private static async Task DownloadChunkWithBudgetAsync(
+            string url, string destPath, long start, long end,
+            Action<int> onBytes, CancellationToken ct, ManualResetEventSlim pause, SemaphoreSlim budget)
+        {
+            await budget.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                await DownloadChunkAsync(url, destPath, start, end, onBytes, ct, pause).ConfigureAwait(false);
+            }
+            finally
+            {
+                budget.Release();
+            }
+        }
+
+        /// <summary>下载一个块；暂停时等待恢复；连接被服务端掐断（暂停太久触发读超时）时重试该块。</summary>
+        private static async Task DownloadChunkAsync(
+            string url, string destPath, long start, long end,
             Action<int> onBytes, CancellationToken ct, ManualResetEventSlim pause)
         {
             for (int attempt = 0; ; attempt++)
@@ -157,7 +176,7 @@ namespace UniversalConvert.App
                 catch (Exception ex)
                 {
                     // 暂停引起的读超时/连接中断：等暂停结束再重试；非暂停的持续失败也先重试，过多才放弃
-                    Log.Warn($"下载分段 {segment} 第 {attempt + 1} 次尝试失败: {ex.Message}");
+                    Log.Warn($"下载块 {start}-{end} 第 {attempt + 1} 次尝试失败: {ex.Message}");
                     if (attempt >= 20)
                     {
                         throw;

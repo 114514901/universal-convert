@@ -49,8 +49,10 @@ namespace UniversalConvert.App
             int succeeded = 0;
             int failed = 0;
 
-            // 同时最多 2 个扩展下载，避免与每个扩展内部的 8 线程分段下载叠加过多连接
-            var gate = new SemaphoreSlim(2);
+            // 同时最多 3 个扩展下载（文件级并发上限）；全局连接预算（9）由共享 SemaphoreSlim 控制，
+            // 各文件的 8MB 块竞争预算——文件完成自动把连接让给剩余文件
+            var gate = new SemaphoreSlim(3);
+            var budget = new SemaphoreSlim(9);
             var tasks = _items.Select(async item =>
             {
                 await gate.WaitAsync();
@@ -59,7 +61,7 @@ namespace UniversalConvert.App
                     // Progress<T> 在 UI 线程构造，回调回到 UI 线程，可直接更新绑定属性
                     var progress = new Progress<double>(p => item.SetDownloadProgress(p));
                     Log.Info($"开始安装/更新扩展: {item.Info.Id} {item.Info.Version} (下载: {item.Info.DownloadUrl})");
-                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal);
+                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal, budget);
                     Log.Info($"扩展 {item.Info.Id} 安装/更新结果: {result}");
 
                     if (result == ExtensionInstallResult.Installed)
