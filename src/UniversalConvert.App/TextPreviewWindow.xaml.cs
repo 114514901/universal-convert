@@ -198,7 +198,7 @@ namespace UniversalConvert.App
                         continue;
                     }
                     // 普通词
-                    AppendPlain(word);
+                    plain.Append(word);
                     i = wordEnd;
                     continue;
                 }
