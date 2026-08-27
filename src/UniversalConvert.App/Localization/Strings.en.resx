@@ -600,6 +600,12 @@
   <data name="ImagePreviewSizeFormat" xml:space="preserve">
     <value>{0} × {1}, {2}</value>
   </data>
+  <data name="TextPreviewFailed" xml:space="preserve">
+    <value>Cannot open this file</value>
+  </data>
+  <data name="TextPreviewStatsFormat" xml:space="preserve">
+    <value>{0} lines · {1} chars</value>
+  </data>
   <data name="ParamsColumn" xml:space="preserve">
     <value>Parameters</value>
   </data>

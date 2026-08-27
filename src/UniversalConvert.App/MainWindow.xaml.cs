@@ -249,6 +249,11 @@ namespace UniversalConvert.App
                 var window = new ImagePreviewWindow(row.Path) { Owner = this };
                 window.Show();
             }
+            else if (CanPreviewText(row.Path))
+            {
+                var window = new TextPreviewWindow(row.Path) { Owner = this };
+                window.Show();
+            }
         }
 
         /// <summary>内置预览支持的图片扩展名（WPF 直接解码或 ffmpeg 可转码）。</summary>
@@ -262,6 +267,19 @@ namespace UniversalConvert.App
         {
             var ext = Path.GetExtension(path);
             return PreviewableImageExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>内置预览支持的文本扩展名（JSON 带语法高亮）。</summary>
+        private static readonly string[] PreviewableTextExtensions =
+        {
+            ".txt", ".md", ".markdown", ".log", ".json", ".xml", ".csv", ".ini", ".cfg",
+            ".srt", ".lrc", ".yaml", ".yml", ".css", ".js", ".py", ".bat", ".cmd", ".ps1"
+        };
+
+        private static bool CanPreviewText(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return PreviewableTextExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
         }
 
         private void OnFileListKeyDown(object sender, KeyEventArgs e)
@@ -301,6 +319,11 @@ namespace UniversalConvert.App
             else if (CanPreviewImage(row.Path))
             {
                 var window = new ImagePreviewWindow(row.Path) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewText(row.Path))
+            {
+                var window = new TextPreviewWindow(row.Path) { Owner = this };
                 window.Show();
             }
             else

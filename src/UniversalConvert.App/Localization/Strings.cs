@@ -187,6 +187,8 @@ namespace UniversalConvert.App.Localization
         public static string PreviewLoading => Get("PreviewLoading");
         public static string ImagePreviewFailed => Get("ImagePreviewFailed");
         public static string ImagePreviewSizeFormat => Get("ImagePreviewSizeFormat");
+        public static string TextPreviewFailed => Get("TextPreviewFailed");
+        public static string TextPreviewStatsFormat => Get("TextPreviewStatsFormat");
         public static string ParamsColumn => Get("ParamsColumn");
         public static string FormatColumn => Get("FormatColumn");
         public static string OutputLocation => Get("OutputLocation");

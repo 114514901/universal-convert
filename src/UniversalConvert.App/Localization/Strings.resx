@@ -600,6 +600,12 @@
   <data name="ImagePreviewSizeFormat" xml:space="preserve">
     <value>{0} × {1}，{2}</value>
   </data>
+  <data name="TextPreviewFailed" xml:space="preserve">
+    <value>无法打开该文件</value>
+  </data>
+  <data name="TextPreviewStatsFormat" xml:space="preserve">
+    <value>{0} 行 · {1} 字符</value>
+  </data>
   <data name="ParamsColumn" xml:space="preserve">
     <value>转换参数</value>
   </data>
