@@ -136,6 +136,8 @@ namespace UniversalConvert.App
                 plain.Clear();
             }
 
+            void AppendPlain(char c) { plain.Append(c); }
+
             while (i < n)
             {
                 // 注释
