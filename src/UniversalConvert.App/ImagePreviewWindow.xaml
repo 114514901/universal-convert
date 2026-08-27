@@ -16,17 +16,29 @@
                    TextTrimming="CharacterEllipsis" Margin="4,2,4,8"/>
 
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="#1E1E1E">
-            <ScrollViewer x:Name="ImageScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <Image x:Name="PreviewImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
-                       Margin="8"/>
+            <ScrollViewer x:Name="ImageScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          SizeChanged="OnScrollSizeChanged" PreviewMouseWheel="OnPreviewMouseWheel">
+                <Grid>
+                    <Image x:Name="PreviewImage" RenderOptions.BitmapScalingMode="HighQuality"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           MouseLeftButtonDown="OnImageMouseDown" MouseMove="OnImageMouseMove"
+                           MouseLeftButtonUp="OnImageMouseUp" MouseLeave="OnImageMouseLeave">
+                        <Image.RenderTransform>
+                            <ScaleTransform x:Name="ImageScale"/>
+                        </Image.RenderTransform>
+                    </Image>
+                </Grid>
             </ScrollViewer>
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,8,4,0">
             <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="#666666"/>
-            <Button x:Name="ZoomActualButton" Content="100%" Padding="12,4" Margin="16,0,0,0" Click="OnZoomActual" IsEnabled="False"/>
+            <Button x:Name="ZoomOutButton" Content="−" Padding="10,4" Margin="16,0,0,0" Click="OnZoomOut" IsEnabled="False"/>
+            <Button x:Name="ZoomInButton" Content="＋" Padding="10,4" Margin="8,0,0,0" Click="OnZoomIn" IsEnabled="False"/>
+            <Button x:Name="ZoomActualButton" Content="100%" Padding="12,4" Margin="8,0,0,0" Click="OnZoomActual" IsEnabled="False"/>
             <Button x:Name="FitButton" Content="{x:Static loc:Strings.FitToWindow}" Padding="12,4" Margin="8,0,0,0" Click="OnZoomFit" IsEnabled="False"/>
-            <Button Content="{x:Static loc:Strings.Close}" Padding="16,4" Margin="16,0,0,0" HorizontalAlignment="Right" Click="OnClose"/>
+            <TextBlock x:Name="ZoomText" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#888888" FontSize="12"/>
+            <Button Content="{x:Static loc:Strings.Close}" Padding="16,4" Margin="24,0,0,0" HorizontalAlignment="Right" Click="OnClose"/>
         </StackPanel>
     </Grid>
 </Window>

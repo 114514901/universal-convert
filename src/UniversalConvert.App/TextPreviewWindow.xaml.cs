@@ -107,7 +107,9 @@ namespace UniversalConvert.App
         private static readonly SolidColorBrush StringBrush = new SolidColorBrush(Color.FromRgb(0xCE, 0x91, 0x78)); // 字符串
         private static readonly SolidColorBrush NumberBrush = new SolidColorBrush(Color.FromRgb(0xB5, 0xCE, 0xA8)); // 数字
         private static readonly SolidColorBrush LiteralBrush = new SolidColorBrush(Color.FromRgb(0x56, 0x9C, 0xD6)); // true/false/null
-        private static readonly SolidColorBrush PunctuationBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); // 标点
+        private static readonly SolidColorBrush BraceBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xC0, 0x7B));   // { }
+        private static readonly SolidColorBrush BracketBrush = new SolidColorBrush(Color.FromRgb(0xC6, 0x78, 0xDD)); // [ ]
+        private static readonly SolidColorBrush PunctuationBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); // : 与 ,
         private static readonly SolidColorBrush PlainBrush = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33));  // 普通
 
         public static void Fill(Paragraph paragraph, string text)
@@ -163,7 +165,10 @@ namespace UniversalConvert.App
                 else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',')
                 {
                     FlushPlain();
-                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = PunctuationBrush });
+                    var brush = (c == '{' || c == '}') ? BraceBrush
+                        : (c == '[' || c == ']') ? BracketBrush
+                        : PunctuationBrush;
+                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = brush });
                     i++;
                 }
                 else
