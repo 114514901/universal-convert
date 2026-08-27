@@ -237,10 +237,31 @@ namespace UniversalConvert.App
         private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var row = FileList.SelectedItem as FileRow;
-            if (row == null || !CanPreviewAudio(row.Path)) return;
+            if (row == null) return;
 
-            var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
-            window.Show();
+            if (CanPreviewAudio(row.Path))
+            {
+                var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewImage(row.Path))
+            {
+                var window = new ImagePreviewWindow(row.Path) { Owner = this };
+                window.Show();
+            }
+        }
+
+        /// <summary>内置预览支持的图片扩展名（WPF 直接解码或 ffmpeg 可转码）。</summary>
+        private static readonly string[] PreviewableImageExtensions =
+        {
+            ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".tif",
+            ".ico", ".webp", ".heic", ".heif", ".avif", ".psd", ".tga"
+        };
+
+        private static bool CanPreviewImage(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return PreviewableImageExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
         }
 
         private void OnFileListKeyDown(object sender, KeyEventArgs e)
@@ -275,6 +296,11 @@ namespace UniversalConvert.App
             if (CanPreviewAudio(row.Path))
             {
                 var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewImage(row.Path))
+            {
+                var window = new ImagePreviewWindow(row.Path) { Owner = this };
                 window.Show();
             }
             else

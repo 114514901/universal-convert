@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.2.0-dev.5] - 2026-08-25
+
+### 新增
+- 图片预览：文件列表双击或右键预览常见图片（jpg/png/bmp/gif/tiff/ico 等）直接内置查看（适应窗口/100% 缩放，显示尺寸与体积）；webp/heic/avif/psd/tga 等 WPF 不能解码的格式自动用 ffmpeg 转 PNG 显示
+
 ## [2.2.0-dev.4] - 2026-08-25
 
 ### 修复

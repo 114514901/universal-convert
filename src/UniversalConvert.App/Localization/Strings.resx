@@ -582,6 +582,18 @@
   <data name="Preview" xml:space="preserve">
     <value>预览</value>
   </data>
+  <data name="FitToWindow" xml:space="preserve">
+    <value>适应窗口</value>
+  </data>
+  <data name="PreviewLoading" xml:space="preserve">
+    <value>正在加载…</value>
+  </data>
+  <data name="ImagePreviewFailed" xml:space="preserve">
+    <value>无法预览该图片</value>
+  </data>
+  <data name="ImagePreviewSizeFormat" xml:space="preserve">
+    <value>{0} × {1}，{2}</value>
+  </data>
   <data name="ParamsColumn" xml:space="preserve">
     <value>转换参数</value>
   </data>

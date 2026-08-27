@@ -582,6 +582,18 @@
   <data name="Preview" xml:space="preserve">
     <value>Preview</value>
   </data>
+  <data name="FitToWindow" xml:space="preserve">
+    <value>Fit to window</value>
+  </data>
+  <data name="PreviewLoading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="ImagePreviewFailed" xml:space="preserve">
+    <value>Cannot preview this image</value>
+  </data>
+  <data name="ImagePreviewSizeFormat" xml:space="preserve">
+    <value>{0} × {1}, {2}</value>
+  </data>
   <data name="ParamsColumn" xml:space="preserve">
     <value>Parameters</value>
   </data>

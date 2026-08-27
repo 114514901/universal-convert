@@ -181,6 +181,10 @@ namespace UniversalConvert.App.Localization
         public static string Original => Get("Original");
         public static string ManualCustom => Get("ManualCustom");
         public static string Preview => Get("Preview");
+        public static string FitToWindow => Get("FitToWindow");
+        public static string PreviewLoading => Get("PreviewLoading");
+        public static string ImagePreviewFailed => Get("ImagePreviewFailed");
+        public static string ImagePreviewSizeFormat => Get("ImagePreviewSizeFormat");
         public static string ParamsColumn => Get("ParamsColumn");
         public static string FormatColumn => Get("FormatColumn");
         public static string OutputLocation => Get("OutputLocation");
