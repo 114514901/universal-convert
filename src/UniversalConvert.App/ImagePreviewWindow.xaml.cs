@@ -4,19 +4,22 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UniversalConvert.App.Localization;
 
 namespace UniversalConvert.App
 {
     /// <summary>
-    /// 简易图片预览窗口：适应窗口/100%/缩放手动或滚轮控制。
+    /// 简易图片预览窗口：适应窗口/100%/缩放（滚轮、按钮）与拖拽平移。
+    /// 显示尺寸用 Image 的 Width/Height 直接控制（ScaleTransform 只影响渲染、不影响布局，
+    /// 会导致滚动条/拖拽失效），保证缩放后滚动范围正确。
     /// WPF 无法直接解码的格式（webp/heic/avif/psd 等）自动用随包 ffmpeg 转成 PNG 临时文件显示，关闭时清理。
     /// </summary>
     public partial class ImagePreviewWindow : Window
     {
         private const double ZoomStep = 1.25;
+        private const double MinScale = 0.05;
+        private const double MaxScale = 64.0;
 
         private readonly string _filePath;
         private string _tempPngPath;
@@ -124,31 +127,75 @@ namespace UniversalConvert.App
             return null;
         }
 
-        // ---------- 缩放 ----------
+        // ---------- 缩放（用 Width/Height 控制显示尺寸，滚动/拖拽随布局尺寸生效） ----------
 
-        /// <summary>适应窗口：图片尺寸锁定为视口大小（ScrollViewer 中 Stretch 无效，必须显式尺寸）。</summary>
+        private BitmapImage Source
+        {
+            get { return PreviewImage.Source as BitmapImage; }
+        }
+
+        /// <summary>当前显示比例：fit 模式按"图片显示尺寸/原始尺寸"估算，缩放模式为显式比例。</summary>
+        private double CurrentScale()
+        {
+            var src = Source;
+            if (src == null) return 1.0;
+            if (_fitMode)
+            {
+                if (PreviewImage.ActualWidth > 0 && src.PixelWidth > 0)
+                {
+                    return PreviewImage.ActualWidth / src.PixelWidth;
+                }
+                return 1.0;
+            }
+            return PreviewImage.ActualWidth > 0 && src.PixelWidth > 0
+                ? PreviewImage.ActualWidth / src.PixelWidth
+                : 1.0;
+        }
+
         private void ApplyFit()
         {
             _fitMode = true;
-            ImageScale.ScaleX = 1;
-            ImageScale.ScaleY = 1;
             SetImageToViewport();
             UpdateZoomText();
         }
 
         private void SetImageToViewport()
         {
-            var viewport = new Size(
-                Math.Max(64, ImageScroll.ViewportWidth - 24),
-                Math.Max(64, ImageScroll.ViewportHeight - 24));
-            PreviewImage.Width = viewport.Width;
-            PreviewImage.Height = viewport.Height;
+            var src = Source;
+            if (src == null) return;
+
+            var vw = Math.Max(64, ImageScroll.ViewportWidth - 24);
+            var vh = Math.Max(64, ImageScroll.ViewportHeight - 24);
+            var scale = Math.Min(vw / (double)src.PixelWidth, vh / (double)src.PixelHeight);
+            PreviewImage.Width = src.PixelWidth * scale;
+            PreviewImage.Height = src.PixelHeight * scale;
         }
 
-        private void SetImageNatural()
+        /// <summary>按给定比例设置显示尺寸，并保持视口中心对应的内容点不动。</summary>
+        private void SetScaleKeepCenter(double newScale)
         {
-            PreviewImage.Width = double.NaN;
-            PreviewImage.Height = double.NaN;
+            var src = Source;
+            if (src == null) return;
+
+            var oldScale = CurrentScale();
+            // 缩放前视口中心对应的内容坐标（相对图片原点）
+            var contentX = (ImageScroll.HorizontalOffset + ImageScroll.ViewportWidth / 2) / oldScale;
+            var contentY = (ImageScroll.VerticalOffset + ImageScroll.ViewportHeight / 2) / oldScale;
+
+            _fitMode = false;
+            PreviewImage.Width = src.PixelWidth * newScale;
+            PreviewImage.Height = src.PixelHeight * newScale;
+
+            // 缩放后让同一内容坐标回到视口中心
+            ImageScroll.ScrollToHorizontalOffset(contentX * newScale - ImageScroll.ViewportWidth / 2);
+            ImageScroll.ScrollToVerticalOffset(contentY * newScale - ImageScroll.ViewportHeight / 2);
+            UpdateZoomText();
+        }
+
+        private void ZoomBy(double factor)
+        {
+            var next = Math.Max(MinScale, Math.Min(MaxScale, CurrentScale() * factor));
+            SetScaleKeepCenter(next);
         }
 
         private void OnZoomFit(object sender, RoutedEventArgs e)
@@ -158,64 +205,35 @@ namespace UniversalConvert.App
 
         private void OnZoomActual(object sender, RoutedEventArgs e)
         {
-            _fitMode = false;
-            ImageScale.ScaleX = 1;
-            ImageScale.ScaleY = 1;
-            SetImageNatural();
-            UpdateZoomText();
+            SetScaleKeepCenter(1.0);
         }
 
         private void OnZoomIn(object sender, RoutedEventArgs e)
         {
-            _fitMode = false;
-            SetImageNatural();
-            ImageScale.ScaleX *= ZoomStep;
-            ImageScale.ScaleY *= ZoomStep;
-            UpdateZoomText();
+            ZoomBy(ZoomStep);
         }
 
         private void OnZoomOut(object sender, RoutedEventArgs e)
         {
-            var next = ImageScale.ScaleX / ZoomStep;
-            if (next < 0.05)
-            {
-                next = 0.05;
-            }
-            _fitMode = false;
-            SetImageNatural();
-            var ratio = next / ImageScale.ScaleX;
-            ImageScale.ScaleX = next;
-            ImageScale.ScaleY *= ratio;
-            UpdateZoomText();
+            ZoomBy(1.0 / ZoomStep);
         }
 
         private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var src = PreviewImage.Source as BitmapImage;
-            if (src == null) return;
-
-            _fitMode = false;
-            SetImageNatural();
-
-            var factor = e.Delta > 0 ? ZoomStep : 1.0 / ZoomStep;
-            var next = Math.Max(0.05, Math.Min(64.0, ImageScale.ScaleX * factor));
-            var ratio = next / ImageScale.ScaleX;
-            ImageScale.ScaleX = next;
-            ImageScale.ScaleY *= ratio;
-            UpdateZoomText();
-
+            if (Source == null) return;
+            ZoomBy(e.Delta > 0 ? ZoomStep : 1.0 / ZoomStep);
             e.Handled = true;
         }
 
         private void OnScrollSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (_fitMode && PreviewImage.Source != null)
+            if (_fitMode)
             {
                 SetImageToViewport();
             }
         }
 
-        // ---------- 拖拽平移（放缩后的图片直接拖动，滚动条同步） ----------
+        // ---------- 拖拽平移（直接移动滚动偏移，滚动条同步） ----------
 
         private bool _dragging;
         private Point _dragStart;
@@ -225,7 +243,11 @@ namespace UniversalConvert.App
         private void OnImageMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left) return;
-            if (PreviewImage.Source == null || _fitMode) return;
+            if (PreviewImage.Source == null) return;
+            // 内容大于视口时才需要拖拽；否则忽略
+            var canScrollHoriz = ImageScroll.ExtentWidth > ImageScroll.ViewportWidth;
+            var canScrollVert = ImageScroll.ExtentHeight > ImageScroll.ViewportHeight;
+            if (!canScrollHoriz && !canScrollVert) return;
 
             _dragging = true;
             _dragStart = e.GetPosition(ImageScroll);
@@ -241,10 +263,8 @@ namespace UniversalConvert.App
             if (!_dragging) return;
 
             var pos = e.GetPosition(ImageScroll);
-            var dx = pos.X - _dragStart.X;
-            var dy = pos.Y - _dragStart.Y;
-            ImageScroll.ScrollToHorizontalOffset(_scrollStartX - dx);
-            ImageScroll.ScrollToVerticalOffset(_scrollStartY - dy);
+            ImageScroll.ScrollToHorizontalOffset(_scrollStartX - (pos.X - _dragStart.X));
+            ImageScroll.ScrollToVerticalOffset(_scrollStartY - (pos.Y - _dragStart.Y));
             e.Handled = true;
         }
 
@@ -268,7 +288,7 @@ namespace UniversalConvert.App
         private void UpdateZoomText()
         {
             if (PreviewImage.Source == null) return;
-            ZoomText.Text = _fitMode ? "适应" : string.Format("{0:0}%", ImageScale.ScaleX * 100);
+            ZoomText.Text = _fitMode ? "适应" : string.Format("{0:0}%", CurrentScale() * 100);
         }
 
         private static string Quote(string path)

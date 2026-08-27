@@ -17,7 +17,7 @@
 
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1">
             <RichTextBox x:Name="ContentBox" IsReadOnly="True"
-                         FontFamily="Consolas" FontSize="13"
+                         FontFamily="Consolas, Microsoft YaHei UI" FontSize="14"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                          BorderThickness="0" Padding="8,6" Background="White"/>
         </Border>

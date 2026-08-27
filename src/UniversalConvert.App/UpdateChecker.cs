@@ -90,7 +90,7 @@ namespace UniversalConvert.App
         /// <summary>分块下载的块大小（8MB）：块级独立下载与全局预算调度，文件完成自动释放连接给剩余文件。</summary>
         private const long ChunkSize = 8L * 1024 * 1024;
 
-        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null, ManualResetEventSlim pause = null, SemaphoreSlim sharedBudget = null)
+        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null, ManualResetEventSlim pause = null, SemaphoreSlim sharedBudget = null, IProgress<Tuple<long, long>> byteProgress = null)
         {
             Log.Info($"开始下载更新: {downloadUrl}");
             long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
@@ -99,7 +99,7 @@ namespace UniversalConvert.App
             {
                 // 拿不到文件大小（或服务器不支持），回退单线程
                 Log.Info("服务器不支持分段下载，回退单线程");
-                await DownloadSequentialAsync(downloadUrl, destPath, progress, ct, pause).ConfigureAwait(false);
+                await DownloadSequentialAsync(downloadUrl, destPath, progress, ct, pause, byteProgress).ConfigureAwait(false);
             }
             else
             {
@@ -127,6 +127,7 @@ namespace UniversalConvert.App
                         {
                             done += n;
                             progress?.Report(Math.Min(100.0, (double)done / total * 100.0));
+                            byteProgress?.Report(Tuple.Create(done, total));
                         }
                     }, ct, pause, budget));
                 }
@@ -298,7 +299,7 @@ namespace UniversalConvert.App
             return c == 301 || c == 302 || c == 303 || c == 307 || c == 308;
         }
 
-        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null)
+        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null, IProgress<Tuple<long, long>> byteProgress = null)
         {
             var req = CreateRequest(url, "GET");
 
@@ -319,6 +320,7 @@ namespace UniversalConvert.App
                     if (total > 0)
                     {
                         progress?.Report(Math.Min(100.0, (double)read / total * 100.0));
+                        byteProgress?.Report(Tuple.Create(read, total));
                     }
                 }
             }

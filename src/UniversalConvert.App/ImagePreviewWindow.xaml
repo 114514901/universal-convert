@@ -22,11 +22,7 @@
                     <Image x:Name="PreviewImage" RenderOptions.BitmapScalingMode="HighQuality"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            MouseLeftButtonDown="OnImageMouseDown" MouseMove="OnImageMouseMove"
-                           MouseLeftButtonUp="OnImageMouseUp" MouseLeave="OnImageMouseLeave">
-                        <Image.RenderTransform>
-                            <ScaleTransform x:Name="ImageScale"/>
-                        </Image.RenderTransform>
-                    </Image>
+                           MouseLeftButtonUp="OnImageMouseUp" MouseLeave="OnImageMouseLeave"/>
                 </Grid>
             </ScrollViewer>
         </Border>

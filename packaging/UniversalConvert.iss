@@ -17,7 +17,7 @@
 #define MyAppName "UniversalConvert"
 ; 版本号默认 2.1.0，CI 打 tag 时会用 /DMyAppVersion=<tag> 覆盖
 #ifndef MyAppVersion
-#define MyAppVersion "2.2.0"
+#define MyAppVersion "2.3.0"
 #endif
 #define MyAppPublisher "UniversalConvert"
 #define MyAppExeName "UniversalConvert.App.exe"

@@ -150,27 +150,41 @@ namespace UniversalConvert.App
 
         private void OnUninstall(object sender, RoutedEventArgs e)
         {
-            var row = ExtensionList.SelectedItem as ExtensionRow;
-            if (row == null) return;
+            // 支持多选批量卸载：处理所有选中且已安装的扩展
+            var rows = ExtensionList.SelectedItems.Cast<ExtensionRow>()
+                .Where(r => ExtensionCenter.GetInstalledVersion(r.Info) != null)
+                .ToList();
+            if (rows.Count == 0) return;
 
-            var confirm = MessageBox.Show(
-                string.Format(Strings.UninstallConfirm, row.Info.Name),
-                "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
+            var confirmText = rows.Count == 1
+                ? string.Format(Strings.UninstallConfirm, rows[0].Info.Name)
+                : string.Format(Strings.UninstallConfirmMany, rows.Count);
+            var confirm = MessageBox.Show(confirmText, "UniversalConvert",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes) return;
 
-            var result = ExtensionCenter.Uninstall(row.Info);
-            if (result == ExtensionInstallResult.StagedForRestart)
+            bool staged = false;
+            var first = rows[0];
+            foreach (var row in rows)
             {
-                // 插件已加载、目录被锁定：已标记待卸载，重启后删除
-                StatusText.Text = string.Format(Strings.UninstalledRestart, row.Info.Name);
-                _ = RefreshAsync();
-                AppRestart.PromptAndRestart();
+                var result = ExtensionCenter.Uninstall(row.Info);
+                if (result == ExtensionInstallResult.StagedForRestart)
+                {
+                    staged = true;
+                }
             }
-            else if (result == ExtensionInstallResult.Installed)
+
+            StatusText.Text = rows.Count == 1
+                ? (staged
+                    ? string.Format(Strings.UninstalledRestart, first.Info.Name)
+                    : string.Format(Strings.Uninstalled, first.Info.Name))
+                : string.Format(Strings.UninstalledMany, rows.Count);
+            _ = RefreshAsync();
+
+            // 有暂存待重启的卸载（插件已加载被锁定）就提示重启
+            if (staged)
             {
-                StatusText.Text = string.Format(Strings.Uninstalled, row.Info.Name);
-                _ = RefreshAsync();
+                AppRestart.PromptAndRestart();
             }
         }
 

@@ -60,8 +60,10 @@ namespace UniversalConvert.App
                 {
                     // Progress<T> 在 UI 线程构造，回调回到 UI 线程，可直接更新绑定属性
                     var progress = new Progress<double>(p => item.SetDownloadProgress(p));
+                    // 字节级进度（已下载/总大小 MB 显示）
+                    var byteProgress = new Progress<Tuple<long, long>>(t => item.SetByteProgress(t.Item1, t.Item2));
                     Log.Info($"开始安装/更新扩展: {item.Info.Id} {item.Info.Version} (下载: {item.Info.DownloadUrl})");
-                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal, budget);
+                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal, budget, byteProgress);
                     Log.Info($"扩展 {item.Info.Id} 安装/更新结果: {result}");
 
                     if (result == ExtensionInstallResult.Installed)
@@ -186,14 +188,25 @@ namespace UniversalConvert.App
             private set { _statusText = value; OnPropertyChanged(nameof(StatusText)); }
         }
 
-        /// <summary>下载进度回调（0-100）。</summary>
+        /// <summary>下载进度回调（0-100）——仅更新进度条（文本由字节级进度显示）。</summary>
         public void SetDownloadProgress(double percent)
         {
             Progress = percent;
             IsIndeterminate = false;
-            StatusText = percent >= 100
-                ? Strings.ExtensionExtracting
-                : string.Format(Strings.Downloading, (int)percent);
+            if (percent >= 100)
+            {
+                StatusText = Strings.ExtensionExtracting;
+            }
+        }
+
+        /// <summary>字节级进度：显示 "已下载/总大小 MB"（保留一位小数）。</summary>
+        public void SetByteProgress(long doneBytes, long totalBytes)
+        {
+            if (totalBytes <= 0) return;
+            Progress = Math.Min(100.0, (double)doneBytes / totalBytes * 100.0);
+            IsIndeterminate = false;
+            StatusText = string.Format("{0:0.0}/{1:0.0} MB",
+                doneBytes / 1048576.0, totalBytes / 1048576.0);
         }
 
         public void SetDone(string status)

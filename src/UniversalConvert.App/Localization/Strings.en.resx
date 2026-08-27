@@ -507,6 +507,12 @@
   <data name="UninstallConfirm" xml:space="preserve">
     <value>Uninstall {0}?</value>
   </data>
+  <data name="UninstallConfirmMany" xml:space="preserve">
+    <value>Uninstall the {0} selected extensions?</value>
+  </data>
+  <data name="UninstalledMany" xml:space="preserve">
+    <value>Uninstalled {0} extensions</value>
+  </data>
   <data name="LoadingExtensions" xml:space="preserve">
     <value>Loading extensions...</value>
   </data>

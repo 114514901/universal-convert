@@ -163,6 +163,8 @@ namespace UniversalConvert.App.Localization
         public static string InstallFailed => Get("InstallFailed");
         public static string Installing => Get("Installing");
         public static string UninstallConfirm => Get("UninstallConfirm");
+        public static string UninstallConfirmMany => Get("UninstallConfirmMany");
+        public static string UninstalledMany => Get("UninstalledMany");
         public static string LoadingExtensions => Get("LoadingExtensions");
         public static string LoadExtensionsFailed => Get("LoadExtensionsFailed");
         public static string ViewLog => Get("ViewLog");
