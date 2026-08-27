@@ -117,11 +117,19 @@ namespace UniversalConvert.App
         private static readonly SolidColorBrush StringBrush = new SolidColorBrush(Color.FromRgb(0x98, 0xC3, 0x79)); // 字符串（绿）
         private static readonly SolidColorBrush NumberBrush = new SolidColorBrush(Color.FromRgb(0xD1, 0x9A, 0x66)); // 数字（橙）
         private static readonly SolidColorBrush LiteralBrush = new SolidColorBrush(Color.FromRgb(0x56, 0x9C, 0xD6)); // true/false/null（蓝）
-        private static readonly SolidColorBrush BraceBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xC0, 0x7B));   // { }（金，与字符串绿明显区分）
-        private static readonly SolidColorBrush BracketBrush = new SolidColorBrush(Color.FromRgb(0xC6, 0x78, 0xDD)); // [ ]（紫）
+        private static readonly SolidColorBrush BraceBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xC0, 0x7B));   // 括号层级色 1（金）
+        private static readonly SolidColorBrush BracketBrush = new SolidColorBrush(Color.FromRgb(0xC6, 0x78, 0xDD)); // 括号层级色 2（紫）
+        private static readonly SolidColorBrush Level3Brush = new SolidColorBrush(Color.FromRgb(0x56, 0xB6, 0xC2)); // 括号层级色 3（青）
+        private static readonly SolidColorBrush Level4Brush = new SolidColorBrush(Color.FromRgb(0xE0, 0x6C, 0x75)); // 括号层级色 4（红）
         private static readonly SolidColorBrush PunctuationBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); // : 与 ,
         private static readonly SolidColorBrush PlainBrush = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33));  // 普通
         private static readonly SolidColorBrush CommentBrush = new SolidColorBrush(Color.FromRgb(0x6A, 0x99, 0x55)); // 注释（灰绿）
+
+        /// <summary>括号配对着色颜色表（按嵌套深度循环）。</summary>
+        private static readonly SolidColorBrush[] BracketLevelColors =
+        {
+            BraceBrush, BracketBrush, Level3Brush, Level4Brush
+        };
 
         /// <summary>YAML 高亮（简化）：键蓝、字符串绿、数字橙、布尔蓝、注释灰绿、列表符灰。</summary>
         public static void FillYaml(Paragraph paragraph, string text)
@@ -248,6 +256,9 @@ namespace UniversalConvert.App
             // 普通文本缓冲（避免每个字符一个 Run）
             var plain = new StringBuilder();
 
+            // 括号配对栈：记录开括号字符与层级色，闭括号取与其配对的开括号同色
+            var bracketStack = new Stack<Tuple<char, SolidColorBrush>>();
+
             void FlushPlain()
             {
                 if (plain.Length == 0) return;
@@ -291,13 +302,35 @@ namespace UniversalConvert.App
                     paragraph.Inlines.Add(new Run(token) { Foreground = brush });
                     i = end;
                 }
-                else if (c == '{' || c == '}' || c == '[' || c == ']' || c == ':' || c == ',')
+                else if (c == '{' || c == '[' || c == '(')
+                {
+                    // 开括号：按当前嵌套深度取色入栈（配对闭括号将使用同一颜色）
+                    FlushPlain();
+                    var color = BracketLevelColors[bracketStack.Count % BracketLevelColors.Length];
+                    bracketStack.Push(Tuple.Create(c, color));
+                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = color });
+                    i++;
+                }
+                else if (c == '}' || c == ']' || c == ')')
                 {
                     FlushPlain();
-                    var brush = (c == '{' || c == '}') ? BraceBrush
-                        : (c == '[' || c == ']') ? BracketBrush
-                        : PunctuationBrush;
-                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = brush });
+                    // 与栈顶开括号配对 → 同色；不匹配/空栈 → 按当前深度颜色
+                    SolidColorBrush color;
+                    if (bracketStack.Count > 0 && IsMatchingPair(bracketStack.Peek().Item1, c))
+                    {
+                        color = bracketStack.Pop().Item2;
+                    }
+                    else
+                    {
+                        color = BracketLevelColors[bracketStack.Count % BracketLevelColors.Length];
+                    }
+                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = color });
+                    i++;
+                }
+                else if (c == ':' || c == ',')
+                {
+                    FlushPlain();
+                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = PunctuationBrush });
                     i++;
                 }
                 else
@@ -308,6 +341,14 @@ namespace UniversalConvert.App
             }
 
             FlushPlain();
+        }
+
+        /// <summary>判断开括号与闭括号是否构成配对。</summary>
+        private static bool IsMatchingPair(char open, char close)
+        {
+            return (open == '{' && close == '}')
+                || (open == '[' && close == ']')
+                || (open == '(' && close == ')');
         }
     }
 }
