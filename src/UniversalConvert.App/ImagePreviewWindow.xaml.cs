@@ -132,13 +132,11 @@ namespace UniversalConvert.App
             PreviewImage.Stretch = System.Windows.Media.Stretch.None;
             PreviewImage.Width = double.NaN;
             PreviewImage.Height = double.NaN;
-            PreviewImage.StretchDirection = System.Windows.Media.StretchDirection.Both;
         }
 
         private void OnZoomFit(object sender, RoutedEventArgs e)
         {
             PreviewImage.Stretch = System.Windows.Media.Stretch.Uniform;
-            PreviewImage.StretchDirection = System.Windows.Media.StretchDirection.DownOnly;
         }
 
         private void OnClose(object sender, RoutedEventArgs e)

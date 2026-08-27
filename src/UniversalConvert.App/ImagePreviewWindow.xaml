@@ -18,7 +18,7 @@
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="#1E1E1E">
             <ScrollViewer x:Name="ImageScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                 <Image x:Name="PreviewImage" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
-                       StretchDirection="DownOnly" Margin="8"/>
+                       Margin="8"/>
             </ScrollViewer>
         </Border>
 
