@@ -84,6 +84,9 @@
   <data name="ExtensionFailedFormat" xml:space="preserve">
     <value>Failed: {0}</value>
   </data>
+  <data name="ExtensionCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
   <data name="ExtensionAllSucceeded" xml:space="preserve">
     <value>All done ({0})</value>
   </data>

@@ -34,7 +34,12 @@
 
         <TextBlock x:Name="SummaryText" Grid.Row="1" Margin="0,10,0,0" TextWrapping="Wrap" Foreground="#666666"/>
 
-        <Button x:Name="CloseButton" Grid.Row="2" Content="{x:Static loc:Strings.Close}" Width="90" HorizontalAlignment="Right"
-                Margin="0,12,0,0" IsEnabled="False" Click="OnClose"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="PauseButton" Content="{x:Static loc:Strings.Pause}" Padding="14,4" Margin="0,0,8,0"
+                    Click="OnPause"/>
+            <Button x:Name="CancelButton" Content="{x:Static loc:Strings.Cancel}" Padding="14,4" Margin="0,0,8,0"
+                    Click="OnCancel"/>
+            <Button x:Name="CloseButton" Content="{x:Static loc:Strings.Close}" Width="90" IsEnabled="False" Click="OnClose"/>
+        </StackPanel>
     </Grid>
 </Window>

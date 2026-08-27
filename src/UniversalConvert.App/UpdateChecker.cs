@@ -86,7 +86,7 @@ namespace UniversalConvert.App
 
         private const int DownloadThreads = 8;
 
-        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null)
+        public static async Task DownloadAsync(string downloadUrl, string destPath, IProgress<double> progress, CancellationToken ct, string expectedSha256 = null, ManualResetEventSlim pause = null)
         {
             Log.Info($"开始下载更新: {downloadUrl}");
             long total = await GetContentLengthAsync(downloadUrl, ct).ConfigureAwait(false);
@@ -95,7 +95,7 @@ namespace UniversalConvert.App
             {
                 // 拿不到文件大小（或服务器不支持），回退单线程
                 Log.Info("服务器不支持分段下载，回退单线程");
-                await DownloadSequentialAsync(downloadUrl, destPath, progress, ct).ConfigureAwait(false);
+                await DownloadSequentialAsync(downloadUrl, destPath, progress, ct, pause).ConfigureAwait(false);
             }
             else
             {
@@ -116,14 +116,16 @@ namespace UniversalConvert.App
                     if (start >= total) break;
                     long end = Math.Min(total - 1, start + chunkSize - 1);
 
-                    tasks.Add(DownloadRangeAsync(downloadUrl, destPath, start, end, n =>
+                    // 每段独立任务，带段级重试：暂停导致的连接超时（ReadWriteTimeout）在恢复后重下该段
+                    int segment = i;
+                    tasks.Add(DownloadSegmentAsync(segment, downloadUrl, destPath, start, end, n =>
                     {
                         lock (doneLock)
                         {
                             done += n;
-                            progress?.Report((double)done / total * 100.0);
+                            progress?.Report(Math.Min(100.0, (double)done / total * 100.0));
                         }
-                    }, ct));
+                    }, ct, pause));
                 }
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -132,6 +134,48 @@ namespace UniversalConvert.App
             // 下载完成后统一做 SHA256 校验（防下载损坏/被篡改）
             VerifySha256(destPath, expectedSha256);
             Log.Info("更新下载完成" + (string.IsNullOrEmpty(expectedSha256) ? "" : "（SHA256 校验通过）"));
+        }
+
+        /// <summary>下载一个分段；暂停时等待恢复；连接被服务端掐断（暂停太久触发读超时）时重试该段。</summary>
+        private static async Task DownloadSegmentAsync(
+            int segment, string url, string destPath, long start, long end,
+            Action<int> onBytes, CancellationToken ct, ManualResetEventSlim pause)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                WaitIfPaused(pause, ct);
+                ct.ThrowIfCancellationRequested();
+                try
+                {
+                    await DownloadRangeAsync(url, destPath, start, end, onBytes, ct, pause).ConfigureAwait(false);
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    // 暂停引起的读超时/连接中断：等暂停结束再重试；非暂停的持续失败也先重试，过多才放弃
+                    Log.Warn($"下载分段 {segment} 第 {attempt + 1} 次尝试失败: {ex.Message}");
+                    if (attempt >= 20)
+                    {
+                        throw;
+                    }
+                    await Task.Delay(400, ct).ConfigureAwait(false);
+                }
+            }
+        }
+
+        /// <summary>暂停信号置位期间等待（响应取消）。</summary>
+        private static void WaitIfPaused(ManualResetEventSlim pause, CancellationToken ct)
+        {
+            if (pause == null || !pause.IsSet) return;
+            while (pause.IsSet)
+            {
+                ct.ThrowIfCancellationRequested();
+                pause.Wait(200);
+            }
         }
 
         /// <summary>计算文件 SHA256（十六进制小写）。</summary>
@@ -166,7 +210,7 @@ namespace UniversalConvert.App
             }
         }
 
-        private static async Task DownloadRangeAsync(string url, string destPath, long start, long end, Action<int> onBytes, CancellationToken ct)
+        private static async Task DownloadRangeAsync(string url, string destPath, long start, long end, Action<int> onBytes, CancellationToken ct, ManualResetEventSlim pause = null)
         {
             var req = CreateRequest(url, "GET");
             req.AddRange(start, end);
@@ -180,6 +224,7 @@ namespace UniversalConvert.App
                 int n;
                 while ((n = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
                 {
+                    WaitIfPaused(pause, ct);
                     ct.ThrowIfCancellationRequested();
                     await file.WriteAsync(buffer, 0, n).ConfigureAwait(false);
                     onBytes(n);
@@ -234,7 +279,7 @@ namespace UniversalConvert.App
             return c == 301 || c == 302 || c == 303 || c == 307 || c == 308;
         }
 
-        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct)
+        private static async Task DownloadSequentialAsync(string url, string destPath, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null)
         {
             var req = CreateRequest(url, "GET");
 
@@ -248,12 +293,13 @@ namespace UniversalConvert.App
                 int n;
                 while ((n = await stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false)) > 0)
                 {
+                    WaitIfPaused(pause, ct);
                     ct.ThrowIfCancellationRequested();
                     await file.WriteAsync(buffer, 0, n).ConfigureAwait(false);
                     read += n;
                     if (total > 0)
                     {
-                        progress?.Report((double)read / total * 100.0);
+                        progress?.Report(Math.Min(100.0, (double)read / total * 100.0));
                     }
                 }
             }

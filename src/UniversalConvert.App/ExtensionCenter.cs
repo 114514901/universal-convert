@@ -118,15 +118,16 @@ namespace UniversalConvert.App
         /// <summary>待应用更新目录：%AppData%\UniversalConvert\pending。</summary>
         public static string PendingUpdatesDirectory => Path.Combine(ConfigStore.ConfigDirectory, "pending");
 
-        /// <summary>安装扩展；目标目录被锁定（插件已加载、更新场景）时自动暂存到 pending，重启后应用。</summary>
-        public static async Task<ExtensionInstallResult> InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct)
+        /// <summary>安装扩展；目标目录被锁定（插件已加载、更新场景）时自动暂存到 pending，重启后应用。
+        /// pause：共享暂停信号（置位期间挂起下载，恢复后自动续传）。</summary>
+        public static async Task<ExtensionInstallResult> InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null)
         {
             var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
 
             Log.Info($"安装扩展 {info.Id} {info.Version}...");
             try
             {
-                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct, info.Sha256).ConfigureAwait(false);
+                await UpdateChecker.DownloadAsync(info.DownloadUrl, temp, progress, ct, info.Sha256, pause).ConfigureAwait(false);
                 return ExtractOrStage(temp, GetInstallDirectory(info), info.Name);
             }
             catch (Exception ex)

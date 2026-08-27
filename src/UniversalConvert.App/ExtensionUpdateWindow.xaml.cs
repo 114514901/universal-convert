@@ -18,6 +18,9 @@ namespace UniversalConvert.App
     {
         private readonly IList<ExtensionInfo> _extensions;
         private readonly List<ExtensionUpdateItem> _items = new List<ExtensionUpdateItem>();
+        private bool _paused;
+        private readonly ManualResetEventSlim _pauseSignal = new ManualResetEventSlim(false);
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         /// <summary>执行结果汇总（窗口关闭后供调用方展示）。</summary>
         public string Summary { get; private set; }
@@ -56,7 +59,7 @@ namespace UniversalConvert.App
                     // Progress<T> 在 UI 线程构造，回调回到 UI 线程，可直接更新绑定属性
                     var progress = new Progress<double>(p => item.SetDownloadProgress(p));
                     Log.Info($"开始安装/更新扩展: {item.Info.Id} {item.Info.Version} (下载: {item.Info.DownloadUrl})");
-                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, CancellationToken.None);
+                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal);
                     Log.Info($"扩展 {item.Info.Id} 安装/更新结果: {result}");
 
                     if (result == ExtensionInstallResult.Installed)
@@ -68,6 +71,11 @@ namespace UniversalConvert.App
                     {
                         item.SetDone(Strings.ExtensionDoneRestart);
                         Interlocked.Increment(ref succeeded);
+                    }
+                    else if (_cts.IsCancellationRequested)
+                    {
+                        item.SetFailed(Strings.ExtensionCancelled);
+                        Interlocked.Increment(ref failed);
                     }
                     else
                     {
@@ -89,16 +97,50 @@ namespace UniversalConvert.App
 
             await Task.WhenAll(tasks);
 
+            // 全部取消时不弹重启提示
+            var cancelledAll = _cts.IsCancellationRequested;
             Summary = failed > 0
                 ? string.Format(Strings.ExtensionSummaryFormat, succeeded, failed)
                 : string.Format(Strings.ExtensionAllSucceeded, succeeded);
             SummaryText.Text = Summary;
             CloseButton.IsEnabled = true;
+            PauseButton.IsEnabled = false;
+            CancelButton.IsEnabled = false;
+            _pauseSignal.Reset();
 
-            // 安装/更新都需要重启才生效（新装需加载、已加载的更新需暂存应用），有成功就提示
-            if (succeeded > 0)
+            // 安装/更新都需要重启才生效（新装需加载、已加载的更新需暂存应用），有成功就提示；全部取消则不提示
+            if (succeeded > 0 && !cancelledAll)
             {
                 AppRestart.PromptAndRestart();
+            }
+        }
+
+        private void OnPause(object sender, RoutedEventArgs e)
+        {
+            _paused = !_paused;
+            if (_paused)
+            {
+                _pauseSignal.Set();
+                PauseButton.Content = Strings.Resume;
+            }
+            else
+            {
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
+            }
+        }
+
+        private void OnCancel(object sender, RoutedEventArgs e)
+        {
+            _cts.Cancel();
+            CancelButton.IsEnabled = false;
+            PauseButton.IsEnabled = false;
+            // 取消时若处于暂停，复位暂停信号让下载任务能响应取消退出
+            if (_paused)
+            {
+                _paused = false;
+                _pauseSignal.Reset();
+                PauseButton.Content = Strings.Pause;
             }
         }
 
