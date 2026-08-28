@@ -266,6 +266,11 @@ namespace UniversalConvert.App
                 var window = new ImagePreviewWindow(row.Path) { Owner = this };
                 window.Show();
             }
+            else if (CanPreviewVideo(row.Path))
+            {
+                var window = new VideoPreviewWindow(row.Path) { Owner = this };
+                window.Show();
+            }
             else if (CanPreviewText(row.Path))
             {
                 var window = new TextPreviewWindow(row.Path) { Owner = this };
@@ -284,6 +289,19 @@ namespace UniversalConvert.App
         {
             var ext = Path.GetExtension(path);
             return PreviewableImageExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>内置预览支持的视频扩展名（MediaElement 播放；解码失败的回落系统播放器）。</summary>
+        private static readonly string[] PreviewableVideoExtensions =
+        {
+            ".mp4", ".m4v", ".avi", ".wmv", ".mov", ".mpg", ".mpeg", ".ts",
+            ".mkv", ".webm", ".flv", ".3gp", ".ogv", ".rmvb"
+        };
+
+        private static bool CanPreviewVideo(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return PreviewableVideoExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>内置预览支持的文本扩展名（JSON 带语法高亮）。</summary>
@@ -336,6 +354,11 @@ namespace UniversalConvert.App
             else if (CanPreviewImage(row.Path))
             {
                 var window = new ImagePreviewWindow(row.Path) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewVideo(row.Path))
+            {
+                var window = new VideoPreviewWindow(row.Path) { Owner = this };
                 window.Show();
             }
             else if (CanPreviewText(row.Path))

@@ -190,6 +190,7 @@ namespace UniversalConvert.App.Localization
         public static string FitToWindow => Get("FitToWindow");
         public static string PreviewLoading => Get("PreviewLoading");
         public static string ImagePreviewFailed => Get("ImagePreviewFailed");
+        public static string VideoPreviewFallback => Get("VideoPreviewFallback");
         public static string ImagePreviewSizeFormat => Get("ImagePreviewSizeFormat");
         public static string TextPreviewFailed => Get("TextPreviewFailed");
         public static string TextPreviewStatsFormat => Get("TextPreviewStatsFormat");

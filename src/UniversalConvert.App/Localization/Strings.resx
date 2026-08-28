@@ -609,6 +609,9 @@
   <data name="ImagePreviewFailed" xml:space="preserve">
     <value>无法预览该图片</value>
   </data>
+  <data name="VideoPreviewFallback" xml:space="preserve">
+    <value>无法解码，已用系统播放器打开</value>
+  </data>
   <data name="ImagePreviewSizeFormat" xml:space="preserve">
     <value>{0} × {1}，{2}</value>
   </data>

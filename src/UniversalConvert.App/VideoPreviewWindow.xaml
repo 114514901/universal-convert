@@ -1,0 +1,43 @@
+<Window x:Class="UniversalConvert.App.VideoPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
+        Title="UniversalConvert" Height="600" Width="900"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="300" MinWidth="480"
+        Loaded="OnLoaded" Closed="OnClosed">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleText" Grid.Row="0" FontSize="14" FontWeight="SemiBold"
+                   TextTrimming="CharacterEllipsis" Margin="4,2,4,8"/>
+
+        <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="#111111">
+            <MediaElement x:Name="Video" Stretch="Uniform" LoadedBehavior="Manual"
+                          MediaOpened="OnMediaOpened" MediaEnded="OnMediaEnded" MediaFailed="OnMediaFailed"/>
+        </Border>
+
+        <Slider x:Name="ProgressSlider" Grid.Row="2" Minimum="0" Maximum="1" Value="0"
+                Margin="4,10,4,0" VerticalAlignment="Center" IsEnabled="False"
+                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"
+                ValueChanged="OnProgressChanged"/>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="4,10,4,0">
+            <Button x:Name="PlayPauseButton" Content="{x:Static loc:Strings.Play}" Padding="14,4"
+                    IsEnabled="False" Click="OnPlayPause" Margin="0,0,8,0"/>
+            <Button Content="{x:Static loc:Strings.Stop}" Padding="14,4" Click="OnStop" Margin="0,0,16,0"/>
+            <TextBlock x:Name="TimeText" VerticalAlignment="Center" Foreground="#666666" Margin="0,0,16,0"/>
+            <TextBlock Text="{x:Static loc:Strings.Volume}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <Slider x:Name="VolumeSlider" Width="120" Minimum="0" Maximum="1" Value="1"
+                    VerticalAlignment="Center" ValueChanged="OnVolumeChanged"/>
+            <TextBlock x:Name="VolumeText" VerticalAlignment="Center" Margin="8,0,0,0"
+                       Foreground="#666666" FontSize="12"/>
+            <Button Content="{x:Static loc:Strings.Close}" Padding="16,4" Margin="24,0,0,0"
+                    HorizontalAlignment="Right" Click="OnClose"/>
+        </StackPanel>
+    </Grid>
+</Window>
