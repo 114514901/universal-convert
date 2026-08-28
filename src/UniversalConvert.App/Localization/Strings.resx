@@ -672,6 +672,15 @@
   <data name="Restart" xml:space="preserve">
     <value>重启</value>
   </data>
+  <data name="Continue" xml:space="preserve">
+    <value>继续运行</value>
+  </data>
+  <data name="TerminateProcess" xml:space="preserve">
+    <value>结束进程</value>
+  </data>
+  <data name="CrashContinueWarning" xml:space="preserve">
+    <value>继续运行可能有风险：程序状态可能异常或数据不一致，崩溃可能再次出现。建议「重启」或「结束进程」。</value>
+  </data>
   <data name="TestHang" xml:space="preserve">
     <value>测试卡死</value>
   </data>

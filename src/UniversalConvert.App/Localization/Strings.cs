@@ -202,6 +202,9 @@ namespace UniversalConvert.App.Localization
         public static string CheckingUpdate => Get("CheckingUpdate");
         public static string UpToDate => Get("UpToDate");
         public static string Restart => Get("Restart");
+        public static string Continue => Get("Continue");
+        public static string TerminateProcess => Get("TerminateProcess");
+        public static string CrashContinueWarning => Get("CrashContinueWarning");
         public static string TestHang => Get("TestHang");
         public static string HangReportSummary => Get("HangReportSummary");
         public static string HangReportText => Get("HangReportText");

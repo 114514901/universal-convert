@@ -672,6 +672,15 @@
   <data name="Restart" xml:space="preserve">
     <value>Restart</value>
   </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="TerminateProcess" xml:space="preserve">
+    <value>Terminate process</value>
+  </data>
+  <data name="CrashContinueWarning" xml:space="preserve">
+    <value>Continuing may be risky: the program state may be corrupted and the crash may recur. Restart or terminate the process instead.</value>
+  </data>
   <data name="TestHang" xml:space="preserve">
     <value>Test hang</value>
   </data>

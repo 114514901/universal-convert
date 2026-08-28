@@ -58,8 +58,25 @@ namespace UniversalConvert.App
             Application.Current.Shutdown();
         }
 
+        /// <summary>继续运行（有风险）：关闭报告窗口，应用继续。</summary>
+        private void OnContinue(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+            Close();
+        }
+
+        /// <summary>结束进程：正常退出流程（触发看护进程退出信号、保存设置等）。</summary>
         private void OnClose(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                Application.Current.Shutdown();
+            }
+            catch
+            {
+                // Shutdown 失败则强制退出，避免窗口关不掉
+                Environment.Exit(1);
+            }
             Close();
         }
     }
