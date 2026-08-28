@@ -18,6 +18,9 @@ namespace UniversalConvert.App
         private bool _playing;
         private bool _seeking;
         private bool _stopped;
+        private readonly DispatcherTimer _clickTimer = new DispatcherTimer();
+        private bool _pendingClick;
+        private int _pendingSeekSeconds;
 
         public VideoPreviewWindow(string filePath)
         {
@@ -123,29 +126,52 @@ namespace UniversalConvert.App
             TimeText.Text = string.Empty;
         }
 
-        // ---------- 画面快捷操作：左右 1/3 单击 ±5 秒，中央双击播放/暂停 ----------
+        // ---------- 画面快捷操作：左右 1/3 单击 ±5 秒，任意位置双击播放/暂停 ----------
+        // MediaElement 无 MouseDoubleClick 事件（非 Control），用点击计时自行判定：
+        // 每次单击延迟 300ms 执行（等待可能的双击），300ms 内再次点击 → 播放/暂停
 
         private void OnVideoMouseLeftDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (Video.ActualWidth <= 0 || !Video.NaturalDuration.HasTimeSpan) return;
+
+            // 双击（任意位置）→ 播放/暂停
+            if (_pendingClick && _clickTimer.IsEnabled)
+            {
+                _clickTimer.Stop();
+                _pendingClick = false;
+                OnPlayPause(sender, e);
+                e.Handled = true;
+                return;
+            }
+
+            // 单击：记录区域，延迟执行（中央为 0 秒 = 无动作）
             var x = e.GetPosition(Video).X;
             var region = x / Video.ActualWidth;
-            if (region < 1.0 / 3.0)
-            {
-                SeekRelative(-5);
-                e.Handled = true;
-            }
-            else if (region > 2.0 / 3.0)
-            {
-                SeekRelative(5);
-                e.Handled = true;
-            }
+            _pendingClick = false;
+            _pendingSeekSeconds = region < 1.0 / 3.0 ? -5 : region > 2.0 / 3.0 ? 5 : 0;
+            StartClickTimer();
+            e.Handled = true;
         }
 
-        private void OnVideoMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void StartClickTimer()
         {
-            OnPlayPause(sender, e);
-            e.Handled = true;
+            _pendingClick = true;
+            _clickTimer.Interval = TimeSpan.FromMilliseconds(300);
+            _clickTimer.Tick -= OnClickTimerTick;
+            _clickTimer.Tick += OnClickTimerTick;
+            _clickTimer.Stop();
+            _clickTimer.Start();
+        }
+
+        private void OnClickTimerTick(object sender, EventArgs e)
+        {
+            _clickTimer.Stop();
+            if (!_pendingClick) return;
+            _pendingClick = false;
+            if (_pendingSeekSeconds != 0)
+            {
+                SeekRelative(_pendingSeekSeconds);
+            }
         }
 
         private void SeekRelative(int seconds)
