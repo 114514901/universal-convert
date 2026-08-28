@@ -88,6 +88,23 @@ namespace UniversalConvert.App
         {
             var window = new SettingsWindow(_settingsManager) { Owner = this };
             window.ShowDialog();
+
+            // 手动检查发现比横幅更新的版本时，同步刷新横幅
+            var found = window.LatestFound;
+            if (found != null && IsNewerThan(found.Version, _updateInfo?.Version))
+            {
+                _updateInfo = found;
+                UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, found.Version);
+                UpdateBanner.Visibility = Visibility.Visible;
+            }
+        }
+
+        private static bool IsNewerThan(string candidate, string current)
+        {
+            if (string.IsNullOrEmpty(current)) return true;
+            var c = SemVersion.Parse(candidate);
+            var cur = SemVersion.Parse(current);
+            return c != null && cur != null && c.CompareTo(cur) > 0;
         }
 
         private void OnViewReleaseNotes(object sender, RoutedEventArgs e)

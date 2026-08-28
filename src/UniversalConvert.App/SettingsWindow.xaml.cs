@@ -27,6 +27,9 @@ namespace UniversalConvert.App
         private Button _downloadButton;
         private ProgressBar _updateProgressBar;
 
+        /// <summary>本次打开期间手动检查发现的最新版本（供主窗口在关闭后同步更新横幅）。</summary>
+        public UpdateInfo LatestFound { get; private set; }
+
         public SettingsWindow(SettingsManager manager)
         {
             InitializeComponent();
@@ -225,6 +228,7 @@ namespace UniversalConvert.App
             if (info != null)
             {
                 _updateInfo = info;
+                LatestFound = info;
                 _updateStatusText.Text = string.Format(Strings.UpdateAvailable, info.Version);
                 _viewNotesButton.Visibility = Visibility.Visible;
                 if (!string.IsNullOrEmpty(info.DownloadUrl))
