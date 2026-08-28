@@ -50,6 +50,7 @@ namespace UniversalConvert.App
             // MediaPlayer.Volume 默认是 0.5（50%）而音量条初始在 100%：
             // 显式对齐为满音量，避免「显示满格但实际只有一半、拉一下才变大」
             _player.Volume = 1.0;
+            VolumeText.Text = "100%";
 
             // 提供者优先：若某插件声明支持该格式的预览（如 MIDI 合成），先渲染再播放
             var provider = FindPreviewProvider(host, filePath);
@@ -267,7 +268,17 @@ namespace UniversalConvert.App
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            _player.Volume = VolumeSlider.Value;
+            // 指数音量曲线（人耳对数感知，Windows 风格）：滑块 100% → 满音量，低区敏感、高区平滑
+            _player.Volume = VolumeToAmplitude(VolumeSlider.Value);
+            VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
+        }
+
+        /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>
+        private static double VolumeToAmplitude(double sliderValue)
+        {
+            if (sliderValue <= 0) return 0;
+            if (sliderValue >= 1) return 1;
+            return Math.Pow(sliderValue, 2.0);
         }
 
         private void UpdateTimeDisplay()
