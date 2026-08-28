@@ -270,7 +270,11 @@ namespace UniversalConvert.App
         {
             // 指数音量曲线（人耳对数感知，Windows 风格）：滑块 100% → 满音量，低区敏感、高区平滑
             _player.Volume = VolumeToAmplitude(VolumeSlider.Value);
-            VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
+            // XAML 加载期间 Value 初始化可能先于 VolumeText 字段赋值，需判空（视频预览窗口同款崩溃）
+            if (VolumeText != null)
+            {
+                VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
+            }
         }
 
         /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>

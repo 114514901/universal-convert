@@ -138,8 +138,15 @@ namespace UniversalConvert.App
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Video.Volume = VolumeSlider.Value;
-            VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
+            // XAML 加载期间 Value 初始化可能先于 VolumeText 字段赋值，需判空
+            if (Video != null)
+            {
+                Video.Volume = VolumeSlider.Value;
+            }
+            if (VolumeText != null)
+            {
+                VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
+            }
         }
 
         private void UpdateTimeText()
