@@ -17,6 +17,7 @@ namespace UniversalConvert.App
         private readonly DispatcherTimer _timer = new DispatcherTimer();
         private bool _playing;
         private bool _seeking;
+        private bool _stopped;
 
         public VideoPreviewWindow(string filePath)
         {
@@ -97,6 +98,14 @@ namespace UniversalConvert.App
             }
             else
             {
+                // WPF MediaElement 已知问题：Stop() 后直接 Play() 可能无效（画面冻结）
+                // ——重新赋值 Source 确保可播
+                if (_stopped)
+                {
+                    _stopped = false;
+                    Video.Source = null;
+                    Video.Source = new Uri(_filePath);
+                }
                 Video.Play();
                 _playing = true;
                 PlayPauseButton.Content = Strings.Pause;
@@ -107,6 +116,7 @@ namespace UniversalConvert.App
         {
             Video.Stop();
             _playing = false;
+            _stopped = true;
             PlayPauseButton.Content = Strings.Play;
             ProgressSlider.Value = 0;
             TimeText.Text = string.Empty;
@@ -129,9 +139,13 @@ namespace UniversalConvert.App
 
         private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            // 拖动中实时显示时间（不 seek，避免拖动卡顿）
+            // 拖动中实时 seek 到对应位置，画面预览该帧；同时更新时间
             if (_seeking)
             {
+                if (Video.NaturalDuration.HasTimeSpan)
+                {
+                    Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
+                }
                 UpdateTimeText();
             }
         }
