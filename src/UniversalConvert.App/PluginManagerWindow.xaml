@@ -16,6 +16,7 @@
         <TextBlock Grid.Row="0" Text="{x:Static loc:Strings.Plugins}" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
         <ListView x:Name="PluginList" Grid.Row="1" SelectionChanged="OnSelectionChanged"
+                  SelectionMode="Extended"
                   ContextMenuOpening="OnContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>

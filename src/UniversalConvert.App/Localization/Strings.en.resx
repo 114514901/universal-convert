@@ -513,6 +513,9 @@
   <data name="UninstalledMany" xml:space="preserve">
     <value>Uninstalled {0} extensions</value>
   </data>
+  <data name="UninstalledManyFailed" xml:space="preserve">
+    <value>Uninstalled {0} extensions (some failed)</value>
+  </data>
   <data name="LoadingExtensions" xml:space="preserve">
     <value>Loading extensions...</value>
   </data>

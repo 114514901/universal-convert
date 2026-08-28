@@ -75,40 +75,71 @@ namespace UniversalConvert.App
 
         private void OnSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var row = PluginList.SelectedItem as PluginRow;
-            UninstallButton.IsEnabled = row != null && row.IsUserPlugin;
+            // 多选支持：选中项中含用户扩展即可卸载
+            UninstallButton.IsEnabled = PluginList.SelectedItems
+                .Cast<PluginRow>()
+                .Any(r => r.IsUserPlugin);
         }
 
         private void OnUninstall(object sender, RoutedEventArgs e)
         {
-            var row = PluginList.SelectedItem as PluginRow;
-            if (row == null || !row.IsUserPlugin) return;
+            // 批量卸载：处理所有选中且为用户扩展的行
+            var rows = PluginList.SelectedItems.Cast<PluginRow>()
+                .Where(r => r.IsUserPlugin)
+                .ToList();
+            if (rows.Count == 0) return;
 
-            var confirm = MessageBox.Show(
-                string.Format(Strings.UninstallConfirm, row.Name),
-                "UniversalConvert", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var confirmText = rows.Count == 1
+                ? string.Format(Strings.UninstallConfirm, rows[0].Name)
+                : string.Format(Strings.UninstallConfirmMany, rows.Count);
+            var confirm = MessageBox.Show(confirmText, "UniversalConvert",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes) return;
 
-            var plugin = _host.Plugins.FirstOrDefault(p => p.Id == row.Id);
-            if (plugin == null) return;
+            bool staged = false;
+            bool anyFailed = false;
+            foreach (var row in rows)
+            {
+                var plugin = _host.Plugins.FirstOrDefault(p => p.Id == row.Id);
+                if (plugin == null) continue;
 
-            var result = PluginManager.UninstallUserPlugin(plugin);
-            if (result == ExtensionInstallResult.Failed)
+                var result = PluginManager.UninstallUserPlugin(plugin);
+                if (result == ExtensionInstallResult.Failed)
+                {
+                    anyFailed = true;
+                    continue;
+                }
+
+                if (result == ExtensionInstallResult.StagedForRestart)
+                {
+                    staged = true;
+                    row.BaseStatus = string.Format(Strings.UninstalledRestart, row.Name);
+                }
+                else
+                {
+                    row.BaseStatus = string.Format(Strings.Uninstalled, row.Name);
+                }
+            }
+
+            if (anyFailed)
             {
                 MessageBox.Show(Strings.ExtensionUninstallFailed, "UniversalConvert",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
             }
 
-            var staged = result == ExtensionInstallResult.StagedForRestart;
-            row.BaseStatus = staged
-                ? string.Format(Strings.UninstalledRestart, row.Name)
-                : string.Format(Strings.Uninstalled, row.Name);
-            UpdateStatusText.Text = row.BaseStatus;
+            UpdateStatusText.Text = rows.Count == 1
+                ? rows[0].BaseStatus
+                : (anyFailed
+                    ? string.Format(Strings.UninstalledManyFailed, rows.Count)
+                    : string.Format(Strings.UninstalledMany, rows.Count));
             RefreshList();
             UninstallButton.IsEnabled = false;
 
-            if (staged) AppRestart.PromptAndRestart();
+            // 有暂存待重启的卸载就提示重启
+            if (staged)
+            {
+                AppRestart.PromptAndRestart();
+            }
         }
 
         private async void OnCheckUpdates(object sender, RoutedEventArgs e)
