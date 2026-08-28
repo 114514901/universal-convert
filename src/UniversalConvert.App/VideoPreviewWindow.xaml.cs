@@ -216,6 +216,8 @@ namespace UniversalConvert.App
             UpdateTimeText();
         }
 
+        private DateTime _lastPreviewRender;
+
         private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             // 拖动中实时 seek 到对应位置，画面预览该帧；同时更新时间
@@ -224,6 +226,15 @@ namespace UniversalConvert.App
                 if (Video.NaturalDuration.HasTimeSpan)
                 {
                     Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
+                    // WPF MediaElement 暂停态不渲染 seek 帧——短暂 Play/Pause 强制渲染当前帧
+                    // （间隔极短不产生声音；40ms 节流避免高频拖动卡顿）
+                    var now = DateTime.Now;
+                    if ((now - _lastPreviewRender).TotalMilliseconds >= 40)
+                    {
+                        _lastPreviewRender = now;
+                        Video.Play();
+                        Video.Pause();
+                    }
                 }
                 UpdateTimeText();
             }
