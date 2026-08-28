@@ -47,6 +47,7 @@ namespace UniversalConvert.App
 
         private void OnMediaOpened(object sender, RoutedEventArgs e)
         {
+            PlayPauseButton.IsEnabled = true;
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 ProgressSlider.Maximum = Video.NaturalDuration.TimeSpan.TotalSeconds;
@@ -122,6 +123,42 @@ namespace UniversalConvert.App
             TimeText.Text = string.Empty;
         }
 
+        // ---------- 画面快捷操作：左右 1/3 单击 ±5 秒，中央双击播放/暂停 ----------
+
+        private void OnVideoMouseLeftDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (Video.ActualWidth <= 0 || !Video.NaturalDuration.HasTimeSpan) return;
+            var x = e.GetPosition(Video).X;
+            var region = x / Video.ActualWidth;
+            if (region < 1.0 / 3.0)
+            {
+                SeekRelative(-5);
+                e.Handled = true;
+            }
+            else if (region > 2.0 / 3.0)
+            {
+                SeekRelative(5);
+                e.Handled = true;
+            }
+        }
+
+        private void OnVideoMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            OnPlayPause(sender, e);
+            e.Handled = true;
+        }
+
+        private void SeekRelative(int seconds)
+        {
+            if (!Video.NaturalDuration.HasTimeSpan) return;
+            var target = Video.Position + TimeSpan.FromSeconds(seconds);
+            if (target < TimeSpan.Zero) target = TimeSpan.Zero;
+            if (target > Video.NaturalDuration.TimeSpan) target = Video.NaturalDuration.TimeSpan;
+            Video.Position = target;
+            ProgressSlider.Value = target.TotalSeconds;
+            UpdateTimeText();
+        }
+
         private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _seeking = true;
@@ -152,15 +189,24 @@ namespace UniversalConvert.App
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            // 指数音量曲线（与音频预览一致）：人耳对数感知，滑块 100% → 满音量
             // XAML 加载期间 Value 初始化可能先于 VolumeText 字段赋值，需判空
             if (Video != null)
             {
-                Video.Volume = VolumeSlider.Value;
+                Video.Volume = VolumeToAmplitude(VolumeSlider.Value);
             }
             if (VolumeText != null)
             {
                 VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
             }
+        }
+
+        /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>
+        private static double VolumeToAmplitude(double sliderValue)
+        {
+            if (sliderValue <= 0) return 0;
+            if (sliderValue >= 1) return 1;
+            return Math.Pow(sliderValue, 2.0);
         }
 
         private void UpdateTimeText()

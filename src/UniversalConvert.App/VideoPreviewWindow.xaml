@@ -18,7 +18,8 @@
 
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="#111111">
             <MediaElement x:Name="Video" Stretch="Uniform" LoadedBehavior="Manual"
-                          MediaOpened="OnMediaOpened" MediaEnded="OnMediaEnded" MediaFailed="OnMediaFailed"/>
+                          MediaOpened="OnMediaOpened" MediaEnded="OnMediaEnded" MediaFailed="OnMediaFailed"
+                          MouseLeftButtonDown="OnVideoMouseLeftDown" MouseDoubleClick="OnVideoMouseDoubleClick"/>
         </Border>
 
         <Slider x:Name="ProgressSlider" Grid.Row="2" Minimum="0" Maximum="1" Value="0"
