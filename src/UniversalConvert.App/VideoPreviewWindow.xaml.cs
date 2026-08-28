@@ -185,9 +185,19 @@ namespace UniversalConvert.App
             UpdateTimeText();
         }
 
+        private bool _wasPlayingBeforeSeek;
+
+        // 拖拽进度条期间临时暂停（避免反复 seek 产生噪声/杂音），松手恢复原播放状态
         private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _seeking = true;
+            _wasPlayingBeforeSeek = _playing;
+            if (_playing)
+            {
+                Video.Pause();
+                _playing = false;
+                PlayPauseButton.Content = Strings.Play;
+            }
         }
 
         private void OnProgressPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -196,6 +206,12 @@ namespace UniversalConvert.App
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
+            }
+            if (_wasPlayingBeforeSeek)
+            {
+                Video.Play();
+                _playing = true;
+                PlayPauseButton.Content = Strings.Pause;
             }
             UpdateTimeText();
         }

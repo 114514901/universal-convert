@@ -246,6 +246,30 @@ namespace UniversalConvert.App
             UpdateTimeText(position, duration);
         }
 
+        private bool _wasPlayingBeforeSeek;
+
+        // 拖拽进度条期间临时暂停（避免反复 seek 产生噪声/杂音），松手恢复原播放状态
+        private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            _wasPlayingBeforeSeek = _playing;
+            if (_playing)
+            {
+                _player.Pause();
+                _playing = false;
+                PlayPauseButton.Content = Strings.Play;
+            }
+        }
+
+        private void OnProgressPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (_wasPlayingBeforeSeek)
+            {
+                _player.Play();
+                _playing = true;
+                PlayPauseButton.Content = Strings.Pause;
+            }
+        }
+
         private void OnProgressValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (_updatingSlider) return;

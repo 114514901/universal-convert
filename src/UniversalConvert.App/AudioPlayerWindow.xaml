@@ -18,7 +18,8 @@
 
         <Slider x:Name="ProgressSlider" Grid.Row="1" Minimum="0" Maximum="100" Value="0"
                 IsMoveToPointEnabled="True" IsEnabled="False"
-                ValueChanged="OnProgressValueChanged"/>
+                ValueChanged="OnProgressValueChanged"
+                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"/>
 
         <TextBlock x:Name="TimeText" Grid.Row="2" Margin="0,4,0,0" Foreground="#666666"/>
 
