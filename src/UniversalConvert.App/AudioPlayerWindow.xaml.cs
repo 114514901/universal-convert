@@ -30,14 +30,15 @@ namespace UniversalConvert.App
         private BitrateTimeline _timeline;
         private int _averageBitrate;
 
-        public AudioPlayerWindow(string filePath, CoreHost host)
+        /// <param name="displayName">标题显示名（渲染/解密预览时传原文件名，让标题可读）；null 用文件名。</param>
+        public AudioPlayerWindow(string filePath, CoreHost host, string displayName = null)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
 
             _filePath = filePath;
             _playbackPath = filePath;
-            TitleText.Text = Path.GetFileName(filePath);
+            TitleText.Text = displayName ?? Path.GetFileName(filePath);
 
             _timer.Interval = TimeSpan.FromMilliseconds(500);
             _timer.Tick += OnTimerTick;

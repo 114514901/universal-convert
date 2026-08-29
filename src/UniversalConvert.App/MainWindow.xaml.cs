@@ -318,7 +318,8 @@ namespace UniversalConvert.App
 
                 if (!TryAudioPreviewProvider(effective))
                 {
-                    var window = new AudioPlayerWindow(effective, _host) { Owner = this };
+                    // displayName：渲染后的 effective 是临时文件，标题显示原文件名
+                    var window = new AudioPlayerWindow(effective, _host, renderProvider != null ? Path.GetFileName(path) : null) { Owner = this };
                     window.Show();
                 }
 
