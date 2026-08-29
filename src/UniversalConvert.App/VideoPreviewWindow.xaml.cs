@@ -217,6 +217,7 @@ namespace UniversalConvert.App
         }
 
         private DateTime _lastPreviewRender;
+        private bool _previewRendering;
 
         private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -226,18 +227,45 @@ namespace UniversalConvert.App
                 if (Video.NaturalDuration.HasTimeSpan)
                 {
                     Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
-                    // WPF MediaElement 暂停态不渲染 seek 帧——短暂 Play/Pause 强制渲染当前帧
-                    // （间隔极短不产生声音；40ms 节流避免高频拖动卡顿）
+                    // 暂停态 MediaElement 不渲染 seek 帧——静音短暂播放强制渲染当前帧
+                    // （40ms 节流 + 防重入；拖动中若已松手则保持播放状态）
                     var now = DateTime.Now;
                     if ((now - _lastPreviewRender).TotalMilliseconds >= 40)
                     {
                         _lastPreviewRender = now;
-                        Video.Play();
-                        Video.Pause();
+                        RenderPreviewFrame();
                     }
                 }
                 UpdateTimeText();
             }
+        }
+
+        /// <summary>
+        /// 强制渲染当前帧：同步 Play+Pause 无效（Play 异步启动，Pause 在真正渲染前就执行），
+        /// 改为静音 Play 一段短暂时间让 MediaElement 实际启动并渲染 seek 目标帧，再暂停恢复音量。
+        /// </summary>
+        private async void RenderPreviewFrame()
+        {
+            if (_previewRendering) return;
+            _previewRendering = true;
+            try
+            {
+                var volume = Video.Volume;
+                Video.Volume = 0;
+                Video.Play();
+                await Task.Delay(50);
+                if (_seeking)
+                {
+                    // 仍在拖动中：暂停保持预览态
+                    Video.Pause();
+                }
+                Video.Volume = volume;
+            }
+            finally
+            {
+                _previewRendering = false;
+            }
+        }
         }
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
