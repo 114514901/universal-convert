@@ -204,6 +204,8 @@ namespace UniversalConvert.App
         private void OnProgressPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _seeking = false;
+            _previewRequestId++;                 // 使进行中的抽帧请求作废
+            PreviewFrameImage.Visibility = Visibility.Collapsed;
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
@@ -218,23 +220,22 @@ namespace UniversalConvert.App
         }
 
         private DateTime _lastPreviewRender;
-        private bool _previewRendering;
+        private int _previewRequestId;
 
         private void OnProgressChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            // 拖动中实时 seek 到对应位置，画面预览该帧；同时更新时间
+            // 拖动中实时 seek + ffmpeg 抽帧预览（浮层显示该位置画面）
             if (_seeking)
             {
                 if (Video.NaturalDuration.HasTimeSpan)
                 {
                     Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
-                    // 暂停态 MediaElement 不渲染 seek 帧——静音短暂播放强制渲染当前帧
-                    // （40ms 节流 + 防重入；拖动中若已松手则保持播放状态）
+                    // 抽帧较重，150ms 节流
                     var now = DateTime.Now;
-                    if ((now - _lastPreviewRender).TotalMilliseconds >= 40)
+                    if ((now - _lastPreviewRender).TotalMilliseconds >= 150)
                     {
                         _lastPreviewRender = now;
-                        RenderPreviewFrame();
+                        RenderPreviewFrame(ProgressSlider.Value);
                     }
                 }
                 UpdateTimeText();
@@ -242,29 +243,62 @@ namespace UniversalConvert.App
         }
 
         /// <summary>
-        /// 强制渲染当前帧：同步 Play+Pause 无效（Play 异步启动，Pause 在真正渲染前就执行），
-        /// 改为静音 Play 一段短暂时间让 MediaElement 实际启动并渲染 seek 目标帧，再暂停恢复音量。
+        /// ffmpeg 抽帧预览：把拖动位置的画面抽成一帧 PNG 显示在浮层（MediaElement 暂停态
+        /// 不渲染 seek 帧，Play/Pause hack 也不可靠——直接抽帧最稳）。
+        /// 只有最新一次请求的结果会被显示（过期请求丢弃）。
         /// </summary>
-        private async void RenderPreviewFrame()
+        private async void RenderPreviewFrame(double seconds)
         {
-            if (_previewRendering) return;
-            _previewRendering = true;
+            var id = ++_previewRequestId;
+            PreviewFrameImage.Visibility = Visibility.Visible;
+
+            var ffmpeg = AudioMetadata.FindFfmpeg();
+            if (string.IsNullOrEmpty(ffmpeg)) return;
+
+            var tmp = Path.Combine(Path.GetTempPath(), "uc-vprev-" + Guid.NewGuid().ToString("N") + ".png");
             try
             {
-                var volume = Video.Volume;
-                Video.Volume = 0;
-                Video.Play();
-                await Task.Delay(50);
-                if (_seeking)
+                var args = string.Format(
+                    "-y -hide_banner -loglevel error -ss {0} -i {1} -frames:v 1 -vf \"scale='min(640,iw)':-2\" {2}",
+                    seconds.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture),
+                    Quote(_filePath), Quote(tmp));
+
+                var psi = new System.Diagnostics.ProcessStartInfo
                 {
-                    // 仍在拖动中：暂停保持预览态
-                    Video.Pause();
+                    FileName = ffmpeg,
+                    Arguments = args,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                var exitCode = await Task.Run(() =>
+                {
+                    using (var p = System.Diagnostics.Process.Start(psi))
+                    {
+                        if (p == null) return -1;
+                        p.WaitForExit();
+                        return p.ExitCode;
+                    }
+                });
+
+                if (exitCode == 0 && File.Exists(tmp) && id == _previewRequestId)
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.UriSource = new Uri(tmp);
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    PreviewFrameImage.Source = bmp;
                 }
-                Video.Volume = volume;
+            }
+            catch
+            {
+                // 抽帧失败：忽略（保持无预览，不影响拖动）
             }
             finally
             {
-                _previewRendering = false;
+                try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
             }
         }
 

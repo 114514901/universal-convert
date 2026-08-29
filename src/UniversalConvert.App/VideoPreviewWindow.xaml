@@ -17,9 +17,14 @@
                    TextTrimming="CharacterEllipsis" Margin="4,2,4,8"/>
 
         <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1" Background="#111111">
-            <MediaElement x:Name="Video" Stretch="Uniform" LoadedBehavior="Manual"
-                          MediaOpened="OnMediaOpened" MediaEnded="OnMediaEnded" MediaFailed="OnMediaFailed"
-                          PreviewMouseLeftButtonDown="OnVideoMouseLeftDown"/>
+            <Grid>
+                <MediaElement x:Name="Video" Stretch="Uniform" LoadedBehavior="Manual"
+                              MediaOpened="OnMediaOpened" MediaEnded="OnMediaEnded" MediaFailed="OnMediaFailed"
+                              PreviewMouseLeftButtonDown="OnVideoMouseLeftDown"/>
+                <!-- 拖动进度条时的抽帧预览浮层（滑动结束后隐藏） -->
+                <Image x:Name="PreviewFrameImage" Stretch="Uniform" Visibility="Collapsed"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+            </Grid>
         </Border>
 
         <Slider x:Name="ProgressSlider" Grid.Row="2" Minimum="0" Maximum="1" Value="0"
