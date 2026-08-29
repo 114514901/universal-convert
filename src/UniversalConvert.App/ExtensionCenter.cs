@@ -120,7 +120,7 @@ namespace UniversalConvert.App
 
         /// <summary>安装扩展；目标目录被锁定（插件已加载、更新场景）时自动暂存到 pending，重启后应用。
         /// pause：共享暂停信号（置位期间挂起下载，恢复后自动续传）。</summary>
-        public static async Task<ExtensionInstallResult> InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null, SemaphoreSlim sharedBudget = null, IProgress<Tuple<long, long>> byteProgress = null)
+        public static async Task<ExtensionInstallResult> InstallAsync(ExtensionInfo info, IProgress<double> progress, CancellationToken ct, ManualResetEventSlim pause = null, SemaphoreSlim sharedBudget = null, IProgress<Tuple<long, long>> byteProgress = null, Action<string> onError = null)
         {
             var temp = Path.Combine(Path.GetTempPath(), "uc_ext_" + Guid.NewGuid().ToString("N") + ".zip");
 
@@ -133,6 +133,7 @@ namespace UniversalConvert.App
             catch (Exception ex)
             {
                 Log.Error("扩展安装失败: " + ex.Message);
+                try { onError?.Invoke(ex.Message); } catch { }
                 return ExtensionInstallResult.Failed;
             }
             finally

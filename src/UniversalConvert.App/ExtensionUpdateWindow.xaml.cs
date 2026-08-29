@@ -48,6 +48,7 @@ namespace UniversalConvert.App
         {
             int succeeded = 0;
             int failed = 0;
+            var failedDetails = new List<string>();
 
             // 同时最多 3 个扩展下载（文件级并发上限）；全局连接预算（9）由共享 SemaphoreSlim 控制，
             // 各文件的 8MB 块竞争预算——文件完成自动把连接让给剩余文件
@@ -62,8 +63,9 @@ namespace UniversalConvert.App
                     var progress = new Progress<double>(p => item.SetDownloadProgress(p));
                     // 字节级进度（已下载/总大小 MB 显示）
                     var byteProgress = new Progress<Tuple<long, long>>(t => item.SetByteProgress(t.Item1, t.Item2));
+                    var errorMsg = "";
                     Log.Info($"开始安装/更新扩展: {item.Info.Id} {item.Info.Version} (下载: {item.Info.DownloadUrl})");
-                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal, budget, byteProgress);
+                    var result = await ExtensionCenter.InstallAsync(item.Info, progress, _cts.Token, _pauseSignal, budget, byteProgress, msg => errorMsg = msg);
                     Log.Info($"扩展 {item.Info.Id} 安装/更新结果: {result}");
 
                     if (result == ExtensionInstallResult.Installed)
@@ -85,6 +87,11 @@ namespace UniversalConvert.App
                     {
                         item.SetFailed(Strings.ExtensionUpdateFailed);
                         Interlocked.Increment(ref failed);
+                        lock (failedDetails)
+                        {
+                            failedDetails.Add(item.Info.Name +
+                                (string.IsNullOrEmpty(errorMsg) ? "" : "：" + errorMsg));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -111,6 +118,14 @@ namespace UniversalConvert.App
             PauseButton.IsEnabled = false;
             CancelButton.IsEnabled = false;
             _pauseSignal.Reset();
+
+            // 有失败项时弹窗提示原因（部分取消不算弹窗条件）
+            if (failed > 0 && !cancelledAll)
+            {
+                MessageBox.Show(
+                    Summary + Environment.NewLine + Environment.NewLine + string.Join(Environment.NewLine, failedDetails),
+                    Strings.ExtensionUpdateFailed, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 
             // 安装/更新都需要重启才生效（新装需加载、已加载的更新需暂存应用），有成功就提示；全部取消则不提示
             if (succeeded > 0 && !cancelledAll)
