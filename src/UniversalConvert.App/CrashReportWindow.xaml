@@ -48,7 +48,7 @@
             <Button Content="{x:Static loc:Strings.CopyLog}" Padding="12,5" Click="OnCopyLog" Margin="0,0,6,0"/>
             <Button Content="{x:Static loc:Strings.OpenLogFolder}" Padding="12,5" Click="OnOpenFolder" Margin="0,0,6,0"/>
             <Button Content="{x:Static loc:Strings.Restart}" Padding="12,5" Click="OnRestart" Margin="0,0,6,0"/>
-            <Button Content="{x:Static loc:Strings.Continue}" Padding="12,5" FontWeight="SemiBold"
+            <Button x:Name="ContinueButton" Content="{x:Static loc:Strings.Continue}" Padding="12,5" FontWeight="SemiBold"
                     Click="OnContinue" Margin="0,0,6,0"/>
             <Button Content="{x:Static loc:Strings.TerminateProcess}" Padding="12,5" Click="OnClose"/>
         </StackPanel>

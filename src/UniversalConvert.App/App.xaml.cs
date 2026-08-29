@@ -233,7 +233,8 @@ namespace UniversalConvert.App
                 ? BuildHangReportText(logsDir)
                 : string.Empty;
 
-            var window = new CrashReportWindow(summary, reportText, logText, logsDir);
+            // 看护卡死/终结报告：进程即将结束，不允许「继续运行」
+            var window = new CrashReportWindow(summary, reportText, logText, logsDir, allowContinue: false);
             MainWindow = window;
             window.Show();
         }

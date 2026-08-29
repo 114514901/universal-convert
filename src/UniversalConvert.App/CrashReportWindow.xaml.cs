@@ -12,7 +12,8 @@ namespace UniversalConvert.App
         private readonly string _logText;
         private readonly string _logsDir;
 
-        public CrashReportWindow(string summary, string reportText, string logText, string logsDir)
+        /// <summary>allowContinue=false（看护卡死报告等）：进程即将结束，禁止「继续运行」。</summary>
+        public CrashReportWindow(string summary, string reportText, string logText, string logsDir, bool allowContinue = true)
         {
             InitializeComponent();
             Icon = AppIcon.Get();
@@ -22,6 +23,11 @@ namespace UniversalConvert.App
             _reportText = reportText;
             _logText = logText;
             _logsDir = logsDir;
+            if (!allowContinue)
+            {
+                ContinueButton.IsEnabled = false;
+                ContinueButton.ToolTip = "当前为卡死/终结报告模式，无法继续运行";
+            }
         }
 
         private void OnCopyReport(object sender, RoutedEventArgs e)
@@ -59,10 +65,9 @@ namespace UniversalConvert.App
             Application.Current.Shutdown();
         }
 
-        /// <summary>继续运行（有风险）：关闭报告窗口，应用继续。</summary>
+        /// <summary>继续运行（有风险）：关闭报告窗口，应用继续（不设 DialogResult，兼容非 ShowDialog 场景）。</summary>
         private void OnContinue(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
             Close();
         }
 
