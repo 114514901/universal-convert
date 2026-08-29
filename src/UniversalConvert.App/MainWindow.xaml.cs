@@ -316,7 +316,7 @@ namespace UniversalConvert.App
                     }
                 }
 
-                if (!TryAudioPreviewProvider(effective))
+                if (!TryAudioPreviewProvider(effective, Path.GetFileName(path)))
                 {
                     // displayName：渲染后的 effective 是临时文件，标题显示原文件名
                     var window = new AudioPlayerWindow(effective, _host, renderProvider != null ? Path.GetFileName(path) : null) { Owner = this };
@@ -337,7 +337,7 @@ namespace UniversalConvert.App
             else if (CanPreviewVideo(path))
             {
                 // 优先交给扩展的视频预览提供者（如 VLC 扩展）；没有或拒绝则用内置预览
-                if (!TryVideoPreviewProvider(path))
+                if (!TryVideoPreviewProvider(path, Path.GetFileName(path)))
                 {
                     var window = new VideoPreviewWindow(path) { Owner = this };
                     window.Show();
@@ -354,8 +354,9 @@ namespace UniversalConvert.App
             }
         }
 
-        /// <summary>尝试让媒体预览提供者扩展接管音频预览；无提供者/拒绝/异常时返回 false 回退内置。</summary>
-        private bool TryAudioPreviewProvider(string path)
+        /// <summary>尝试让媒体预览提供者扩展接管音频预览；无提供者/拒绝/异常时返回 false 回退内置。
+        /// displayName：渲染预览时传原文件名，扩展可显示（v2 接口）。</summary>
+        private bool TryAudioPreviewProvider(string path, string displayName = null)
         {
             var ext = Path.GetExtension(path);
             foreach (var provider in _host.Plugins.OfType<IMediaPreviewProvider>())
@@ -365,7 +366,11 @@ namespace UniversalConvert.App
                     if (provider.CanPreviewAudio(ext))
                     {
                         Log.Info($"音频预览提供者接管: {provider.GetType().FullName} ({path})");
-                        if (provider.ShowPreview(path))
+                        var v2 = provider as IMediaPreviewProvider2;
+                        var ok = v2 != null
+                            ? v2.ShowPreviewWithName(path, displayName ?? Path.GetFileName(path))
+                            : provider.ShowPreview(path);
+                        if (ok)
                         {
                             return true;
                         }
@@ -380,8 +385,9 @@ namespace UniversalConvert.App
             return false;
         }
 
-        /// <summary>尝试让视频预览提供者扩展接管预览；无提供者/拒绝/异常时返回 false 回退内置。</summary>
-        private bool TryVideoPreviewProvider(string path)
+        /// <summary>尝试让视频预览提供者扩展接管预览；无提供者/拒绝/异常时返回 false 回退内置。
+        /// displayName：渲染预览时传原文件名，扩展可显示（v2 接口）。</summary>
+        private bool TryVideoPreviewProvider(string path, string displayName = null)
         {
             var ext = Path.GetExtension(path);
             foreach (var provider in _host.Plugins.OfType<IVideoPreviewProvider>())
@@ -391,7 +397,11 @@ namespace UniversalConvert.App
                     if (provider.CanPreviewVideo(ext))
                     {
                         Log.Info($"视频预览提供者接管: {provider.GetType().FullName} ({path})");
-                        if (provider.ShowPreview(path))
+                        var v2 = provider as IMediaPreviewProvider2;
+                        var ok = v2 != null
+                            ? v2.ShowPreviewWithName(path, displayName ?? Path.GetFileName(path))
+                            : provider.ShowPreview(path);
+                        if (ok)
                         {
                             return true;
                         }
