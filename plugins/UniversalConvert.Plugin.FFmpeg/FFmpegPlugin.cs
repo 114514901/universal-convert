@@ -28,7 +28,7 @@ namespace UniversalConvert.Plugin.FFmpeg
         private static readonly string[] AudioInputs =
             { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".wma", ".opus" };
         private static readonly string[] AudioOutputs =
-            { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".opus" };
+            { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a", ".opus", ".wma" };
         private static readonly string[] ImageInputs =
             { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff", ".tif", ".heic", ".heif", ".avif" };
         private static readonly string[] ImageOutputs =
