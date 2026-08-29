@@ -42,6 +42,10 @@ jobs:
           New-Item -ItemType Directory -Force $dir | Out-Null
           tar -xf $zip -C $dir
           $bin = (Get-ChildItem -Path $dir -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1).DirectoryName
+          # 打印打包的 ffmpeg 版本（master 滚动快照，便于追溯每个 release 的版本/安全修复状态）
+          Write-Host "===== 打包 ffmpeg 版本 ====="
+          & (Join-Path $bin "ffmpeg.exe") -version | Select-Object -First 1
+          Write-Host "============================="
           New-Item -ItemType Directory -Force dist\tools | Out-Null
           Copy-Item (Join-Path $bin "ffmpeg.exe") dist\tools\ -Force
           Copy-Item (Join-Path $bin "ffprobe.exe") dist\tools\ -Force
