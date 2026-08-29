@@ -266,7 +266,6 @@ namespace UniversalConvert.App
                 _previewRendering = false;
             }
         }
-        }
 
         private void OnVolumeChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
