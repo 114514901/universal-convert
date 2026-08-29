@@ -65,10 +65,98 @@ namespace UniversalConvert.App
             PlayPauseButton.Content = Strings.Play;
         }
 
-        private void OnMediaFailed(object sender, ExceptionRoutedEventArgs e)
+        private async void OnMediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
             _timer.Stop();
-            StatusFail();
+            if (_triedFallback) return; // 已兜底过一次（转码后仍失败）不再递归
+            await TryFallbackTranscodeAsync();
+        }
+
+        // ---------- ffmpeg 转码兜底（系统解码器不支持时，转成 H.264+AAC mp4 再播） ----------
+
+        private bool _triedFallback;
+        private bool _transcoding;
+        private string _fallbackMp4;
+        private System.Diagnostics.Process _transcodeProcess;
+
+        private async Task TryFallbackTranscodeAsync()
+        {
+            _triedFallback = true;
+            var ffmpeg = AudioMetadataReader.FindFfmpeg();
+            if (string.IsNullOrEmpty(ffmpeg))
+            {
+                StatusFail();
+                return;
+            }
+
+            _transcoding = true;
+            _fallbackMp4 = Path.Combine(Path.GetTempPath(), "uc-vtrans-" + Guid.NewGuid().ToString("N") + ".mp4");
+            TitleText.Text = Path.GetFileName(_filePath) + "（" + Strings.VideoTranscoding + " 0%）";
+
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = ffmpeg,
+                    Arguments = string.Format(
+                        "-y -hide_banner -loglevel info -i {0} -c:v libx264 -preset veryfast -crf 23 -c:a aac -movflags +faststart {1}",
+                        Quote(_filePath), Quote(_fallbackMp4)),
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true
+                };
+
+                _transcodeProcess = System.Diagnostics.Process.Start(psi);
+                if (_transcodeProcess == null)
+                {
+                    StatusFail();
+                    return;
+                }
+
+                // 解析 stderr 进度（Duration/time=）
+                double duration = 0;
+                string line;
+                while ((line = await _transcodeProcess.StandardError.ReadLineAsync()) != null)
+                {
+                    var dur = ParseFfmpegTime(line, @"Duration:\s*(\d+):(\d+):(\d+)");
+                    if (dur.HasValue) duration = dur.Value.TotalSeconds;
+                    var cur = ParseFfmpegTime(line, @"time=(\d+):(\d+):(\d+)");
+                    if (cur.HasValue && duration > 0)
+                    {
+                        var pct = Math.Min(99, (int)(cur.Value.TotalSeconds / duration * 100));
+                        TitleText.Text = Path.GetFileName(_filePath) + "（" + Strings.VideoTranscoding + " " + pct + "%）";
+                    }
+                }
+                _transcodeProcess.WaitForExit();
+                var ok = _transcodeProcess.ExitCode == 0 && File.Exists(_fallbackMp4);
+                _transcodeProcess = null;
+
+                if (ok)
+                {
+                    // 转码成功：播放临时文件（窗口关闭时删除）
+                    TitleText.Text = Path.GetFileName(_filePath) + "（" + Strings.VideoTranscoded + "）";
+                    _stopped = false;
+                    Video.Source = null;
+                    Video.Source = new Uri(_fallbackMp4);
+                    Video.Play();
+                    _playing = true;
+                    PlayPauseButton.Content = Strings.Pause;
+                    _timer.Start();
+                }
+                else
+                {
+                    StatusFail();
+                }
+            }
+            catch
+            {
+                _transcodeProcess = null;
+                StatusFail();
+            }
+            finally
+            {
+                _transcoding = false;
+            }
         }
 
         private void StatusFail()
@@ -337,6 +425,18 @@ namespace UniversalConvert.App
             return "\"" + path.Replace("\"", "\\\"") + "\"";
         }
 
+        /// <summary>从 ffmpeg stderr 行解析时间（如 Duration:/time=）。</summary>
+        private static TimeSpan? ParseFfmpegTime(string line, string pattern)
+        {
+            var m = System.Text.RegularExpressions.Regex.Match(line ?? string.Empty, pattern);
+            if (!m.Success) return null;
+            int h, min, s;
+            if (!int.TryParse(m.Groups[1].Value, out h)) return null;
+            if (!int.TryParse(m.Groups[2].Value, out min)) return null;
+            if (!int.TryParse(m.Groups[3].Value, out s)) return null;
+            return new TimeSpan(h, min, s);
+        }
+
         private void OnClose(object sender, RoutedEventArgs e)
         {
             Close();
@@ -345,6 +445,20 @@ namespace UniversalConvert.App
         private void OnClosed(object sender, EventArgs e)
         {
             _timer.Stop();
+            // 终止进行中的转码进程并清理临时文件
+            try
+            {
+                if (_transcodeProcess != null && !_transcodeProcess.HasExited)
+                {
+                    _transcodeProcess.Kill();
+                }
+            }
+            catch { }
+            try
+            {
+                if (!string.IsNullOrEmpty(_fallbackMp4) && File.Exists(_fallbackMp4)) File.Delete(_fallbackMp4);
+            }
+            catch { }
             try { Video.Close(); } catch { }
         }
     }

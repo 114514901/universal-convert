@@ -612,6 +612,12 @@
   <data name="VideoPreviewFallback" xml:space="preserve">
     <value>Cannot decode, opened with system player</value>
   </data>
+  <data name="VideoTranscoding" xml:space="preserve">
+    <value>Transcoding to a playable format</value>
+  </data>
+  <data name="VideoTranscoded" xml:space="preserve">
+    <value>Playing transcoded copy</value>
+  </data>
   <data name="ImagePreviewSizeFormat" xml:space="preserve">
     <value>{0} × {1}, {2}</value>
   </data>

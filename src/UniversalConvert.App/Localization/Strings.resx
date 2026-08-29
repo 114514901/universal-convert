@@ -612,6 +612,12 @@
   <data name="VideoPreviewFallback" xml:space="preserve">
     <value>无法解码，已用系统播放器打开</value>
   </data>
+  <data name="VideoTranscoding" xml:space="preserve">
+    <value>正在转码以匹配播放格式</value>
+  </data>
+  <data name="VideoTranscoded" xml:space="preserve">
+    <value>已转码播放</value>
+  </data>
   <data name="ImagePreviewSizeFormat" xml:space="preserve">
     <value>{0} × {1}，{2}</value>
   </data>
