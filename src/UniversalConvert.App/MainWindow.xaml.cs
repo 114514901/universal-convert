@@ -266,8 +266,12 @@ namespace UniversalConvert.App
 
             if (CanPreviewAudio(path))
             {
-                var window = new AudioPlayerWindow(path, _host) { Owner = this };
-                window.Show();
+                // 媒体预览提供者（如 VLC 扩展）优先接管音频预览；没有/拒绝则用内置音频播放器
+                if (!TryAudioPreviewProvider(path))
+                {
+                    var window = new AudioPlayerWindow(path, _host) { Owner = this };
+                    window.Show();
+                }
             }
             else if (CanPreviewImage(path))
             {
@@ -292,6 +296,32 @@ namespace UniversalConvert.App
             {
                 try { Process.Start(path); } catch { }
             }
+        }
+
+        /// <summary>尝试让媒体预览提供者扩展接管音频预览；无提供者/拒绝/异常时返回 false 回退内置。</summary>
+        private bool TryAudioPreviewProvider(string path)
+        {
+            var ext = Path.GetExtension(path);
+            foreach (var provider in _host.Plugins.OfType<IMediaPreviewProvider>())
+            {
+                try
+                {
+                    if (provider.CanPreviewAudio(ext))
+                    {
+                        Log.Info($"音频预览提供者接管: {provider.GetType().FullName} ({path})");
+                        if (provider.ShowPreview(path))
+                        {
+                            return true;
+                        }
+                        Log.Info($"音频预览提供者拒绝接管: {provider.GetType().FullName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"音频预览提供者异常: {provider.GetType().FullName}: {ex}");
+                }
+            }
+            return false;
         }
 
         /// <summary>尝试让视频预览提供者扩展接管预览；无提供者/拒绝/异常时返回 false 回退内置。</summary>
