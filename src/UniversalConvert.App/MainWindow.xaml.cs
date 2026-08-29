@@ -278,11 +278,27 @@ namespace UniversalConvert.App
                 string renderTemp = null;
                 if (renderProvider != null)
                 {
+                    // 渲染可能耗时（如 MIDI 合成），先给反馈再等
+                    var busy = new BusyWindow(Strings.BusyRendering) { Owner = this };
+                    busy.Show();
                     try
                     {
                         renderTemp = await renderProvider.RenderPreviewAsync(path, CancellationToken.None);
                         if (!string.IsNullOrEmpty(renderTemp) && File.Exists(renderTemp))
                         {
+                            // 渲染产物改名为「原文件名+新扩展名」，让播放器标题可读
+                            try
+                            {
+                                var friendly = Path.Combine(Path.GetTempPath(),
+                                    Path.ChangeExtension(Path.GetFileName(path), Path.GetExtension(renderTemp)));
+                                if (!string.Equals(friendly, renderTemp, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (File.Exists(friendly)) File.Delete(friendly);
+                                    File.Move(renderTemp, friendly);
+                                    renderTemp = friendly;
+                                }
+                            }
+                            catch { }
                             effective = renderTemp;
                         }
                         else
@@ -293,6 +309,10 @@ namespace UniversalConvert.App
                     catch
                     {
                         renderTemp = null;
+                    }
+                    finally
+                    {
+                        busy.Close();
                     }
                 }
 

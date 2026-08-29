@@ -191,6 +191,7 @@ namespace UniversalConvert.App.Localization
         public static string PreviewLoading => Get("PreviewLoading");
         public static string ImagePreviewFailed => Get("ImagePreviewFailed");
         public static string VideoPreviewFallback => Get("VideoPreviewFallback");
+        public static string BusyRendering => Get("BusyRendering");
         public static string VideoTranscoding => Get("VideoTranscoding");
         public static string VideoTranscoded => Get("VideoTranscoded");
         public static string ImagePreviewSizeFormat => Get("ImagePreviewSizeFormat");

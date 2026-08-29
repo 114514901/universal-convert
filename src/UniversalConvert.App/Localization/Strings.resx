@@ -624,6 +624,9 @@
   <data name="VideoPreviewFallback" xml:space="preserve">
     <value>无法解码，已用系统播放器打开</value>
   </data>
+  <data name="BusyRendering" xml:space="preserve">
+    <value>正在处理音频（渲染/合成）…</value>
+  </data>
   <data name="VideoTranscoding" xml:space="preserve">
     <value>正在转码以匹配播放格式</value>
   </data>

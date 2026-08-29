@@ -624,6 +624,9 @@
   <data name="VideoPreviewFallback" xml:space="preserve">
     <value>Cannot decode, opened with system player</value>
   </data>
+  <data name="BusyRendering" xml:space="preserve">
+    <value>Processing audio (rendering/synthesis)…</value>
+  </data>
   <data name="VideoTranscoding" xml:space="preserve">
     <value>Transcoding to a playable format</value>
   </data>
