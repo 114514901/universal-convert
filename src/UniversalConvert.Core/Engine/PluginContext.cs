@@ -34,7 +34,7 @@ namespace UniversalConvert.Core.Engine
         {
             if (string.IsNullOrEmpty(toolName)) return null;
 
-            // 1. 配置文件显式指定
+            // 1. 配置文件显式指定（用户明确配置，信任其选择）
             string path;
             if (_config.ToolPaths != null && _config.ToolPaths.TryGetValue(toolName, out path))
             {
@@ -48,9 +48,9 @@ namespace UniversalConvert.Core.Engine
                 if (File.Exists(local)) return local;
             }
 
-            // 3. 系统 PATH
-            var fromPath = FindOnPath(toolName);
-            if (fromPath != null) return fromPath;
+            // 注：不再回退系统 PATH——PATH 中的同名工具可能为旧版/带漏洞版本
+            // （如 ffmpeg < 8.1.2 的 CVE-2026-8461 越界写入），静默使用存在安全风险；
+            // 缺失时明确报「未找到所需工具」，由用户显式配置路径。
 
             return null;
         }
@@ -68,29 +68,6 @@ namespace UniversalConvert.Core.Engine
         public void Log(string message)
         {
             _log(message);
-        }
-
-        private static string FindOnPath(string toolName)
-        {
-            var name = toolName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-                ? toolName
-                : toolName + ".exe";
-
-            var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-            foreach (var dir in pathEnv.Split(Path.PathSeparator))
-            {
-                if (string.IsNullOrEmpty(dir)) continue;
-                try
-                {
-                    var candidate = Path.Combine(dir.Trim(), name);
-                    if (File.Exists(candidate)) return candidate;
-                }
-                catch
-                {
-                    // 忽略非法路径段
-                }
-            }
-            return null;
         }
     }
 }

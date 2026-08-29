@@ -78,16 +78,10 @@ namespace UniversalConvert.App
 
         public static string FindFfmpeg()
         {
+            // 仅用随包 ffmpeg；不查系统 PATH（PATH 中可能是旧版/带漏洞版本，
+            // 如 ffmpeg < 8.1.2 的 CVE-2026-8461 越界写入，静默使用有安全风险）
             var local = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools", "ffmpeg.exe");
             if (File.Exists(local)) return local;
-
-            var pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-            foreach (var dir in pathEnv.Split(';'))
-            {
-                if (string.IsNullOrEmpty(dir)) continue;
-                var candidate = Path.Combine(dir.Trim(), "ffmpeg.exe");
-                if (File.Exists(candidate)) return candidate;
-            }
             return null;
         }
 
