@@ -266,8 +266,15 @@ namespace UniversalConvert.App
 
             if (CanPreviewAudio(path))
             {
-                // 媒体预览提供者（如 VLC 扩展）优先接管音频预览；没有/拒绝则用内置音频播放器
-                if (!TryAudioPreviewProvider(path))
+                // 解密/渲染类音频（ncm/kgm/qmc/midi 等有 IPreviewProvider 的）必须走内置播放器
+                // （内部先渲染/解密再播），不能让 VLC 等媒体提供者直接拿到加密/原始文件；
+                // 只有普通音频才轮到媒体提供者（VLC）接管
+                var ext = Path.GetExtension(path);
+                var hasRenderProvider = _host?.Plugins != null
+                    && _host.Plugins.OfType<IPreviewProvider>().Any(p =>
+                        p.SupportedPreviewExtensions != null
+                        && p.SupportedPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase));
+                if (hasRenderProvider || !TryAudioPreviewProvider(path))
                 {
                     var window = new AudioPlayerWindow(path, _host) { Owner = this };
                     window.Show();
