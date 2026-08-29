@@ -53,7 +53,10 @@ namespace UniversalConvert.App
             using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
-                var json = await client.DownloadStringTaskAsync(IndexUrl).ConfigureAwait(false);
+                // raw.githubusercontent 有 CDN 缓存：加时间戳参数强制回源，
+                // 避免 index.json 更新后客户端长时间拿到旧列表（下载旧包/版本不符）
+                var url = IndexUrl + "?v=" + DateTime.UtcNow.Ticks;
+                var json = await client.DownloadStringTaskAsync(url).ConfigureAwait(false);
                 var list = Parse(json);
                 Log.Info($"扩展仓库共 {list.Count} 个可用扩展");
                 return list;
