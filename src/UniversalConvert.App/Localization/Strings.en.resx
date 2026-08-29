@@ -708,6 +708,9 @@
   <data name="HangReportSummary" xml:space="preserve">
     <value>The app stopped responding and was terminated by the watchdog.</value>
   </data>
+  <data name="CrashUnexpectedSummary" xml:space="preserve">
+    <value>The app exited unexpectedly (no normal exit signal; possibly a native crash). Logs are preserved. Click Restart to relaunch.</value>
+  </data>
   <data name="HangReportText" xml:space="preserve">
     <value>The app was unresponsive for too long (UI hang or frozen process) and was terminated by the watchdog. Click Restart to launch it again.</value>
   </data>

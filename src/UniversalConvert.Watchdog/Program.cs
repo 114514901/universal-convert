@@ -101,8 +101,19 @@ namespace UniversalConvert.Watchdog
                 {
                     if (target.HasExited)
                     {
-                        Log("主程序已退出");
-                        return; // 主程序正常/异常退出；崩溃报告由主程序进程内处理
+                        // 区分正常退出与意外崩溃：主程序退出前会 Set 退出信号；
+                        // 进程消失但信号未收到 → 原生/托管外崩溃（无声消失，需要报告）
+                        bool normalExit = exitSignal != null && exitSignal.WaitOne(0);
+                        if (normalExit)
+                        {
+                            Log("主程序已正常退出");
+                        }
+                        else
+                        {
+                            Log("主程序意外退出（未收到正常退出信号，疑似原生崩溃）");
+                            LaunchReport("crash", appPath, logsDir);
+                        }
+                        return;
                     }
 
                     // 1. 心跳超时：进程整体冻死（后台线程也不再写心跳）
@@ -129,7 +140,7 @@ namespace UniversalConvert.Watchdog
                     {
                         Log("卡死检测触发：heartbeatStale=" + heartbeatStale + ", uiHungSustained=" + uiHungSustained);
                         try { target.Kill(); } catch { }
-                        LaunchReport(appPath, logsDir);
+                        LaunchReport("hang", appPath, logsDir);
                         return;
                     }
                 }
@@ -168,11 +179,11 @@ namespace UniversalConvert.Watchdog
             }
         }
 
-        private static void LaunchReport(string appPath, string logsDir)
+        private static void LaunchReport(string kind, string appPath, string logsDir)
         {
             try
             {
-                var args = "--report hang";
+                var args = "--report " + kind;
                 if (!string.IsNullOrEmpty(logsDir))
                 {
                     args += " \"" + logsDir + "\"";

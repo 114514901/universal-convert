@@ -228,8 +228,10 @@ namespace UniversalConvert.App
                 : parsed.ReportDir;
 
             var logText = ReadFileSafe(Path.Combine(logsDir, "app.log"));
-            var summary = parsed.ReportKind == "hang" ? Strings.HangReportSummary : Strings.CrashReportTitle;
-            var reportText = parsed.ReportKind == "hang"
+            var summary = parsed.ReportKind == "hang" ? Strings.HangReportSummary
+                : parsed.ReportKind == "crash" ? Strings.CrashUnexpectedSummary
+                : Strings.CrashReportTitle;
+            var reportText = parsed.ReportKind == "hang" || parsed.ReportKind == "crash"
                 ? BuildHangReportText(logsDir)
                 : string.Empty;
 

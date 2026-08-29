@@ -210,6 +210,7 @@ namespace UniversalConvert.App.Localization
         public static string CrashContinueWarning => Get("CrashContinueWarning");
         public static string TestHang => Get("TestHang");
         public static string HangReportSummary => Get("HangReportSummary");
+        public static string CrashUnexpectedSummary => Get("CrashUnexpectedSummary");
         public static string HangReportText => Get("HangReportText");
         public static string ExceptionLabel => Get("ExceptionLabel");
         public static string ReportLabel => Get("ReportLabel");
