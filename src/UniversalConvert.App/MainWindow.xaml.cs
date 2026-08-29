@@ -275,8 +275,12 @@ namespace UniversalConvert.App
             }
             else if (CanPreviewVideo(path))
             {
-                var window = new VideoPreviewWindow(path) { Owner = this };
-                window.Show();
+                // 优先交给扩展的视频预览提供者（如 VLC 扩展）；没有或拒绝则用内置预览
+                if (!TryVideoPreviewProvider(path))
+                {
+                    var window = new VideoPreviewWindow(path) { Owner = this };
+                    window.Show();
+                }
             }
             else if (CanPreviewText(path))
             {
@@ -287,6 +291,27 @@ namespace UniversalConvert.App
             {
                 try { Process.Start(path); } catch { }
             }
+        }
+
+        /// <summary>尝试让视频预览提供者扩展接管预览；无提供者/拒绝/异常时返回 false 回退内置。</summary>
+        private bool TryVideoPreviewProvider(string path)
+        {
+            var ext = Path.GetExtension(path);
+            foreach (var provider in _host.Plugins.OfType<IVideoPreviewProvider>())
+            {
+                try
+                {
+                    if (provider.CanPreviewVideo(ext) && provider.ShowPreview(path))
+                    {
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // 提供者异常：跳过继续下一个，最后回退内置
+                }
+            }
+            return false;
         }
 
         private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
