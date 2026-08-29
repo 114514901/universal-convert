@@ -14,6 +14,7 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
+using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
 using UniversalConvert.Core.Plugins;
@@ -301,14 +302,19 @@ namespace UniversalConvert.App
             {
                 try
                 {
-                    if (provider.CanPreviewVideo(ext) && provider.ShowPreview(path))
+                    if (provider.CanPreviewVideo(ext))
                     {
-                        return true;
+                        Log.Info($"视频预览提供者接管: {provider.GetType().FullName} ({path})");
+                        if (provider.ShowPreview(path))
+                        {
+                            return true;
+                        }
+                        Log.Info($"视频预览提供者拒绝接管: {provider.GetType().FullName}");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // 提供者异常：跳过继续下一个，最后回退内置
+                    Log.Error($"视频预览提供者异常: {provider.GetType().FullName}: {ex}");
                 }
             }
             return false;
