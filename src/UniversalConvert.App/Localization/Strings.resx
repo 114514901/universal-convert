@@ -390,6 +390,18 @@
   <data name="SettingLanguageDescription" xml:space="preserve">
     <value>界面语言（重启后生效）</value>
   </data>
+  <data name="SettingPreviewPlayer" xml:space="preserve">
+    <value>预览播放器</value>
+  </data>
+  <data name="SettingPreviewPlayerDescription" xml:space="preserve">
+    <value>双击/右键预览文件时的打开方式：内置预览器（音频/图片/视频/文本）或系统默认程序</value>
+  </data>
+  <data name="PreviewPlayerBuiltIn" xml:space="preserve">
+    <value>内置</value>
+  </data>
+  <data name="PreviewPlayerSystem" xml:space="preserve">
+    <value>系统</value>
+  </data>
   <data name="SettingUpdateChannel" xml:space="preserve">
     <value>更新渠道</value>
   </data>

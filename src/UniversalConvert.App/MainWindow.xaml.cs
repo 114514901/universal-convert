@@ -251,31 +251,49 @@ namespace UniversalConvert.App
             return false;
         }
 
+        /// <summary>统一预览入口：按设置「预览播放器」分流（系统 = 直接系统默认，内置 = 内置预览器）。</summary>
+        private void PreviewFile(string path)
+        {
+            if (!File.Exists(path)) return;
+
+            var mode = _settingsManager.Get("previewPlayer");
+            if (string.Equals(mode, "system", StringComparison.OrdinalIgnoreCase))
+            {
+                try { Process.Start(path); } catch { }
+                return;
+            }
+
+            if (CanPreviewAudio(path))
+            {
+                var window = new AudioPlayerWindow(path, _host) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewImage(path))
+            {
+                var window = new ImagePreviewWindow(path) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewVideo(path))
+            {
+                var window = new VideoPreviewWindow(path) { Owner = this };
+                window.Show();
+            }
+            else if (CanPreviewText(path))
+            {
+                var window = new TextPreviewWindow(path) { Owner = this };
+                window.Show();
+            }
+            else
+            {
+                try { Process.Start(path); } catch { }
+            }
+        }
+
         private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var row = FileList.SelectedItem as FileRow;
             if (row == null) return;
-
-            if (CanPreviewAudio(row.Path))
-            {
-                var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewImage(row.Path))
-            {
-                var window = new ImagePreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewVideo(row.Path))
-            {
-                var window = new VideoPreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewText(row.Path))
-            {
-                var window = new TextPreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
+            PreviewFile(row.Path);
         }
 
         /// <summary>内置预览支持的图片扩展名（WPF 直接解码或 ffmpeg 可转码）。</summary>
@@ -344,32 +362,8 @@ namespace UniversalConvert.App
         private void OnPreviewContext(object sender, RoutedEventArgs e)
         {
             var row = FileList.SelectedItem as FileRow;
-            if (row == null || !File.Exists(row.Path)) return;
-
-            if (CanPreviewAudio(row.Path))
-            {
-                var window = new AudioPlayerWindow(row.Path, _host) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewImage(row.Path))
-            {
-                var window = new ImagePreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewVideo(row.Path))
-            {
-                var window = new VideoPreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
-            else if (CanPreviewText(row.Path))
-            {
-                var window = new TextPreviewWindow(row.Path) { Owner = this };
-                window.Show();
-            }
-            else
-            {
-                try { Process.Start(row.Path); } catch { }
-            }
+            if (row == null) return;
+            PreviewFile(row.Path);
         }
 
         private void OnClear(object sender, RoutedEventArgs e)

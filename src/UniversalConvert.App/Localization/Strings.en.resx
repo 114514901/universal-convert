@@ -390,6 +390,18 @@
   <data name="SettingLanguageDescription" xml:space="preserve">
     <value>Interface language (takes effect after restart)</value>
   </data>
+  <data name="SettingPreviewPlayer" xml:space="preserve">
+    <value>Preview player</value>
+  </data>
+  <data name="SettingPreviewPlayerDescription" xml:space="preserve">
+    <value>How previews open on double-click / right-click: built-in viewer (audio/image/video/text) or system default app</value>
+  </data>
+  <data name="PreviewPlayerBuiltIn" xml:space="preserve">
+    <value>Built-in</value>
+  </data>
+  <data name="PreviewPlayerSystem" xml:space="preserve">
+    <value>System</value>
+  </data>
   <data name="SettingUpdateChannel" xml:space="preserve">
     <value>Update channel</value>
   </data>

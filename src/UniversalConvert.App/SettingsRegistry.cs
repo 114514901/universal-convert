@@ -48,6 +48,20 @@ namespace UniversalConvert.App
             },
             new SettingDefinition
             {
+                Key = "previewPlayer",
+                Category = "@SettingsCategoryGeneral",
+                Label = "@SettingPreviewPlayer",
+                Description = "@SettingPreviewPlayerDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "builtin",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "builtin", Label = "@PreviewPlayerBuiltIn" },
+                    new OptionChoice { Value = "system", Label = "@PreviewPlayerSystem" }
+                }
+            },
+            new SettingDefinition
+            {
                 Key = "updateChannel",
                 Category = "@SettingsCategoryUpdate",
                 Label = "@SettingUpdateChannel",
