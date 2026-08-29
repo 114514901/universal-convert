@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -253,7 +254,7 @@ namespace UniversalConvert.App
         }
 
         /// <summary>统一预览入口：按设置「预览播放器」分流（系统 = 直接系统默认，内置 = 内置预览器）。</summary>
-        private void PreviewFile(string path)
+        private async Task PreviewFileAsync(string path)
         {
             if (!File.Exists(path)) return;
 
@@ -266,18 +267,45 @@ namespace UniversalConvert.App
 
             if (CanPreviewAudio(path))
             {
-                // 解密/渲染类音频（ncm/kgm/qmc/midi 等有 IPreviewProvider 的）必须走内置播放器
-                // （内部先渲染/解密再播），不能让 VLC 等媒体提供者直接拿到加密/原始文件；
-                // 只有普通音频才轮到媒体提供者（VLC）接管
                 var ext = Path.GetExtension(path);
-                var hasRenderProvider = _host?.Plugins != null
-                    && _host.Plugins.OfType<IPreviewProvider>().Any(p =>
-                        p.SupportedPreviewExtensions != null
+                var renderProvider = _host?.Plugins?.OfType<IPreviewProvider>()
+                    .FirstOrDefault(p => p.SupportedPreviewExtensions != null
                         && p.SupportedPreviewExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase));
-                if (hasRenderProvider || !TryAudioPreviewProvider(path))
+
+                // 加密/渲染类音频（ncm/kgm/qmc/midi）：先渲染/解密成临时文件，
+                // 再交给播放器（VLC 扩展或内置）——VLC 拿到的是可解的文件
+                var effective = path;
+                string renderTemp = null;
+                if (renderProvider != null)
                 {
-                    var window = new AudioPlayerWindow(path, _host) { Owner = this };
+                    try
+                    {
+                        renderTemp = await renderProvider.RenderPreviewAsync(path, CancellationToken.None);
+                        if (!string.IsNullOrEmpty(renderTemp) && File.Exists(renderTemp))
+                        {
+                            effective = renderTemp;
+                        }
+                        else
+                        {
+                            renderTemp = null;
+                        }
+                    }
+                    catch
+                    {
+                        renderTemp = null;
+                    }
+                }
+
+                if (!TryAudioPreviewProvider(effective))
+                {
+                    var window = new AudioPlayerWindow(effective, _host) { Owner = this };
                     window.Show();
+                }
+
+                // 渲染临时文件延迟清理（VLC/内置播放通常分钟内结束；%TEMP% 兜底自清）
+                if (renderTemp != null && renderTemp != path)
+                {
+                    ScheduleTempCleanup(renderTemp);
                 }
             }
             else if (CanPreviewImage(path))
@@ -357,11 +385,27 @@ namespace UniversalConvert.App
             return false;
         }
 
+        /// <summary>渲染临时文件延迟清理（约 20 分钟后尝试；文件仍被占用则失败忽略，%TEMP% 兜底）。</summary>
+        private void ScheduleTempCleanup(string tempPath)
+        {
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(20) };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                try
+                {
+                    if (File.Exists(tempPath)) File.Delete(tempPath);
+                }
+                catch { }
+            };
+            timer.Start();
+        }
+
         private void OnFileDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var row = FileList.SelectedItem as FileRow;
             if (row == null) return;
-            PreviewFile(row.Path);
+            _ = PreviewFileAsync(row.Path);
         }
 
         /// <summary>内置预览支持的图片扩展名（WPF 直接解码或 ffmpeg 可转码）。</summary>
@@ -431,7 +475,7 @@ namespace UniversalConvert.App
         {
             var row = FileList.SelectedItem as FileRow;
             if (row == null) return;
-            PreviewFile(row.Path);
+            _ = PreviewFileAsync(row.Path);
         }
 
         private void OnClear(object sender, RoutedEventArgs e)
