@@ -252,7 +252,7 @@ namespace UniversalConvert.App
             var id = ++_previewRequestId;
             PreviewFrameImage.Visibility = Visibility.Visible;
 
-            var ffmpeg = AudioMetadata.FindFfmpeg();
+            var ffmpeg = AudioMetadataReader.FindFfmpeg();
             if (string.IsNullOrEmpty(ffmpeg)) return;
 
             var tmp = Path.Combine(Path.GetTempPath(), "uc-vprev-" + Guid.NewGuid().ToString("N") + ".png");
@@ -330,6 +330,11 @@ namespace UniversalConvert.App
             var pos = _seeking ? TimeSpan.FromSeconds(ProgressSlider.Value) : Video.Position;
             TimeText.Text = string.Format("{0:hh\\:mm\\:ss} / {1:hh\\:mm\\:ss}",
                 pos, Video.NaturalDuration.TimeSpan);
+        }
+
+        private static string Quote(string path)
+        {
+            return "\"" + path.Replace("\"", "\\\"") + "\"";
         }
 
         private void OnClose(object sender, RoutedEventArgs e)
