@@ -125,11 +125,11 @@ namespace UniversalConvert.Plugin.FFmpeg
             if (TryGet(request.Options, "videoCodec", out value))
                 sb.Append(" -c:v ").Append(value);
             if (TryGet(request.Options, "videoBitrate", out value))
-                sb.Append(" -b:v ").Append(value);
+                sb.Append(" -b:v ").Append(NormalizeBitrate(value));
             if (TryGet(request.Options, "audioBitrate", out value))
-                sb.Append(" -b:a ").Append(value);
+                sb.Append(" -b:a ").Append(NormalizeBitrate(value));
             if (TryGet(request.Options, "sampleRate", out value))
-                sb.Append(" -ar ").Append(value);
+                sb.Append(" -ar ").Append(NormalizeSampleRate(value));
             if (TryGet(request.Options, "fps", out value))
                 sb.Append(" -r ").Append(value);
             if (TryGet(request.Options, "scale", out value))
@@ -143,6 +143,37 @@ namespace UniversalConvert.Plugin.FFmpeg
         private static bool SupportsCoverArt(string outExt)
         {
             return outExt == ".mp3" || outExt == ".m4a" || outExt == ".flac";
+        }
+
+        /// <summary>
+        /// 归一化码率参数：预设显示可读单位（如 "320 kbps"），用户自定义可能照抄带单位；
+        /// FFmpeg 实际需要 "320k"。提取数字补 "k"；无法识别则原样返回（由 FFmpeg 报错提示）。
+        /// </summary>
+        private static string NormalizeBitrate(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return value;
+            var m = System.Text.RegularExpressions.Regex.Match(value.Trim(), @"(\d+(?:\.\d+)?)");
+            if (!m.Success) return value;
+            return m.Groups[1].Value + "k";
+        }
+
+        /// <summary>
+        /// 归一化采样率参数：预设显示 "44.1 kHz"，FFmpeg 需要 Hz（44100）。
+        /// 识别 "44.1 kHz" / "44.1k" / "44100" / "48k" → 转整数 Hz；无法识别则原样返回。
+        /// </summary>
+        private static string NormalizeSampleRate(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return value;
+            var m = System.Text.RegularExpressions.Regex.Match(
+                value.Trim(), @"(\d+(?:\.\d+)?)\s*(k|khz|hz)?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (!m.Success) return value;
+            double num;
+            if (!double.TryParse(m.Groups[1].Value,
+                    System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out num)) return value;
+            var unit = (m.Groups[2].Value ?? string.Empty).ToLowerInvariant();
+            if (unit.StartsWith("k")) num *= 1000.0; // kHz → Hz
+            return ((int)Math.Round(num)).ToString();
         }
 
         protected override void OnOutputLine(string line, ConversionRequest request, IProgress<ConversionProgress> progress)
