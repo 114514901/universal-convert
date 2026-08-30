@@ -48,10 +48,19 @@ namespace UniversalConvert.App
             _player.MediaEnded += OnMediaEnded;
             _player.MediaFailed += OnMediaFailed;
 
-            // MediaPlayer.Volume 默认是 0.5（50%）而音量条初始在 100%：
-            // 显式对齐为满音量，避免「显示满格但实际只有一半、拉一下才变大」
-            _player.Volume = 1.0;
-            VolumeText.Text = "100%";
+            // 音量：恢复上次记录（0-1）；无记录默认满音量
+            var savedVolume = VolumeMemory.Load();
+            if (savedVolume.HasValue)
+            {
+                VolumeSlider.Value = savedVolume.Value; // 触发 OnVolumeChanged 同步 _player.Volume + 文案
+            }
+            else
+            {
+                // MediaPlayer.Volume 默认是 0.5（50%）而音量条初始在 100%：
+                // 显式对齐为满音量，避免「显示满格但实际只有一半、拉一下才变大」
+                _player.Volume = 1.0;
+                VolumeText.Text = "100%";
+            }
 
             // 提供者优先：若某插件声明支持该格式的预览（如 MIDI 合成），先渲染再播放
             var provider = FindPreviewProvider(host, filePath);
@@ -300,6 +309,8 @@ namespace UniversalConvert.App
             {
                 VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
             }
+            // 记忆音量（构造期恢复也会回写相同值，无害）
+            VolumeMemory.Save(VolumeSlider.Value);
         }
 
         /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>

@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.5.0-dev.8] - 2026-08-29
+
+### 新增
+- 预览播放器**记忆上次音量**（内置音频播放器与 VLC 扩展共享 `%AppData%\UniversalConvert\preview-volume.txt`）：调过音量后下次打开自动恢复
+
 ## [2.5.0-dev.7] - 2026-08-29
 
 ### 改进
