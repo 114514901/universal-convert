@@ -284,7 +284,7 @@ namespace UniversalConvert.Plugin.FFmpeg
 
         // ---- 参数/预设构造辅助 ----
 
-        private static OptionDefinition EnumOption(string key, string label, string defaultValue, params OptionChoice[] choices)
+        private static OptionDefinition EnumOption(string key, string label, string defaultValue, string alias = null, params OptionChoice[] choices)
         {
             return new OptionDefinition
             {
@@ -292,18 +292,21 @@ namespace UniversalConvert.Plugin.FFmpeg
                 Label = label,
                 Type = OptionType.Enum,
                 DefaultValue = defaultValue,
-                Choices = choices.ToList()
+                Choices = choices.ToList(),
+                AdvancedAlias = alias
             };
         }
 
-        private static OptionDefinition StringOption(string key, string label, string defaultValue)
+        private static OptionDefinition StringOption(string key, string label, string defaultValue, string alias = null, bool advancedEntry = false)
         {
             return new OptionDefinition
             {
                 Key = key,
                 Label = label,
                 Type = OptionType.String,
-                DefaultValue = defaultValue
+                DefaultValue = defaultValue,
+                AdvancedAlias = alias,
+                IsAdvancedEntry = advancedEntry
             };
         }
 
@@ -334,7 +337,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("videoCodec", "@ParamVideoCodec", "",
+                    EnumOption("videoCodec", "@ParamVideoCodec", "", "-c:v",
                         Choice("", "@Original"),
                         Choice("libx264", "H.264 (libx264)"),
                         Choice("libx265", "H.265 (libx265)"),
@@ -348,7 +351,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("1280:720", "720p (1280×720)"),
                         Choice("854:480", "480p (854×480)"),
                         Choice("640:360", "360p (640×360)")),
-                    EnumOption("videoBitrate", "@ParamVideoBitrate", "",
+                    EnumOption("videoBitrate", "@ParamVideoBitrate", "", "-b:v",
                         Choice("", "@Original"),
                         Choice("500k", "500 kbps"),
                         Choice("1000k", "1000 kbps"),
@@ -357,7 +360,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("8000k", "8000 kbps"),
                         Choice("12000k", "12000 kbps"),
                         Choice("20000k", "20000 kbps")),
-                    EnumOption("fps", "@ParamFps", "",
+                    EnumOption("fps", "@ParamFps", "", "-r",
                         Choice("", "@Original"),
                         Choice("24", "24 fps"),
                         Choice("25", "25 fps"),
@@ -375,20 +378,20 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("hue", "@FilterHue"),
                         Choice("custom", "@FilterCustom")),
                     StringOption("videoFilterArgs", "@ParamVideoFilterArgs", ""),
-                    EnumOption("crf", "@ParamCrf", "",
+                    EnumOption("crf", "@ParamCrf", "", "-crf",
                         Choice("", "@Original"),
                         Choice("18", "18（高质量）"),
                         Choice("23", "23（默认）"),
                         Choice("28", "28（较小体积）")),
-                    EnumOption("preset", "@ParamPreset", "",
+                    EnumOption("preset", "@ParamPreset", "", "-preset",
                         Choice("", "@Original"),
                         Choice("ultrafast", "ultrafast"),
                         Choice("veryfast", "veryfast"),
                         Choice("medium", "medium"),
                         Choice("slow", "slow"),
                         Choice("veryslow", "veryslow")),
-                    StringOption("audioCodec", "@ParamAudioCodec", ""),
-                    StringOption("extraArgs", "@ParamExtraArgs", "")
+                    StringOption("audioCodec", "@ParamAudioCodec", "", "-c:a"),
+                    StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -407,7 +410,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("audioBitrate", "@ParamAudioBitrate", "192k",
+                    EnumOption("audioBitrate", "@ParamAudioBitrate", "192k", "-b:a",
                         Choice("", "@Original"),
                         Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
@@ -415,7 +418,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
                         Choice("320k", "320 kbps")),
-                    EnumOption("sampleRate", "@ParamSampleRate", "",
+                    EnumOption("sampleRate", "@ParamSampleRate", "", "-ar",
                         Choice("", "@Original"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
@@ -428,13 +431,13 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("atempo", "@FilterAtempo"),
                         Choice("custom", "@FilterCustom")),
                     StringOption("audioFilterArgs", "@ParamAudioFilterArgs", ""),
-                    EnumOption("audioChannels", "@ParamAudioChannels", "",
+                    EnumOption("audioChannels", "@ParamAudioChannels", "", "-ac",
                         Choice("", "@Original"),
                         Choice("1", "@ChMono"),
                         Choice("2", "@ChStereo"),
                         Choice("6", "@Ch51")),
-                    StringOption("audioCodec", "@ParamAudioCodec", ""),
-                    StringOption("extraArgs", "@ParamExtraArgs", "")
+                    StringOption("audioCodec", "@ParamAudioCodec", "", "-c:a"),
+                    StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -468,11 +471,11 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("320:240", "320×240"),
                         Choice("480:320", "480×320"),
                         Choice("640:480", "640×480")),
-                    EnumOption("fps", "@ParamFps", "10",
+                    EnumOption("fps", "@ParamFps", "10", "-r",
                         Choice("8", "8 fps"),
                         Choice("10", "10 fps"),
                         Choice("15", "15 fps")),
-                    StringOption("extraArgs", "@ParamExtraArgs", "")
+                    StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 }
             };
         }

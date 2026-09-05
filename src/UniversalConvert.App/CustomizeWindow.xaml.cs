@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using UniversalConvert.App.Localization;
@@ -24,6 +25,9 @@ namespace UniversalConvert.App
 
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
+        private readonly Dictionary<string, Action<string>> _advancedAliases = new Dictionary<string, Action<string>>();
+        private Func<string> _advancedEntryGetter;
+        private bool _syncingAdvanced;
         private bool _suppressPresetChanged;
         private bool _suppressOptionChanged;
         private bool _collectMode;
@@ -143,6 +147,10 @@ namespace UniversalConvert.App
                         setter = v => textBox.Text = v ?? string.Empty;
                         getter = () => textBox.Text;
                         textBox.TextChanged += (s, e) => OnOptionManuallyChanged();
+                        if (option.IsAdvancedEntry)
+                        {
+                            textBox.TextChanged += (s, e) => OnAdvancedEntryChanged();
+                        }
                         control = textBox;
                         break;
                 }
@@ -153,6 +161,14 @@ namespace UniversalConvert.App
 
                 _setters[option.Key] = setter;
                 _getters[option.Key] = getter;
+                if (!string.IsNullOrEmpty(option.AdvancedAlias))
+                {
+                    _advancedAliases[option.AdvancedAlias] = setter;
+                }
+                if (option.IsAdvancedEntry)
+                {
+                    _advancedEntryGetter = getter;
+                }
             }
         }
 
@@ -162,6 +178,36 @@ namespace UniversalConvert.App
             if (PresetCombo.SelectedIndex != CustomIndex)
             {
                 PresetCombo.SelectedIndex = CustomIndex;
+            }
+        }
+
+        /// <summary>
+        /// 高级参数输入框变化：解析 "-key value" / "-key=value"，命中的内置参数（有 AdvancedAlias）回填到对应控件。
+        /// 回填只触发内置控件变化（不会回写高级参数框），无递归。
+        /// </summary>
+        private void OnAdvancedEntryChanged()
+        {
+            if (_syncingAdvanced) return;
+            var text = _advancedEntryGetter?.Invoke() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            _syncingAdvanced = true;
+            try
+            {
+                foreach (Match m in Regex.Matches(text, @"-(\S+)(?:\s+|=)\s*(\S+)"))
+                {
+                    var alias = "-" + m.Groups[1].Value;
+                    var val = m.Groups[2].Value.Trim('"');
+                    Action<string> setter;
+                    if (_advancedAliases.TryGetValue(alias, out setter))
+                    {
+                        try { setter(val); } catch { }
+                    }
+                }
+            }
+            finally
+            {
+                _syncingAdvanced = false;
             }
         }
 

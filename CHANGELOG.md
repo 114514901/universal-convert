@@ -2,6 +2,11 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.6.0-dev.1] - 2026-09-05
+
+### 新增
+- 高级参数输入框**双向联动**：在「高级参数」里写内置参数（如 `-crf 18`、`-b:a 320k`、`-preset slow`）时，对应的内置下拉/输入框自动更新为相同内容（核心新增 `OptionDefinition.AdvancedAlias`/`IsAdvancedEntry`，插件声明别名、表单通用解析回填）
+
 ## [2.5.0-dev.9] - 2026-09-05
 
 ### 新增
