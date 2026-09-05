@@ -98,6 +98,13 @@ namespace UniversalConvert.App.Localization
         public static string ErrorNoSpaceLeftSuggestion => Get("ErrorNoSpaceLeftSuggestion");
         public static string ErrorVersionMismatch => Get("ErrorVersionMismatch");
         public static string ErrorVersionMismatchSuggestion => Get("ErrorVersionMismatchSuggestion");
+        public static string ErrorInvalidParameters => Get("ErrorInvalidParameters");
+        public static string ErrorInvalidParametersSuggestion => Get("ErrorInvalidParametersSuggestion");
+        public static string ErrorCodecUnsupported => Get("ErrorCodecUnsupported");
+        public static string ErrorCodecUnsupportedSuggestion => Get("ErrorCodecUnsupportedSuggestion");
+        public static string ErrorToolCrashed => Get("ErrorToolCrashed");
+        public static string ErrorToolCrashedSuggestion => Get("ErrorToolCrashedSuggestion");
+        public static string ErrorInvalidInputIncompleteSuggestion => Get("ErrorInvalidInputIncompleteSuggestion");
         public static string UpdateAvailable => Get("UpdateAvailable");
         public static string DownloadUpdate => Get("DownloadUpdate");
         public static string FilesLabel => Get("FilesLabel");

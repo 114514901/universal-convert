@@ -16,12 +16,22 @@ namespace UniversalConvert.App.Localization
                 case ConversionErrorKind.InvalidInput: return Strings.ErrorInvalidInput;
                 case ConversionErrorKind.NoSpaceLeft: return Strings.ErrorNoSpaceLeft;
                 case ConversionErrorKind.VersionMismatch: return Strings.ErrorVersionMismatch;
+                case ConversionErrorKind.InvalidParameters: return Strings.ErrorInvalidParameters;
+                case ConversionErrorKind.CodecUnsupported: return Strings.ErrorCodecUnsupported;
+                case ConversionErrorKind.ToolCrashed: return Strings.ErrorToolCrashed;
                 default: return Strings.ErrorUnknown;
             }
         }
 
-        public static string GetSuggestion(ConversionErrorKind kind)
+        /// <summary>建议文案；detail 用于同类别下的格式特定细分（如 mp4 未下载完整）。</summary>
+        public static string GetSuggestion(ConversionErrorKind kind, string detail = null)
         {
+            // 格式特定细分优先
+            if (kind == ConversionErrorKind.InvalidInput && detail == "InvalidInputIncomplete")
+            {
+                return Strings.ErrorInvalidInputIncompleteSuggestion;
+            }
+
             switch (kind)
             {
                 case ConversionErrorKind.ToolNotFound: return Strings.ErrorToolNotFoundSuggestion;
@@ -31,6 +41,9 @@ namespace UniversalConvert.App.Localization
                 case ConversionErrorKind.InvalidInput: return Strings.ErrorInvalidInputSuggestion;
                 case ConversionErrorKind.NoSpaceLeft: return Strings.ErrorNoSpaceLeftSuggestion;
                 case ConversionErrorKind.VersionMismatch: return Strings.ErrorVersionMismatchSuggestion;
+                case ConversionErrorKind.InvalidParameters: return Strings.ErrorInvalidParametersSuggestion;
+                case ConversionErrorKind.CodecUnsupported: return Strings.ErrorCodecUnsupportedSuggestion;
+                case ConversionErrorKind.ToolCrashed: return Strings.ErrorToolCrashedSuggestion;
                 default: return Strings.ErrorUnknownSuggestion;
             }
         }

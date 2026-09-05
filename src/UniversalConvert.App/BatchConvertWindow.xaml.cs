@@ -179,9 +179,9 @@ namespace UniversalConvert.App
                 else
                 {
                     var raw = result.FullError ?? result.ErrorMessage;
-                    var analysis = ErrorParser.Parse(raw);
+                    var analysis = ErrorParser.Parse(raw, result.ExitCode, request.OutputExtension);
                     var message = ErrorMessages.GetMessage(analysis.Kind);
-                    var suggestion = ErrorMessages.GetSuggestion(analysis.Kind);
+                    var suggestion = ErrorMessages.GetSuggestion(analysis.Kind, analysis.Detail);
 
                     Interlocked.Increment(ref _failedCount);
                     lock (_outputLock)

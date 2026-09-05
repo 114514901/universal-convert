@@ -106,12 +106,12 @@ namespace UniversalConvert.App
             else
             {
                 var raw = _result.FullError ?? _result.ErrorMessage;
-                var analysis = ErrorParser.Parse(raw);
+                var analysis = ErrorParser.Parse(raw, _result.ExitCode, _request.OutputExtension);
 
                 _fullErrorText = BuildFullErrorText(analysis, raw);
 
                 StatusText.Text = ErrorMessages.GetMessage(analysis.Kind);
-                SuggestionText.Text = ErrorMessages.GetSuggestion(analysis.Kind);
+                SuggestionText.Text = ErrorMessages.GetSuggestion(analysis.Kind, analysis.Detail);
                 SuggestionText.Visibility = Visibility.Visible;
 
                 DetailsBox.Text = raw ?? string.Empty;
@@ -126,7 +126,7 @@ namespace UniversalConvert.App
         private string BuildFullErrorText(ErrorAnalysis analysis, string raw)
         {
             var friendly = ErrorMessages.GetMessage(analysis.Kind);
-            var suggestion = ErrorMessages.GetSuggestion(analysis.Kind);
+            var suggestion = ErrorMessages.GetSuggestion(analysis.Kind, analysis.Detail);
             return friendly + "\n" + suggestion + "\n\n" + (raw ?? string.Empty);
         }
 

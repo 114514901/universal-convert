@@ -264,6 +264,27 @@
   <data name="ErrorVersionMismatch" xml:space="preserve">
     <value>Extension is incompatible with the current app version</value>
   </data>
+  <data name="ErrorInvalidParameters" xml:space="preserve">
+    <value>Invalid parameters or filter</value>
+  </data>
+  <data name="ErrorInvalidParametersSuggestion" xml:space="preserve">
+    <value>The custom parameters, filter expression, or option syntax is wrong. Check -vf/-af/bitrate etc.</value>
+  </data>
+  <data name="ErrorCodecUnsupported" xml:space="preserve">
+    <value>Codec or format not supported</value>
+  </data>
+  <data name="ErrorCodecUnsupportedSuggestion" xml:space="preserve">
+    <value>The output format does not support this codec. Change the codec or output format.</value>
+  </data>
+  <data name="ErrorToolCrashed" xml:space="preserve">
+    <value>Converter tool crashed</value>
+  </data>
+  <data name="ErrorToolCrashedSuggestion" xml:space="preserve">
+    <value>The converter process exited abnormally. Retry, or change the tool/parameters.</value>
+  </data>
+  <data name="ErrorInvalidInputIncompleteSuggestion" xml:space="preserve">
+    <value>The file may be an incomplete download or corrupted. Re-download it and try again.</value>
+  </data>
   <data name="ErrorVersionMismatchSuggestion" xml:space="preserve">
     <value>Update the extension to the latest version (Plugin Manager → Check for updates), or upgrade the app.</value>
   </data>

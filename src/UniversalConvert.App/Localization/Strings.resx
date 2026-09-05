@@ -264,6 +264,27 @@
   <data name="ErrorVersionMismatch" xml:space="preserve">
     <value>扩展与主程序版本不兼容</value>
   </data>
+  <data name="ErrorInvalidParameters" xml:space="preserve">
+    <value>参数或滤镜错误</value>
+  </data>
+  <data name="ErrorInvalidParametersSuggestion" xml:space="preserve">
+    <value>自定义参数、滤镜表达式或选项写法有误，请检查 -vf/-af/码率等参数</value>
+  </data>
+  <data name="ErrorCodecUnsupported" xml:space="preserve">
+    <value>编码器或格式不支持</value>
+  </data>
+  <data name="ErrorCodecUnsupportedSuggestion" xml:space="preserve">
+    <value>该输出格式不支持当前编码器，请更换编码器或输出格式</value>
+  </data>
+  <data name="ErrorToolCrashed" xml:space="preserve">
+    <value>转换工具崩溃</value>
+  </data>
+  <data name="ErrorToolCrashedSuggestion" xml:space="preserve">
+    <value>转换工具进程异常退出，请重试，或更换工具/参数</value>
+  </data>
+  <data name="ErrorInvalidInputIncompleteSuggestion" xml:space="preserve">
+    <value>文件可能未下载完整或已损坏，请重新下载后再转换</value>
+  </data>
   <data name="ErrorVersionMismatchSuggestion" xml:space="preserve">
     <value>请将该扩展更新到最新版本（扩展管理器 → 检查扩展更新），或升级主程序。</value>
   </data>
