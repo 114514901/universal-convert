@@ -740,7 +740,73 @@
   </data>
   <data name="ParamFps" xml:space="preserve">
     <value>Frame rate</value>
+  </data>  <data name="ParamVideoFilter" xml:space="preserve">
+    <value>Video filter</value>
   </data>
+  <data name="ParamVideoFilterArgs" xml:space="preserve">
+    <value>Video filter args</value>
+  </data>
+  <data name="ParamAudioFilter" xml:space="preserve">
+    <value>Audio filter</value>
+  </data>
+  <data name="ParamAudioFilterArgs" xml:space="preserve">
+    <value>Audio filter args</value>
+  </data>
+  <data name="ParamCrf" xml:space="preserve">
+    <value>Quality (CRF)</value>
+  </data>
+  <data name="ParamPreset" xml:space="preserve">
+    <value>Encoding preset</value>
+  </data>
+  <data name="ParamAudioChannels" xml:space="preserve">
+    <value>Audio channels</value>
+  </data>
+  <data name="ParamAudioCodec" xml:space="preserve">
+    <value>Audio codec</value>
+  </data>
+  <data name="ParamExtraArgs" xml:space="preserve">
+    <value>Extra args</value>
+  </data>
+  <data name="FilterScale" xml:space="preserve">
+    <value>Scale</value>
+  </data>
+  <data name="FilterCrop" xml:space="preserve">
+    <value>Crop</value>
+  </data>
+  <data name="FilterHFlip" xml:space="preserve">
+    <value>H-flip</value>
+  </data>
+  <data name="FilterVFlip" xml:space="preserve">
+    <value>V-flip</value>
+  </data>
+  <data name="FilterEq" xml:space="preserve">
+    <value>Brightness/contrast</value>
+  </data>
+  <data name="FilterHue" xml:space="preserve">
+    <value>Hue</value>
+  </data>
+  <data name="FilterCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="FilterVolume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="FilterEqualizer" xml:space="preserve">
+    <value>Equalizer</value>
+  </data>
+  <data name="FilterAtempo" xml:space="preserve">
+    <value>Tempo</value>
+  </data>
+  <data name="ChMono" xml:space="preserve">
+    <value>Mono</value>
+  </data>
+  <data name="ChStereo" xml:space="preserve">
+    <value>Stereo</value>
+  </data>
+  <data name="Ch51" xml:space="preserve">
+    <value>5.1</value>
+  </data>
+
   <data name="ParamAudioBitrate" xml:space="preserve">
     <value>Audio bitrate</value>
   </data>

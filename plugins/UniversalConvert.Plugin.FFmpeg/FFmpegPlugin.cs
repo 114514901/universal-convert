@@ -134,6 +134,44 @@ namespace UniversalConvert.Plugin.FFmpeg
                 sb.Append(" -r ").Append(value);
             if (TryGet(request.Options, "scale", out value))
                 sb.Append(" -vf scale=").Append(value);
+            if (TryGet(request.Options, "crf", out value))
+                sb.Append(" -crf ").Append(value);
+            if (TryGet(request.Options, "preset", out value))
+                sb.Append(" -preset ").Append(value);
+            if (TryGet(request.Options, "audioChannels", out value))
+                sb.Append(" -ac ").Append(value);
+            if (TryGet(request.Options, "audioCodec", out value))
+                sb.Append(" -c:a ").Append(value);
+
+            // 视频滤镜（-vf）
+            if (TryGet(request.Options, "videoFilter", out value))
+            {
+                string args;
+                TryGet(request.Options, "videoFilterArgs", out args);
+                var vf = BuildVideoFilter(value, args);
+                if (!string.IsNullOrEmpty(vf))
+                {
+                    sb.Append(" -vf ").Append(ProcessRunner.Quote(vf));
+                }
+            }
+
+            // 音频滤镜（-af）
+            if (TryGet(request.Options, "audioFilter", out value))
+            {
+                string args;
+                TryGet(request.Options, "audioFilterArgs", out args);
+                var af = BuildAudioFilter(value, args);
+                if (!string.IsNullOrEmpty(af))
+                {
+                    sb.Append(" -af ").Append(ProcessRunner.Quote(af));
+                }
+            }
+
+            // 高级参数：原样拼接（放末尾，用户参数覆盖内置）
+            if (TryGet(request.Options, "extraArgs", out value))
+            {
+                sb.Append(' ').Append(value);
+            }
 
             sb.Append(' ').Append(ProcessRunner.Quote(outputPath));
             return sb.ToString();
@@ -174,6 +212,35 @@ namespace UniversalConvert.Plugin.FFmpeg
             var unit = (m.Groups[2].Value ?? string.Empty).ToLowerInvariant();
             if (unit.StartsWith("k")) num *= 1000.0; // kHz → Hz
             return ((int)Math.Round(num)).ToString();
+        }
+
+        /// <summary>视频滤镜 → FFmpeg -vf 表达式。custom 直接透传 args。</summary>
+        private static string BuildVideoFilter(string filter, string args)
+        {
+            switch (filter)
+            {
+                case "scale": return "scale=" + (args ?? "");
+                case "crop": return "crop=" + (args ?? "");
+                case "hflip": return "hflip";
+                case "vflip": return "vflip";
+                case "eq": return "eq=" + (args ?? "");
+                case "hue": return "hue=" + (args ?? "");
+                case "custom": return args;
+                default: return null;
+            }
+        }
+
+        /// <summary>音频滤镜 → FFmpeg -af 表达式。custom 直接透传 args。</summary>
+        private static string BuildAudioFilter(string filter, string args)
+        {
+            switch (filter)
+            {
+                case "volume": return "volume=" + (args ?? "");
+                case "equalizer": return "equalizer=" + (args ?? "");
+                case "atempo": return "atempo=" + (args ?? "");
+                case "custom": return args;
+                default: return null;
+            }
         }
 
         protected override void OnOutputLine(string line, ConversionRequest request, IProgress<ConversionProgress> progress)
@@ -226,6 +293,17 @@ namespace UniversalConvert.Plugin.FFmpeg
                 Type = OptionType.Enum,
                 DefaultValue = defaultValue,
                 Choices = choices.ToList()
+            };
+        }
+
+        private static OptionDefinition StringOption(string key, string label, string defaultValue)
+        {
+            return new OptionDefinition
+            {
+                Key = key,
+                Label = label,
+                Type = OptionType.String,
+                DefaultValue = defaultValue
             };
         }
 
@@ -286,7 +364,31 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("30", "30 fps"),
                         Choice("48", "48 fps"),
                         Choice("60", "60 fps"),
-                        Choice("120", "120 fps"))
+                        Choice("120", "120 fps")),
+                    EnumOption("videoFilter", "@ParamVideoFilter", "",
+                        Choice("", "@Original"),
+                        Choice("scale", "@FilterScale"),
+                        Choice("crop", "@FilterCrop"),
+                        Choice("hflip", "@FilterHFlip"),
+                        Choice("vflip", "@FilterVFlip"),
+                        Choice("eq", "@FilterEq"),
+                        Choice("hue", "@FilterHue"),
+                        Choice("custom", "@FilterCustom")),
+                    StringOption("videoFilterArgs", "@ParamVideoFilterArgs", ""),
+                    EnumOption("crf", "@ParamCrf", "",
+                        Choice("", "@Original"),
+                        Choice("18", "18（高质量）"),
+                        Choice("23", "23（默认）"),
+                        Choice("28", "28（较小体积）")),
+                    EnumOption("preset", "@ParamPreset", "",
+                        Choice("", "@Original"),
+                        Choice("ultrafast", "ultrafast"),
+                        Choice("veryfast", "veryfast"),
+                        Choice("medium", "medium"),
+                        Choice("slow", "slow"),
+                        Choice("veryslow", "veryslow")),
+                    StringOption("audioCodec", "@ParamAudioCodec", ""),
+                    StringOption("extraArgs", "@ParamExtraArgs", "")
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -318,7 +420,21 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
-                        Choice("96000", "96000 Hz"))
+                        Choice("96000", "96000 Hz")),
+                    EnumOption("audioFilter", "@ParamAudioFilter", "",
+                        Choice("", "@Original"),
+                        Choice("volume", "@FilterVolume"),
+                        Choice("equalizer", "@FilterEqualizer"),
+                        Choice("atempo", "@FilterAtempo"),
+                        Choice("custom", "@FilterCustom")),
+                    StringOption("audioFilterArgs", "@ParamAudioFilterArgs", ""),
+                    EnumOption("audioChannels", "@ParamAudioChannels", "",
+                        Choice("", "@Original"),
+                        Choice("1", "@ChMono"),
+                        Choice("2", "@ChStereo"),
+                        Choice("6", "@Ch51")),
+                    StringOption("audioCodec", "@ParamAudioCodec", ""),
+                    StringOption("extraArgs", "@ParamExtraArgs", "")
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -355,7 +471,8 @@ namespace UniversalConvert.Plugin.FFmpeg
                     EnumOption("fps", "@ParamFps", "10",
                         Choice("8", "8 fps"),
                         Choice("10", "10 fps"),
-                        Choice("15", "15 fps"))
+                        Choice("15", "15 fps")),
+                    StringOption("extraArgs", "@ParamExtraArgs", "")
                 }
             };
         }
