@@ -4,7 +4,8 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="UniversalConvert" Height="380" Width="540"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="240" MinWidth="440"
-        Loaded="OnLoaded">
+        Loaded="OnLoaded"
+        Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -26,13 +27,13 @@
                                      Value="{Binding Progress, Mode=OneWay}" VerticalAlignment="Center"
                                      IsIndeterminate="{Binding IsIndeterminate}"/>
                         <TextBlock Grid.Column="2" Text="{Binding StatusText}" VerticalAlignment="Center"
-                                   TextTrimming="CharacterEllipsis" Foreground="#666666"/>
+                                   TextTrimming="CharacterEllipsis" Foreground="{DynamicResource SecondaryTextBrush}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <TextBlock x:Name="SummaryText" Grid.Row="1" Margin="0,10,0,0" TextWrapping="Wrap" Foreground="#666666"/>
+        <TextBlock x:Name="SummaryText" Grid.Row="1" Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
             <Button x:Name="PauseButton" Content="{x:Static loc:Strings.Pause}" Padding="14,4" Margin="0,0,8,0"

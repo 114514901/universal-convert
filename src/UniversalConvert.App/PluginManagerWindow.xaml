@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.PluginManagerTitle}" Height="460" Width="640"
-        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="320" MinWidth="480">
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="320" MinWidth="480"
+        Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -39,7 +40,7 @@
         </ListView>
 
         <TextBlock x:Name="UpdateStatusText" Grid.Row="2" Margin="0,8,0,0" TextWrapping="Wrap"
-                   Foreground="#666666"/>
+                   Foreground="{DynamicResource SecondaryTextBrush}"/>
 
         <Expander x:Name="ErrorExpander" Grid.Row="3" Margin="0,8,0,0"
                   Header="{x:Static loc:Strings.ErrorsLabel}" Visibility="Collapsed">

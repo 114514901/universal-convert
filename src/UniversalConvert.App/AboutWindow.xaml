@@ -12,15 +12,15 @@
 
                 <TextBlock Text="UniversalConvert" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-                <TextBlock x:Name="VersionText" Margin="0,4,0,0" HorizontalAlignment="Center" Foreground="#666666"/>
+                <TextBlock x:Name="VersionText" Margin="0,4,0,0" HorizontalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
 
                 <TextBlock x:Name="DescText" Margin="0,14,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="380"/>
 
                 <TextBlock x:Name="ThirdPartyText" Margin="0,14,0,0" TextWrapping="Wrap" TextAlignment="Center"
-                           MaxWidth="380" Foreground="#999999" FontSize="12"/>
+                           MaxWidth="380" Foreground="{DynamicResource TertiaryTextBrush}" FontSize="12"/>
 
                 <TextBlock x:Name="LicenseText" Margin="0,8,0,0" TextWrapping="Wrap" TextAlignment="Center"
-                           MaxWidth="380" Foreground="#999999" FontSize="12"/>
+                           MaxWidth="380" Foreground="{DynamicResource TertiaryTextBrush}" FontSize="12"/>
 
                 <TextBlock Text="{x:Static loc:Strings.SupportedFormatsTitle}" FontWeight="SemiBold"
                            Margin="0,14,0,0" HorizontalAlignment="Left" Width="380"/>

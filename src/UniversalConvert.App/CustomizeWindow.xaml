@@ -4,7 +4,7 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.CustomizeTitle}" Height="460" Width="540"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanResize" MinHeight="360" MinWidth="420">
+        ResizeMode="CanResize" MinHeight="360" MinWidth="420" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,7 +16,7 @@
 
         <TextBlock x:Name="FileText" Grid.Row="0" FontWeight="SemiBold" TextWrapping="Wrap"/>
 
-        <TextBlock x:Name="FormatText" Grid.Row="1" Foreground="#666666" Margin="0,4,0,0"/>
+        <TextBlock x:Name="FormatText" Grid.Row="1" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,4,0,0"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,16,0,8">
             <TextBlock Text="{x:Static loc:Strings.Preset}" VerticalAlignment="Center" Margin="0,0,8,0"/>

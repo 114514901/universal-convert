@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.CrashReportTitle}" Height="560" Width="920"
-        WindowStartupLocation="CenterScreen" ResizeMode="CanResize" MinHeight="360" MinWidth="640">
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResize" MinHeight="360" MinWidth="640" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

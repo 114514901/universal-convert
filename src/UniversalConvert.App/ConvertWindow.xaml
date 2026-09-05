@@ -5,7 +5,7 @@
         Title="{x:Static loc:Strings.ConvertingTitle}" Height="420" Width="520"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize" MinHeight="360" MinWidth="460"
-        Loaded="OnLoaded">
+        Loaded="OnLoaded" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

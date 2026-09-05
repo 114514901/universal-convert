@@ -4,7 +4,8 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.ExtensionsCenter}" Height="520" Width="700"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="380" MinWidth="520"
-        Loaded="OnLoaded">
+        Loaded="OnLoaded"
+        Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -13,7 +14,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="DescText" Grid.Row="0" TextWrapping="Wrap" Foreground="#666666" Margin="0,0,0,8"/>
+        <TextBlock x:Name="DescText" Grid.Row="0" TextWrapping="Wrap" Foreground="{DynamicResource SecondaryTextBrush}" Margin="0,0,0,8"/>
 
         <ListView x:Name="ExtensionList" Grid.Row="1" SelectionChanged="OnSelectionChanged"
                   SelectionMode="Extended">
@@ -35,7 +36,7 @@
 
         <StackPanel Grid.Row="2" Margin="0,8,0,0">
             <ProgressBar x:Name="Progress" Height="8" Minimum="0" Maximum="100" Visibility="Collapsed"/>
-            <TextBlock x:Name="StatusText" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="#555555"/>
+            <TextBlock x:Name="StatusText" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
         </StackPanel>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">

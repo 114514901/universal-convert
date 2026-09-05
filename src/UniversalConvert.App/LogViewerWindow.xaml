@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.LogViewerTitle}" Height="520" Width="780"
-        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="320" MinWidth="560">
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="320" MinWidth="560" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

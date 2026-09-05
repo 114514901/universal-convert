@@ -4,7 +4,7 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="UniversalConvert" Height="640" Width="800"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="300" MinWidth="400"
-        Loaded="OnLoaded" Closed="OnClosed">
+        Loaded="OnLoaded" Closed="OnClosed" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -28,12 +28,12 @@
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,8,4,0">
-            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="#666666"/>
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
             <Button x:Name="ZoomOutButton" Content="−" Padding="10,4" Margin="16,0,0,0" Click="OnZoomOut" IsEnabled="False"/>
             <Button x:Name="ZoomInButton" Content="＋" Padding="10,4" Margin="8,0,0,0" Click="OnZoomIn" IsEnabled="False"/>
             <Button x:Name="ZoomActualButton" Content="100%" Padding="12,4" Margin="8,0,0,0" Click="OnZoomActual" IsEnabled="False"/>
             <Button x:Name="FitButton" Content="{x:Static loc:Strings.FitToWindow}" Padding="12,4" Margin="8,0,0,0" Click="OnZoomFit" IsEnabled="False"/>
-            <TextBlock x:Name="ZoomText" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#888888" FontSize="12"/>
+            <TextBlock x:Name="ZoomText" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource TertiaryTextBrush}" FontSize="12"/>
             <Button Content="{x:Static loc:Strings.Close}" Padding="16,4" Margin="24,0,0,0" HorizontalAlignment="Right" Click="OnClose"/>
         </StackPanel>
     </Grid>

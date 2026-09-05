@@ -2,6 +2,18 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.6.0-dev.6] - 2026-09-05
+
+### 修复 / Fixed
+- 扩展管理深色模式：插件管理/扩展中心/扩展更新窗口背景未跟随主题（白字白底）
+  - Fix dark mode for extension management: Plugin Manager / Extension Center / Extension Update windows' backgrounds didn't follow the theme
+- 全部窗口统一补主题背景（含音频/视频/图片预览、批量转换、自定义、崩溃报告、格式选择、日志查看、发布说明等）
+  - Add theme-aware backgrounds to all remaining windows (previews, batch convert, customize, crash report, format choice, log viewer, release notes, etc.)
+- 灰色次要文字/边框改主题动态资源（`SecondaryTextBrush`/`TertiaryTextBrush`），深色下自动变浅
+  - Replace hardcoded gray text/borders with theme resources, lighten automatically in dark mode
+- 文本预览语法高亮：深色下普通文字与标点换浅色（避免深灰字看不见）
+  - Text preview syntax highlighting: plain text & punctuation switch to light colors in dark mode
+
 ## [2.6.0-dev.5] - 2026-09-05
 
 ### 修复

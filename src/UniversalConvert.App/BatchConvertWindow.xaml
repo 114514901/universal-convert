@@ -5,7 +5,7 @@
         Title="{x:Static loc:Strings.BatchTitle}" Height="500" Width="660"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize" MinHeight="380" MinWidth="520"
-        Loaded="OnLoaded">
+        Loaded="OnLoaded" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

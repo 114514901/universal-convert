@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using ModernWpf;
 using UniversalConvert.App.Localization;
 
 namespace UniversalConvert.App
@@ -29,6 +30,7 @@ namespace UniversalConvert.App
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            JsonHighlighter.SetDark(ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark);
             TitleText.Text = Path.GetFileName(_filePath);
 
             string text;
@@ -122,9 +124,16 @@ namespace UniversalConvert.App
         private static readonly SolidColorBrush BracketBrush = new SolidColorBrush(Color.FromRgb(0xC6, 0x78, 0xDD)); // 括号层级色 2（紫）
         private static readonly SolidColorBrush Level3Brush = new SolidColorBrush(Color.FromRgb(0x56, 0xB6, 0xC2)); // 括号层级色 3（青）
         private static readonly SolidColorBrush Level4Brush = new SolidColorBrush(Color.FromRgb(0xE0, 0x6C, 0x75)); // 括号层级色 4（红）
-        private static readonly SolidColorBrush PunctuationBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); // : 与 ,
-        private static readonly SolidColorBrush PlainBrush = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33));  // 普通
+        private static SolidColorBrush PunctuationBrush = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); // : 与 ,（主题感知）
+        private static SolidColorBrush PlainBrush = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33));  // 普通（主题感知）
         private static readonly SolidColorBrush CommentBrush = new SolidColorBrush(Color.FromRgb(0x6A, 0x99, 0x55)); // 注释（灰绿）
+
+        /// <summary>深色模式切换：普通文字/标点在深背景下需换浅色（其余 token 色为 VSCode Dark 配色，深色下天然可用）。</summary>
+        public static void SetDark(bool dark)
+        {
+            PlainBrush = new SolidColorBrush(dark ? Color.FromRgb(0xD4, 0xD4, 0xD4) : Color.FromRgb(0x33, 0x33, 0x33));
+            PunctuationBrush = new SolidColorBrush(dark ? Color.FromRgb(0xBB, 0xBB, 0xBB) : Color.FromRgb(0x80, 0x80, 0x80));
+        }
 
         /// <summary>括号配对着色颜色表（按嵌套深度循环）。</summary>
         private static readonly SolidColorBrush[] BracketLevelColors =

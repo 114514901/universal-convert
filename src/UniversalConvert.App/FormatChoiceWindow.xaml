@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.FormatChoiceTitle}" Height="300" Width="440"
-        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" ShowInTaskbar="False">
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" ShowInTaskbar="False" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

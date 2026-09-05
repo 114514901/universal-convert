@@ -4,7 +4,7 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.AudioPlayer}" Height="280" Width="480"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Closed="OnWindowClosed">
+        Closed="OnWindowClosed" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,14 +21,14 @@
                 ValueChanged="OnProgressValueChanged"
                 PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"/>
 
-        <TextBlock x:Name="TimeText" Grid.Row="2" Margin="0,4,0,0" Foreground="#666666"/>
+        <TextBlock x:Name="TimeText" Grid.Row="2" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
             <TextBlock Text="{x:Static loc:Strings.Volume}" VerticalAlignment="Center" Margin="0,0,8,0"/>
             <Slider x:Name="VolumeSlider" Width="180" Minimum="0" Maximum="1" Value="1"
                     VerticalAlignment="Center" ValueChanged="OnVolumeChanged"/>
             <TextBlock x:Name="VolumeText" VerticalAlignment="Center" Margin="10,0,0,0"
-                       Foreground="#666666" FontSize="12"/>
+                       Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
         </StackPanel>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,14,0,0">

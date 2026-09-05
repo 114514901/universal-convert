@@ -36,3 +36,6 @@ SetupOutput/
 Thumbs.db
 changelog_entry.md
 .ssh_known_hosts
+
+# ---- 本地临时目录 ----
+_tmp/

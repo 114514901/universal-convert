@@ -4,7 +4,7 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="UniversalConvert" Height="640" Width="860"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="300" MinWidth="420"
-        Loaded="OnLoaded">
+        Loaded="OnLoaded" Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,7 +15,7 @@
         <TextBlock x:Name="TitleText" Grid.Row="0" FontSize="14" FontWeight="SemiBold"
                    TextTrimming="CharacterEllipsis" Margin="4,2,4,8"/>
 
-        <Border Grid.Row="1" BorderBrush="#DDDDDD" BorderThickness="1">
+        <Border Grid.Row="1" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
             <RichTextBox x:Name="ContentBox" IsReadOnly="True"
                          FontFamily="Consolas, Microsoft YaHei UI" FontSize="14"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
@@ -23,7 +23,7 @@
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,8,4,0">
-            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="#666666"/>
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextBrush}"/>
             <Button Content="{x:Static loc:Strings.Close}" Padding="16,4" Margin="16,0,0,0"
                     HorizontalAlignment="Right" Click="OnClose"/>
         </StackPanel>

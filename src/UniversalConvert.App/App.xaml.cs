@@ -420,12 +420,18 @@ namespace UniversalConvert.App
                 var app = dark ? "#1F1F1F" : "#F3F3F3";
                 var card = dark ? "#2D2D2D" : "#FFFFFF";
                 var border = dark ? "#3F3F3F" : "#DDDDDD";
+                var secondary = dark ? "#AAAAAA" : "#666666";
+                var tertiary = dark ? "#888888" : "#999999";
                 Application.Current.Resources["AppBackgroundBrush"] =
                     new SolidColorBrush((Color)ColorConverter.ConvertFromString(app));
                 Application.Current.Resources["CardBackgroundBrush"] =
                     new SolidColorBrush((Color)ColorConverter.ConvertFromString(card));
                 Application.Current.Resources["CardBorderBrush"] =
                     new SolidColorBrush((Color)ColorConverter.ConvertFromString(border));
+                Application.Current.Resources["SecondaryTextBrush"] =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(secondary));
+                Application.Current.Resources["TertiaryTextBrush"] =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(tertiary));
             }
             catch
             {

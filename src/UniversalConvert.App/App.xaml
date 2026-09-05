@@ -14,6 +14,8 @@
             <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F3F3F3"/>
             <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
             <SolidColorBrush x:Key="CardBorderBrush" Color="#DDDDDD"/>
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#666666"/>
+            <SolidColorBrush x:Key="TertiaryTextBrush" Color="#999999"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
