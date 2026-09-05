@@ -26,7 +26,11 @@ namespace UniversalConvert.App
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
         private readonly Dictionary<string, Action<string>> _advancedAliases = new Dictionary<string, Action<string>>();
+        private readonly Dictionary<string, Func<string>> _advancedAliasGetters = new Dictionary<string, Func<string>>();
+        private readonly List<string> _advancedAliasOrder = new List<string>();
+        private readonly List<string> _extraTokens = new List<string>();
         private Func<string> _advancedEntryGetter;
+        private Action<string> _advancedEntrySetter;
         private bool _syncingAdvanced;
         private bool _suppressPresetChanged;
         private bool _suppressOptionChanged;
@@ -164,10 +168,22 @@ namespace UniversalConvert.App
                 if (!string.IsNullOrEmpty(option.AdvancedAlias))
                 {
                     _advancedAliases[option.AdvancedAlias] = setter;
+                    _advancedAliasGetters[option.AdvancedAlias] = getter;
+                    _advancedAliasOrder.Add(option.AdvancedAlias);
+                    // 内置选项变化时反向同步到高级参数框
+                    if (control is ComboBox comboAlias)
+                    {
+                        comboAlias.SelectionChanged += (s, e) => OnBuiltInOptionChanged();
+                    }
+                    else if (control is TextBox tbAlias)
+                    {
+                        tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
+                    }
                 }
                 if (option.IsAdvancedEntry)
                 {
                     _advancedEntryGetter = getter;
+                    _advancedEntrySetter = setter;
                 }
             }
         }
@@ -182,18 +198,18 @@ namespace UniversalConvert.App
         }
 
         /// <summary>
-        /// 高级参数输入框变化：解析 "-key value" / "-key=value"，命中的内置参数（有 AdvancedAlias）回填到对应控件。
-        /// 回填只触发内置控件变化（不会回写高级参数框），无递归。
+        /// 高级参数输入框变化：解析 "-key value" / "-key=value"。
+        /// 命中的内置参数回填到对应控件；未命中的 token 保留为「额外参数」。
         /// </summary>
         private void OnAdvancedEntryChanged()
         {
             if (_syncingAdvanced) return;
             var text = _advancedEntryGetter?.Invoke() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(text)) return;
 
             _syncingAdvanced = true;
             try
             {
+                var extras = new List<string>();
                 foreach (Match m in Regex.Matches(text, @"-(\S+)(?:\s+|=)\s*(\S+)"))
                 {
                     var alias = "-" + m.Groups[1].Value;
@@ -203,7 +219,46 @@ namespace UniversalConvert.App
                     {
                         try { setter(val); } catch { }
                     }
+                    else
+                    {
+                        extras.Add(m.Value.Trim());
+                    }
                 }
+                _extraTokens.Clear();
+                _extraTokens.AddRange(extras);
+            }
+            finally
+            {
+                _syncingAdvanced = false;
+            }
+        }
+
+        /// <summary>
+        /// 内置选项（有 AdvancedAlias 的）变化时，反向同步到高级参数框：
+        /// 重建 = 所有内置参数当前值（-alias value）+ 保留的额外参数。
+        /// </summary>
+        private void OnBuiltInOptionChanged()
+        {
+            if (_syncingAdvanced || _suppressOptionChanged) return;
+
+            _syncingAdvanced = true;
+            try
+            {
+                var parts = new List<string>();
+                foreach (var alias in _advancedAliasOrder)
+                {
+                    Func<string> getter;
+                    if (_advancedAliasGetters.TryGetValue(alias, out getter))
+                    {
+                        var v = getter();
+                        if (!string.IsNullOrWhiteSpace(v))
+                        {
+                            parts.Add(alias + " " + v);
+                        }
+                    }
+                }
+                parts.AddRange(_extraTokens);
+                _advancedEntrySetter?.Invoke(string.Join(" ", parts));
             }
             finally
             {
