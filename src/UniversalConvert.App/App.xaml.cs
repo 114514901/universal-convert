@@ -26,8 +26,8 @@ namespace UniversalConvert.App
         {
             base.OnStartup(e);
 
-            // 应用主题：浅色（主题色稍后从设置读取）
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            // 应用主题：默认跟随系统（ThemeManager 默认 null=跟随系统），稍后按设置覆盖
+            ThemeManager.Current.ApplicationTheme = null;
 
             // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
             DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -47,6 +47,9 @@ namespace UniversalConvert.App
 
             // 主题色（读设置，默认 Fluent 蓝）
             ApplyAccentColor(GetConfigValue(config, "themeAccent"));
+
+            // 明暗主题（默认跟随系统）
+            ApplyAppTheme(GetConfigValue(config, "appTheme"));
 
             // 日志：归档上一次运行日志，再配置本次日志（级别读设置，默认 Info）
             ArchivePreviousLog();
@@ -382,6 +385,23 @@ namespace UniversalConvert.App
             catch
             {
                 // 忽略无效颜色
+            }
+        }
+
+        /// <summary>应用明暗主题：auto=跟随系统（null），light=浅色，dark=深色。</summary>
+        public static void ApplyAppTheme(string mode)
+        {
+            if (string.Equals(mode, "dark", StringComparison.OrdinalIgnoreCase))
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            }
+            else if (string.Equals(mode, "light", StringComparison.OrdinalIgnoreCase))
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            }
+            else
+            {
+                ThemeManager.Current.ApplicationTheme = null; // 跟随系统
             }
         }
     }

@@ -657,6 +657,21 @@
   <data name="SettingsCategoryPersonalization" xml:space="preserve">
     <value>个性化</value>
   </data>
+  <data name="SettingAppTheme" xml:space="preserve">
+    <value>主题</value>
+  </data>
+  <data name="SettingAppThemeDescription" xml:space="preserve">
+    <value>应用明暗主题（默认跟随系统）</value>
+  </data>
+  <data name="ThemeAuto" xml:space="preserve">
+    <value>跟随系统</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>深色</value>
+  </data>
   <data name="SettingThemeAccent" xml:space="preserve">
     <value>主题色</value>
   </data>

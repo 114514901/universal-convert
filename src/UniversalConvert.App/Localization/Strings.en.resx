@@ -657,6 +657,21 @@
   <data name="SettingsCategoryPersonalization" xml:space="preserve">
     <value>Personalization</value>
   </data>
+  <data name="SettingAppTheme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="SettingAppThemeDescription" xml:space="preserve">
+    <value>Light/dark theme (default: follow system)</value>
+  </data>
+  <data name="ThemeAuto" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+  <data name="ThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
   <data name="SettingThemeAccent" xml:space="preserve">
     <value>Theme color</value>
   </data>

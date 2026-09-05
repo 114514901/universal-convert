@@ -120,6 +120,21 @@ namespace UniversalConvert.App
             },
             new SettingDefinition
             {
+                Key = "appTheme",
+                Category = "@SettingsCategoryPersonalization",
+                Label = "@SettingAppTheme",
+                Description = "@SettingAppThemeDescription",
+                Type = OptionType.Enum,
+                DefaultValue = "auto",
+                Choices = new List<OptionChoice>
+                {
+                    new OptionChoice { Value = "auto", Label = "@ThemeAuto" },
+                    new OptionChoice { Value = "light", Label = "@ThemeLight" },
+                    new OptionChoice { Value = "dark", Label = "@ThemeDark" }
+                }
+            },
+            new SettingDefinition
+            {
                 Key = "themeAccent",
                 Category = "@SettingsCategoryPersonalization",
                 Label = "@SettingThemeAccent",

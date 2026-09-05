@@ -174,6 +174,12 @@ namespace UniversalConvert.App
                 App.ApplyAccentColor(accentGetter());
             }
 
+            // 明暗主题立即生效（无需重启）
+            if (_getters.TryGetValue("appTheme", out var themeGetter))
+            {
+                App.ApplyAppTheme(themeGetter());
+            }
+
             // 需要重启则询问
             if (needsRestart)
             {
