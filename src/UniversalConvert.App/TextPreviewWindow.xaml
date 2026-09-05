@@ -19,7 +19,7 @@
             <RichTextBox x:Name="ContentBox" IsReadOnly="True"
                          FontFamily="Consolas, Microsoft YaHei UI" FontSize="14"
                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                         BorderThickness="0" Padding="8,6" Background="White"/>
+                         BorderThickness="0" Padding="8,6" Background="{DynamicResource CardBackgroundBrush}"/>
         </Border>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="4,8,4,0">

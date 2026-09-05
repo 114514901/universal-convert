@@ -10,6 +10,10 @@
                 <ui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
             <SolidColorBrush x:Key="AccentBorderBrush" Color="#0078D4"/>
+            <!-- 明暗主题自定义资源（ApplyAppTheme 时切换） -->
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F3F3F3"/>
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="CardBorderBrush" Color="#DDDDDD"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

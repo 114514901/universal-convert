@@ -391,17 +391,45 @@ namespace UniversalConvert.App
         /// <summary>应用明暗主题：auto=跟随系统（null），light=浅色，dark=深色。</summary>
         public static void ApplyAppTheme(string mode)
         {
+            bool dark;
             if (string.Equals(mode, "dark", StringComparison.OrdinalIgnoreCase))
             {
                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                dark = true;
             }
             else if (string.Equals(mode, "light", StringComparison.OrdinalIgnoreCase))
             {
                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                dark = false;
             }
             else
             {
                 ThemeManager.Current.ApplicationTheme = null; // 跟随系统
+                // 跟随系统时按当前系统主题判断自定义资源
+                dark = ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark;
+            }
+
+            ApplyThemeBrushes(dark);
+        }
+
+        /// <summary>切换自定义主题资源（硬编码浅色背景在深色下需换成深色，否则白字白底）。</summary>
+        private static void ApplyThemeBrushes(bool dark)
+        {
+            try
+            {
+                var app = dark ? "#1F1F1F" : "#F3F3F3";
+                var card = dark ? "#2D2D2D" : "#FFFFFF";
+                var border = dark ? "#3F3F3F" : "#DDDDDD";
+                Application.Current.Resources["AppBackgroundBrush"] =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(app));
+                Application.Current.Resources["CardBackgroundBrush"] =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(card));
+                Application.Current.Resources["CardBorderBrush"] =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(border));
+            }
+            catch
+            {
+                // 忽略资源切换失败
             }
         }
     }

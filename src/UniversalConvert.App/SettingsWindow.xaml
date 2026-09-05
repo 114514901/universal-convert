@@ -4,14 +4,14 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.Settings}" Height="540" Width="640"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="360" MinWidth="480"
-        Background="#F3F3F3">
+        Background="{DynamicResource AppBackgroundBrush}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Background="White" CornerRadius="8" BorderBrush="#E5E5E5" BorderThickness="1" Padding="8">
+        <Border Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" BorderBrush="#E5E5E5" BorderThickness="1" Padding="8">
             <TabControl x:Name="SettingsTabs"/>
         </Border>
 
