@@ -2,123 +2,54 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
-## [2.7.0-dev.2] - 2026-09-06
-
-### 修复 / Fixed
-- 内置音/视频预览：进度条时间提示改用代码设置定位目标（避免 XAML `x:Reference` 潜在的运行时解析问题）
-  - Built-in audio/video preview: seek tooltip target is now set in code (avoids potential `x:Reference` runtime resolution issues)
-
-## [2.7.0-dev.1] - 2026-09-06
+## [2.7.0] - 2026-09-06
 
 ### 新增 / Added
-- 插件上下文新增 `IsDarkTheme` API：扩展可查询宿主当前是否为深色主题，自行适配深色 UI（主程序不再介入扩展窗口的深色）
-  - Add `IsDarkTheme` to the plugin context: extensions can query whether the host is in dark mode and adapt their own UI (the host no longer touches extension-window theming)
-
-## [2.6.0-dev.9] - 2026-09-06
-
-### 新增 / Added
-- 内置音/视频预览：音量条悬停滚动滚轮调节音量（步长 5%）
-  - Built-in audio/video preview: hover the volume slider and scroll the wheel to adjust volume (5% steps)
-- 内置音/视频预览：拖动进度条时在鼠标上方显示该位置时长
-  - Built-in audio/video preview: dragging the progress bar shows the seek time above the cursor
-
-## [2.6.0-dev.8] - 2026-09-06
-
-### 修复 / Fixed
-- 内置视频预览：播放结束后点「播放」直接从头重播（无需先点停止）；进度条点击定位到鼠标位置（原为快进 1 秒）；空格键播放/暂停
-  - Built-in video preview: Play restarts from the beginning after the media ends (no need to press Stop first); clicking the progress bar seeks to the clicked position (was +1s); Space toggles play/pause
-- 内置音频预览：播放结束后点「播放」直接从头重播；空格键播放/暂停
-  - Built-in audio preview: Play restarts from the beginning after the media ends; Space toggles play/pause
-
-## [2.6.0-dev.7] - 2026-09-05
+- 深色模式：设置「个性化」新增「主题」选项（跟随系统 / 浅色 / 深色，默认跟随系统），保存即时生效
+  - Dark mode: a Theme option (follow system / light / dark, default follow system) in Settings → Personalization, applied instantly
+- 插件上下文新增 `IsDarkTheme` API：扩展可查询宿主当前是否为深色主题，自行适配深色 UI
+  - Add `IsDarkTheme` to the plugin context: extensions can query the host theme and adapt their own UI
+- FFmpeg 自定义选项卡增强：视频滤镜（缩放/裁剪/翻转/亮度对比度/色调/自定义）、音频滤镜（音量/均衡/变速/自定义）、编码参数（CRF/预设/声道/音频编码器）、高级参数自由输入框
+  - FFmpeg customize tab: video/audio filters, encoding params (CRF/preset/channels/audio codec), and a free-form advanced-args box
+- 高级参数与内置参数双向联动（写 `-crf 18` 自动回填下拉框；改内置参数自动重建高级参数）
+  - Advanced args and built-in options sync both ways
+- 预览播放器记忆上次音量（内置与 VLC 扩展共享配置）
+  - Preview player remembers the last volume (shared between built-in and VLC)
+- 看护进程意外退出检测（原生崩溃弹报告窗口，不再无声消失）
+  - Watchdog detects unexpected exit (native crash) and shows a report window
+- FFmpeg 插件支持输出 .wma
+  - FFmpeg plugin can output .wma
+- 内置音/视频预览：音量条悬停滚动滚轮调节音量（步长 5%）、拖动进度条在鼠标上方显示该位置时长
+  - Built-in audio/video preview: wheel-to-adjust volume (5% steps) and a seek-time tooltip above the cursor while dragging
 
 ### 改进 / Improved
-- 预览启动提速：应用启动空闲时预热媒体管线（Media Foundation），内置音/视频预览首次打开不再卡顿
-  - Warm up the Media Foundation pipeline at app idle after startup, so the first built-in audio/video preview opens without a hitch
-- 图片预览大图解码改后台线程，不再阻塞界面
-  - Large-image decoding in the image preview now runs on a background thread, keeping the UI responsive
-
-## [2.6.0-dev.6] - 2026-09-05
+- 预览启动提速：应用启动空闲时预热媒体管线（Media Foundation），图片预览大图解码改后台线程
+  - Faster preview startup (media pipeline warm-up at idle) and background large-image decoding
+- 错误解析器升级：区分「参数/滤镜错误」「编码器/格式不支持」「工具崩溃」，按输出格式给针对性建议
+  - Better error parsing: parameter/filter errors, unsupported codec, tool crash, and format-specific suggestions
+- FFmpeg 自定义参数自动单位转换（码率/采样率单位容错）
+  - FFmpeg custom args auto unit normalization (bitrate/sample rate)
+- 扩展安装/更新失败时弹窗提示原因（含 SHA256 校验失败）
+  - Extension install/update failures now show a dialog with the reason (incl. SHA256 mismatch)
+- 媒体预览提供者 v2 接口（带显示名），渲染预览可显示原文件名
+  - Media preview provider v2 interface (with display name)
 
 ### 修复 / Fixed
-- 扩展管理深色模式：插件管理/扩展中心/扩展更新窗口背景未跟随主题（白字白底）
-  - Fix dark mode for extension management: Plugin Manager / Extension Center / Extension Update windows' backgrounds didn't follow the theme
-- 全部窗口统一补主题背景（含音频/视频/图片预览、批量转换、自定义、崩溃报告、格式选择、日志查看、发布说明等）
-  - Add theme-aware backgrounds to all remaining windows (previews, batch convert, customize, crash report, format choice, log viewer, release notes, etc.)
-- 灰色次要文字/边框改主题动态资源（`SecondaryTextBrush`/`TertiaryTextBrush`），深色下自动变浅
-  - Replace hardcoded gray text/borders with theme resources, lighten automatically in dark mode
-- 文本预览语法高亮：深色下普通文字与标点换浅色（避免深灰字看不见）
-  - Text preview syntax highlighting: plain text & punctuation switch to light colors in dark mode
+- 深色模式白屏：窗口/卡片背景硬编码浅色未跟随主题，改为主题动态资源；全部窗口统一补主题背景
+  - Dark-mode white screen: hardcoded light backgrounds replaced with theme resources; all windows get theme-aware backgrounds
+- 扩展管理窗口深色模式、灰色次要文字/边框深色下自动变浅、文本预览语法高亮深色适配
+  - Dark mode for extension-management windows, gray text/borders, and text-preview syntax highlighting
+- 内置视频预览：播放结束后点「播放」直接从头重播（无需先点停止）、进度条点击定位到鼠标位置、空格键播放/暂停
+  - Built-in video preview: replay after end, click-to-seek, Space play/pause
+- 内置音频预览：播放结束后点「播放」直接从头重播、空格键播放/暂停
+  - Built-in audio preview: replay after end, Space play/pause
+- 扩展仓库列表拉取加时间戳绕过 CDN 缓存（下载到旧版扩展包）
+  - Extension index fetch adds a timestamp to bypass CDN cache (stale downloads)
+- 渲染/解密预览（ncm 等）标题显示原文件名
+  - Rendered/decrypted preview shows the original filename
+- 进度条时间提示定位目标改代码设置（避免 XAML `x:Reference` 运行时解析问题）
+  - Seek tooltip target set in code (avoids XAML `x:Reference` runtime issue)
 
-## [2.6.0-dev.5] - 2026-09-05
-
-### 修复
-- 深色模式白屏：窗口/卡片背景硬编码浅色未跟随主题——改为主题动态资源（`AppBackgroundBrush`/`CardBackgroundBrush`），切深色时背景同步变深（跟随系统时按系统实际主题判断）
-
-## [2.6.0-dev.4] - 2026-09-05
-
-### 改进
-- **错误解析器升级**：新增「参数/滤镜错误」「编码器/格式不支持」「工具崩溃」三类（区分 `Invalid argument` 参数错误与输入损坏，避免误导）；工具缺失补 Windows「不是内部或外部命令」；接收退出码识别崩溃（访问冲突等）；按输出格式给针对性建议（mp4 moov 缺失 → 提示未下载完整）
-
-## [2.6.0-dev.3] - 2026-09-05
-
-### 新增
-- **深色模式**：设置「个性化」新增「主题」选项（跟随系统 / 浅色 / 深色，默认跟随系统），保存即时生效
-
-## [2.6.0-dev.2] - 2026-09-05
-
-### 新增
-- 高级参数**反向同步**：改内置参数（如下拉选 CRF 18）时，高级参数框自动重建为 `-crf 18 ...`（保留用户手写的额外参数 token），双向联动
-
-## [2.6.0-dev.1] - 2026-09-05
-
-### 新增
-- 高级参数输入框**双向联动**：在「高级参数」里写内置参数（如 `-crf 18`、`-b:a 320k`、`-preset slow`）时，对应的内置下拉/输入框自动更新为相同内容（核心新增 `OptionDefinition.AdvancedAlias`/`IsAdvancedEntry`，插件声明别名、表单通用解析回填）
-
-## [2.5.0-dev.9] - 2026-09-05
-
-### 新增
-- FFmpeg 自定义选项卡增强：**视频滤镜**（缩放/裁剪/水平翻转/垂直翻转/亮度对比度/色调/自定义表达式）、**音频滤镜**（音量/均衡器/变速/自定义）、编码参数（CRF 质量、编码预设、声道数、音频编码器）、**高级参数自由输入框**（原样拼接到命令行末尾，覆盖内置参数）
-
-## [2.5.0-dev.8] - 2026-08-29
-
-### 新增
-- 预览播放器**记忆上次音量**（内置音频播放器与 VLC 扩展共享 `%AppData%\UniversalConvert\preview-volume.txt`）：调过音量后下次打开自动恢复
-
-## [2.5.0-dev.7] - 2026-08-29
-
-### 改进
-- FFmpeg 自定义参数**自动单位转换**：码率输入 "320 kbps"/"320k" → 320k，采样率 "44.1 kHz"/"44.1k" → 44100（Hz）；预设显示保持可读单位不变，用户照抄预设值也不会再因单位报错
-
-## [2.5.0-dev.6] - 2026-08-29
-
-### 新增
-- 看护进程**意外退出检测**：主程序消失但未收到正常退出信号（原生崩溃形态）→ 自动弹出「程序意外退出」报告窗口（时间 + 日志尾部），不再无声消失
-
-## [2.5.0-dev.5] - 2026-08-29
-
-### 修复
-- 扩展仓库列表拉取加时间戳参数：绕过 raw.githubusercontent CDN 缓存，index.json 更新后立即生效（此前缓存导致下载到旧版扩展包）
-
-## [2.5.0-dev.4] - 2026-08-29
-
-### 改进
-- 扩展安装/更新失败时**弹窗提示原因**（汇总 + 各失败项的错误信息，如 SHA256 校验失败），不再只写日志
-
-## [2.5.0-dev.3] - 2026-08-29
-
-### 新增
-- FFmpeg 插件支持输出 **.wma**（wmav2 原生编码；输入本就支持，现在音频可互转 wma）
-
-## [2.5.0-dev.2] - 2026-08-29
-
-### 改进
-- 媒体预览提供者 v2 接口（带显示名）：VLC 扩展可显示原文件名（渲染预览 ncm/midi 不再显示临时产物名）
-
-## [2.5.0-dev.1] - 2026-08-29
-
-### 修复
-- 渲染/解密预览（ncm 等）在无 VLC 扩展时标题显示渲染产物扩展名（如 .flac）：内置播放器支持显示名——标题恒定显示原文件名（song.ncm）
 
 ## [2.4.1] - 2026-08-29
 
