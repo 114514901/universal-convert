@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.3] - 2026-09-06
+
+### 改进 / Improved
+- 「原始」选项改名「自动」（不传该参数、由 FFmpeg 默认处理，语义更直观）
+  - Renamed the "Original" option to "Auto" (omit the arg and let FFmpeg decide, clearer meaning)
+
 ## [2.7.1-dev.2] - 2026-09-06
 
 ### 修复 / Fixed
