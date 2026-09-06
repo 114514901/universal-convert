@@ -4,7 +4,8 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="{x:Static loc:Strings.AudioPlayer}" Height="280" Width="480"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Closed="OnWindowClosed" Background="{DynamicResource AppBackgroundBrush}">
+        Closed="OnWindowClosed" Background="{DynamicResource AppBackgroundBrush}"
+        PreviewKeyDown="OnPreviewKeyDown">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

@@ -4,7 +4,8 @@
         xmlns:loc="clr-namespace:UniversalConvert.App.Localization"
         Title="UniversalConvert" Height="600" Width="900"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize" MinHeight="300" MinWidth="480"
-        Loaded="OnLoaded" Closed="OnClosed" Background="{DynamicResource AppBackgroundBrush}">
+        Loaded="OnLoaded" Closed="OnClosed" Background="{DynamicResource AppBackgroundBrush}"
+        PreviewKeyDown="OnPreviewKeyDown">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -29,6 +30,7 @@
 
         <Slider x:Name="ProgressSlider" Grid.Row="2" Minimum="0" Maximum="1" Value="0"
                 Margin="4,10,4,0" VerticalAlignment="Center" IsEnabled="False"
+                IsMoveToPointEnabled="True"
                 PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"
                 ValueChanged="OnProgressChanged"/>
 

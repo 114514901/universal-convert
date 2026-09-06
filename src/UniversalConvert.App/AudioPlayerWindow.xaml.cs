@@ -384,7 +384,12 @@ namespace UniversalConvert.App
             }
             else
             {
-                _ended = false;
+                if (_ended)
+                {
+                    // 播放到末尾后需 Stop 归位再从头播（所见即所得，无需先点停止）
+                    _ended = false;
+                    _player.Stop();
+                }
                 _player.Play();
                 _playing = true;
                 PlayPauseButton.Content = Strings.Pause;
@@ -407,6 +412,16 @@ namespace UniversalConvert.App
         private void OnClose(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        /// <summary>空格键：播放/暂停（焦点在按钮上时 PreviewKeyDown 先拦截，避免触发按钮点击）。</summary>
+        private void OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Space)
+            {
+                OnPlayPause(sender, e);
+                e.Handled = true;
+            }
         }
 
         private void OnWindowClosed(object sender, EventArgs e)

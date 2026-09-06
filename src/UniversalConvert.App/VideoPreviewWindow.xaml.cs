@@ -62,6 +62,9 @@ namespace UniversalConvert.App
         private void OnMediaEnded(object sender, RoutedEventArgs e)
         {
             _playing = false;
+            // MediaElement 播完自动 Stop；标记 _stopped 让重播走「重设 Source」分支，
+            // 否则直接 Play() 画面冻结（WPF 已知问题），用户得先点停止再播放
+            _stopped = true;
             PlayPauseButton.Content = Strings.Play;
         }
 
@@ -213,6 +216,16 @@ namespace UniversalConvert.App
             PlayPauseButton.Content = Strings.Play;
             ProgressSlider.Value = 0;
             TimeText.Text = string.Empty;
+        }
+
+        /// <summary>空格键：播放/暂停（焦点在按钮上时 PreviewKeyDown 先拦截，避免触发按钮点击）。</summary>
+        private void OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Space)
+            {
+                OnPlayPause(sender, e);
+                e.Handled = true;
+            }
         }
 
         // ---------- 画面快捷操作：左右 1/3 单击 ±5 秒，任意位置双击播放/暂停 ----------

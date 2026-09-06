@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.6.0-dev.8] - 2026-09-06
+
+### 修复 / Fixed
+- 内置视频预览：播放结束后点「播放」直接从头重播（无需先点停止）；进度条点击定位到鼠标位置（原为快进 1 秒）；空格键播放/暂停
+  - Built-in video preview: Play restarts from the beginning after the media ends (no need to press Stop first); clicking the progress bar seeks to the clicked position (was +1s); Space toggles play/pause
+- 内置音频预览：播放结束后点「播放」直接从头重播；空格键播放/暂停
+  - Built-in audio preview: Play restarts from the beginning after the media ends; Space toggles play/pause
+
 ## [2.6.0-dev.7] - 2026-09-05
 
 ### 改进 / Improved
