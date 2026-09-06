@@ -176,9 +176,10 @@ namespace UniversalConvert.App
                         };
                         getter2 = () =>
                         {
-                            var text = combo.Text ?? string.Empty;
-                            var byLabel = choices.FirstOrDefault(c => c.Label == text);
-                            return byLabel != null ? byLabel.Value : text;
+                            // 直接用 SelectedItem 的 Value（FFmpeg 格式，如 "128k"），
+                            // 避免 combo.Text 在 SelectionChanged 时仍是旧值导致错位（选 128 却回填 96）
+                            var selected = combo.SelectedItem as OptionChoice;
+                            return selected != null ? selected.Value : (combo.Text ?? string.Empty);
                         };
                         combo.SelectionChanged += (s, e) => OnOptionManuallyChanged();
                         control = combo;

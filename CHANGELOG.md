@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.2] - 2026-09-06
+
+### 修复 / Fixed
+- 高级参数↔内置参数同步错位：下拉选项回填高级参数时读到旧值（选 128 kbps 却回填 96k、采样率同样错位），改用 `SelectedItem` 直接取 FFmpeg 格式值；「原始」现在能正确清除对应参数
+  - Fixed advanced-args ↔ built-in sync drift: the dropdown echoed stale values back (selecting 128 kbps echoed 96k, sample rate drifted too); now reads `SelectedItem` directly, and "Original" properly clears the arg
+
 ## [2.7.1-dev.1] - 2026-09-06
 
 ### 新增 / Added
