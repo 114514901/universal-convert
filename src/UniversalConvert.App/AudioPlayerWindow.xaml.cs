@@ -35,6 +35,7 @@ namespace UniversalConvert.App
         {
             InitializeComponent();
             Icon = AppIcon.Get();
+            SeekTooltip.PlacementTarget = ProgressSlider;
 
             _filePath = filePath;
             _playbackPath = filePath;

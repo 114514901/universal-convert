@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.0-dev.2] - 2026-09-06
+
+### 修复 / Fixed
+- 内置音/视频预览：进度条时间提示改用代码设置定位目标（避免 XAML `x:Reference` 潜在的运行时解析问题）
+  - Built-in audio/video preview: seek tooltip target is now set in code (avoids potential `x:Reference` runtime resolution issues)
+
 ## [2.7.0-dev.1] - 2026-09-06
 
 ### 新增 / Added

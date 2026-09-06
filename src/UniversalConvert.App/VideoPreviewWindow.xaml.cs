@@ -37,6 +37,7 @@ namespace UniversalConvert.App
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             TitleText.Text = Path.GetFileName(_filePath);
+            SeekTooltip.PlacementTarget = ProgressSlider;
 
             // MediaElement 音量默认非满音量，显式对齐滑块 100%
             Video.Volume = 1.0;
