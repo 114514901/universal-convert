@@ -2,6 +2,16 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.1] - 2026-09-06
+
+### 新增 / Added
+- 高级参数输入框改为独立全宽显示在下方（标签在上靠左），支持多行输入
+  - The advanced-args box is now full-width on its own row (label above, left-aligned), with multi-line input
+- 音频编码器改为可选预设下拉（AAC / MP3 / Opus / Vorbis / FLAC / WAV / WMA / 复制流），仍可手动输入
+  - Audio codec is now a preset dropdown (AAC / MP3 / Opus / Vorbis / FLAC / WAV / WMA / copy), still editable
+- 新增「不转换封面」勾选框等开关类选项，统一显示在表单最下方（每排多个，放不下自动换行）
+  - Added toggle options such as "No cover art", shown at the bottom of the form (multiple per row, wrapping)
+
 ## [2.7.0] - 2026-09-06
 
 ### 新增 / Added

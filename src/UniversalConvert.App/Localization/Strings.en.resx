@@ -803,6 +803,12 @@
   <data name="ParamExtraArgs" xml:space="preserve">
     <value>Extra args</value>
   </data>
+  <data name="CodecCopy" xml:space="preserve">
+    <value>Copy (no re-encode)</value>
+  </data>
+  <data name="ParamNoCoverArt" xml:space="preserve">
+    <value>No cover art</value>
+  </data>
   <data name="FilterScale" xml:space="preserve">
     <value>Scale</value>
   </data>

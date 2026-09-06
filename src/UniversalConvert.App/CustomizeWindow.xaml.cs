@@ -87,34 +87,80 @@ namespace UniversalConvert.App
 
         private void BuildOptionControls()
         {
+            var boolWrap = new WrapPanel { Margin = new Thickness(0, 4, 0, 0) };
+            var hasBool = false;
+
             foreach (var option in _entry.Options)
             {
-                var row = new DockPanel { Margin = new Thickness(0, 0, 0, 8), LastChildFill = false };
+                // 勾选框统一收集到最下方 WrapPanel（每排多个，放不下换行）
+                if (option.Type == OptionType.Bool)
+                {
+                    var checkBox = new CheckBox
+                    {
+                        Content = Strings.L(option.Label),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Margin = new Thickness(0, 0, 16, 4)
+                    };
+                    Action<string> setter = v => checkBox.IsChecked =
+                        string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
+                    Func<string> getter = () => checkBox.IsChecked == true ? "true" : "false";
+                    checkBox.Checked += (s, e) => OnOptionManuallyChanged();
+                    checkBox.Unchecked += (s, e) => OnOptionManuallyChanged();
+                    boolWrap.Children.Add(checkBox);
+                    hasBool = true;
+                    RegisterOption(option, setter, getter, checkBox);
+                    continue;
+                }
 
-                var label = new TextBlock
+                // 高级参数：标签在上靠左，输入框在下方全宽（多行）
+                if (option.IsAdvancedEntry)
+                {
+                    var container = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
+                    var label = new TextBlock
+                    {
+                        Text = Strings.L(option.Label),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        Margin = new Thickness(0, 0, 0, 4)
+                    };
+                    var box = new TextBox
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        AcceptsReturn = true,
+                        TextWrapping = TextWrapping.Wrap,
+                        MinHeight = 60,
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+                    };
+                    container.Children.Add(label);
+                    container.Children.Add(box);
+                    OptionsPanel.Children.Add(container);
+
+                    Action<string> setter = v => box.Text = v ?? string.Empty;
+                    Func<string> getter = () => box.Text;
+                    box.TextChanged += (s, e) => OnOptionManuallyChanged();
+                    box.TextChanged += (s, e) => OnAdvancedEntryChanged();
+                    RegisterOption(option, setter, getter, box);
+                    _advancedEntryGetter = getter;
+                    _advancedEntrySetter = setter;
+                    continue;
+                }
+
+                // 普通选项：一行（标签靠左，控件靠右）
+                var row = new DockPanel { Margin = new Thickness(0, 0, 0, 8), LastChildFill = false };
+                var rowLabel = new TextBlock
                 {
                     Text = Strings.L(option.Label),
                     VerticalAlignment = VerticalAlignment.Center,
                     Margin = new Thickness(0, 0, 12, 0)
                 };
-                DockPanel.SetDock(label, Dock.Left);
-                row.Children.Add(label);
+                DockPanel.SetDock(rowLabel, Dock.Left);
+                row.Children.Add(rowLabel);
 
                 FrameworkElement control;
-                Action<string> setter;
-                Func<string> getter;
+                Action<string> setter2;
+                Func<string> getter2;
 
                 switch (option.Type)
                 {
-                    case OptionType.Bool:
-                        var checkBox = new CheckBox { VerticalAlignment = VerticalAlignment.Center };
-                        setter = v => checkBox.IsChecked = string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
-                        getter = () => checkBox.IsChecked == true ? "true" : "false";
-                        checkBox.Checked += (s, e) => OnOptionManuallyChanged();
-                        checkBox.Unchecked += (s, e) => OnOptionManuallyChanged();
-                        control = checkBox;
-                        break;
-
                     case OptionType.Enum:
                         var combo = new ComboBox { Width = 220, IsEditable = true, IsTextSearchEnabled = false };
                         var choices = option.Choices
@@ -122,19 +168,13 @@ namespace UniversalConvert.App
                             .ToList();
                         combo.ItemsSource = choices;
                         combo.DisplayMemberPath = "Label";
-                        setter = v =>
+                        setter2 = v =>
                         {
                             var match = choices.FirstOrDefault(c => c.Value == v);
-                            if (match != null)
-                            {
-                                combo.SelectedItem = match;
-                            }
-                            else
-                            {
-                                combo.Text = v ?? string.Empty;
-                            }
+                            if (match != null) combo.SelectedItem = match;
+                            else combo.Text = v ?? string.Empty;
                         };
-                        getter = () =>
+                        getter2 = () =>
                         {
                             var text = combo.Text ?? string.Empty;
                             var byLabel = choices.FirstOrDefault(c => c.Label == text);
@@ -148,13 +188,9 @@ namespace UniversalConvert.App
                     case OptionType.String:
                     default:
                         var textBox = new TextBox { Width = 220 };
-                        setter = v => textBox.Text = v ?? string.Empty;
-                        getter = () => textBox.Text;
+                        setter2 = v => textBox.Text = v ?? string.Empty;
+                        getter2 = () => textBox.Text;
                         textBox.TextChanged += (s, e) => OnOptionManuallyChanged();
-                        if (option.IsAdvancedEntry)
-                        {
-                            textBox.TextChanged += (s, e) => OnAdvancedEntryChanged();
-                        }
                         control = textBox;
                         break;
                 }
@@ -163,27 +199,32 @@ namespace UniversalConvert.App
                 row.Children.Add(control);
                 OptionsPanel.Children.Add(row);
 
-                _setters[option.Key] = setter;
-                _getters[option.Key] = getter;
-                if (!string.IsNullOrEmpty(option.AdvancedAlias))
+                RegisterOption(option, setter2, getter2, control);
+            }
+
+            if (hasBool)
+            {
+                OptionsPanel.Children.Add(boolWrap);
+            }
+        }
+
+        /// <summary>注册选项的 setter/getter 与「高级参数」联动（有 AdvancedAlias 的内置选项反向同步）。</summary>
+        private void RegisterOption(OptionDefinition option, Action<string> setter, Func<string> getter, FrameworkElement control)
+        {
+            _setters[option.Key] = setter;
+            _getters[option.Key] = getter;
+            if (!string.IsNullOrEmpty(option.AdvancedAlias))
+            {
+                _advancedAliases[option.AdvancedAlias] = setter;
+                _advancedAliasGetters[option.AdvancedAlias] = getter;
+                _advancedAliasOrder.Add(option.AdvancedAlias);
+                if (control is ComboBox comboAlias)
                 {
-                    _advancedAliases[option.AdvancedAlias] = setter;
-                    _advancedAliasGetters[option.AdvancedAlias] = getter;
-                    _advancedAliasOrder.Add(option.AdvancedAlias);
-                    // 内置选项变化时反向同步到高级参数框
-                    if (control is ComboBox comboAlias)
-                    {
-                        comboAlias.SelectionChanged += (s, e) => OnBuiltInOptionChanged();
-                    }
-                    else if (control is TextBox tbAlias)
-                    {
-                        tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
-                    }
+                    comboAlias.SelectionChanged += (s, e) => OnBuiltInOptionChanged();
                 }
-                if (option.IsAdvancedEntry)
+                else if (control is TextBox tbAlias)
                 {
-                    _advancedEntryGetter = getter;
-                    _advancedEntrySetter = setter;
+                    tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
                 }
             }
         }

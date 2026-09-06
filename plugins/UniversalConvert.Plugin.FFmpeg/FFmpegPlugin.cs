@@ -107,7 +107,12 @@ namespace UniversalConvert.Plugin.FFmpeg
             {
                 // 音频输出：目标容器支持封面（attached pic）时保留封面（mjpeg 原样 copy），
                 // 否则丢弃视频流（封面会被当成普通视频流转码进不支持的容器导致失败，如 mp3→m4a）。
-                if (SupportsCoverArt(outExt))
+                // 用户勾选「不转换封面」时强制丢弃视频流/封面。
+                if (TryGetBool(request.Options, "noCoverArt"))
+                {
+                    sb.Append(" -vn");
+                }
+                else if (SupportsCoverArt(outExt))
                 {
                     sb.Append(" -map 0:a? -map 0:v? -c:v copy");
                 }
@@ -271,6 +276,14 @@ namespace UniversalConvert.Plugin.FFmpeg
                 && !string.IsNullOrEmpty(value);
         }
 
+        /// <summary>读取布尔型选项（勾选框）：值为 "true" 时返回 true。</summary>
+        private static bool TryGetBool(IDictionary<string, string> options, string key)
+        {
+            string v;
+            return options != null && options.TryGetValue(key, out v)
+                && string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
+        }
+
         private static TimeSpan? ParseTime(string line, string pattern)
         {
             var match = Regex.Match(line, pattern);
@@ -307,6 +320,17 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DefaultValue = defaultValue,
                 AdvancedAlias = alias,
                 IsAdvancedEntry = advancedEntry
+            };
+        }
+
+        private static OptionDefinition BoolOption(string key, string label, bool defaultValue = false)
+        {
+            return new OptionDefinition
+            {
+                Key = key,
+                Label = label,
+                Type = OptionType.Bool,
+                DefaultValue = defaultValue ? "true" : "false"
             };
         }
 
@@ -390,7 +414,16 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("medium", "medium"),
                         Choice("slow", "slow"),
                         Choice("veryslow", "veryslow")),
-                    StringOption("audioCodec", "@ParamAudioCodec", "", "-c:a"),
+                    EnumOption("audioCodec", "@ParamAudioCodec", "", "-c:a",
+                        Choice("", "@Original"),
+                        Choice("copy", "@CodecCopy"),
+                        Choice("aac", "AAC"),
+                        Choice("libmp3lame", "MP3 (libmp3lame)"),
+                        Choice("libopus", "Opus (libopus)"),
+                        Choice("libvorbis", "Vorbis (libvorbis)"),
+                        Choice("flac", "FLAC"),
+                        Choice("pcm_s16le", "WAV (pcm_s16le)"),
+                        Choice("wmav2", "WMA (wmav2)")),
                     StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 },
                 Presets = new List<ConversionPreset>
@@ -436,7 +469,17 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("1", "@ChMono"),
                         Choice("2", "@ChStereo"),
                         Choice("6", "@Ch51")),
-                    StringOption("audioCodec", "@ParamAudioCodec", "", "-c:a"),
+                    EnumOption("audioCodec", "@ParamAudioCodec", "", "-c:a",
+                        Choice("", "@Original"),
+                        Choice("copy", "@CodecCopy"),
+                        Choice("aac", "AAC"),
+                        Choice("libmp3lame", "MP3 (libmp3lame)"),
+                        Choice("libopus", "Opus (libopus)"),
+                        Choice("libvorbis", "Vorbis (libvorbis)"),
+                        Choice("flac", "FLAC"),
+                        Choice("pcm_s16le", "WAV (pcm_s16le)"),
+                        Choice("wmav2", "WMA (wmav2)")),
+                    BoolOption("noCoverArt", "@ParamNoCoverArt"),
                     StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 },
                 Presets = new List<ConversionPreset>

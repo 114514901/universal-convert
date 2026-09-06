@@ -803,6 +803,12 @@
   <data name="ParamExtraArgs" xml:space="preserve">
     <value>高级参数</value>
   </data>
+  <data name="CodecCopy" xml:space="preserve">
+    <value>复制流（不重编码）</value>
+  </data>
+  <data name="ParamNoCoverArt" xml:space="preserve">
+    <value>不转换封面</value>
+  </data>
   <data name="FilterScale" xml:space="preserve">
     <value>缩放</value>
   </data>
