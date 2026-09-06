@@ -23,7 +23,7 @@ namespace UniversalConvert.Core
         /// <summary>插件加载/初始化过程中的错误（供扩展管理器展示）。</summary>
         public IReadOnlyList<PluginLoadError> LoadErrors => _loadErrors;
 
-        public CoreHost(AppConfig config, string pluginsDirectory, Action<string> log = null)
+        public CoreHost(AppConfig config, string pluginsDirectory, Action<string> log = null, Func<bool> isDarkTheme = null)
         {
             Config = config ?? new AppConfig();
             log = log ?? (_ => { });
@@ -42,7 +42,7 @@ namespace UniversalConvert.Core
             Plugins = MergePlugins(userPlugins, builtinPlugins);
             Log.Info($"共加载 {Plugins.Count} 个插件");
 
-            var context = new PluginContext(Config, log);
+            var context = new PluginContext(Config, log, isDarkTheme);
             foreach (var plugin in Plugins)
             {
                 try

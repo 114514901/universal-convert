@@ -13,12 +13,17 @@ namespace UniversalConvert.Core.Engine
     {
         private readonly AppConfig _config;
         private readonly Action<string> _log;
+        private readonly Func<bool> _isDarkTheme;
 
-        public PluginContext(AppConfig config, Action<string> log = null)
+        public PluginContext(AppConfig config, Action<string> log = null, Func<bool> isDarkTheme = null)
         {
             _config = config ?? new AppConfig();
             _log = log ?? (_ => { });
+            _isDarkTheme = isDarkTheme ?? (() => false);
         }
+
+        /// <summary>宿主当前是否为深色主题（无宿主注入时默认 false，如右键菜单/无 UI 场景）。</summary>
+        public bool IsDarkTheme => _isDarkTheme();
 
         public string DataDirectory
         {

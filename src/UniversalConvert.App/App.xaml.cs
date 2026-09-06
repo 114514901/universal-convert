@@ -63,7 +63,7 @@ namespace UniversalConvert.App
             var uninstallsApplied = ExtensionCenter.ApplyPendingUninstalls();
             Log.Info($"启动：暂存扩展卸载应用结果 = {uninstallsApplied}");
 
-            _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg));
+            _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg), IsDarkTheme);
             _settingsManager = new SettingsManager(config, _host.Plugins);
 
             // 崩溃报告（转储开关/等级读设置，默认开启 + Normal 等级）
@@ -413,6 +413,13 @@ namespace UniversalConvert.App
             }
 
             ApplyThemeBrushes(dark);
+        }
+
+        /// <summary>当前是否为深色主题（跟随系统时反映系统实际深浅）。供扩展上下文（IPluginContext）注入使用。</summary>
+        public static bool IsDarkTheme()
+        {
+            try { return ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark; }
+            catch { return false; }
         }
 
         /// <summary>切换自定义主题资源（硬编码浅色背景在深色下需换成深色，否则白字白底）。</summary>

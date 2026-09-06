@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.0-dev.1] - 2026-09-06
+
+### 新增 / Added
+- 插件上下文新增 `IsDarkTheme` API：扩展可查询宿主当前是否为深色主题，自行适配深色 UI（主程序不再介入扩展窗口的深色）
+  - Add `IsDarkTheme` to the plugin context: extensions can query whether the host is in dark mode and adapt their own UI (the host no longer touches extension-window theming)
+
 ## [2.6.0-dev.9] - 2026-09-06
 
 ### 新增 / Added

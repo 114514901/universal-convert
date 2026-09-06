@@ -16,6 +16,9 @@ namespace UniversalConvert.Core.Plugins
         /// <summary>读取设置项的值；未设置时返回 defaultValue。</summary>
         string GetSetting(string key, string defaultValue = null);
 
+        /// <summary>宿主当前是否为深色主题（跟随系统时反映系统实际深浅）。扩展用它自行适配深色 UI。</summary>
+        bool IsDarkTheme { get; }
+
         /// <summary>写日志。</summary>
         void Log(string message);
     }
