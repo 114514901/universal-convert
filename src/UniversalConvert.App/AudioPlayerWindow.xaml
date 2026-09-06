@@ -20,14 +20,16 @@
         <Slider x:Name="ProgressSlider" Grid.Row="1" Minimum="0" Maximum="100" Value="0"
                 IsMoveToPointEnabled="True" IsEnabled="False"
                 ValueChanged="OnProgressValueChanged"
-                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"/>
+                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"
+                PreviewMouseMove="OnProgressPreviewMouseMove"/>
 
         <TextBlock x:Name="TimeText" Grid.Row="2" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
             <TextBlock Text="{x:Static loc:Strings.Volume}" VerticalAlignment="Center" Margin="0,0,8,0"/>
             <Slider x:Name="VolumeSlider" Width="180" Minimum="0" Maximum="1" Value="1"
-                    VerticalAlignment="Center" ValueChanged="OnVolumeChanged"/>
+                    VerticalAlignment="Center" ValueChanged="OnVolumeChanged"
+                    MouseWheel="OnVolumeMouseWheel"/>
             <TextBlock x:Name="VolumeText" VerticalAlignment="Center" Margin="10,0,0,0"
                        Foreground="{DynamicResource SecondaryTextBrush}" FontSize="12"/>
         </StackPanel>
@@ -38,5 +40,13 @@
             <Button Content="{x:Static loc:Strings.Stop}" Padding="16,6" Click="OnStop" Margin="0,0,8,0"/>
             <Button Content="{x:Static loc:Strings.Close}" Padding="16,6" Click="OnClose"/>
         </StackPanel>
+
+        <!-- 拖动进度条时在鼠标上方显示该位置时长 -->
+        <Popup x:Name="SeekTooltip" Placement="Relative" PlacementTarget="{x:Reference ProgressSlider}"
+               AllowsTransparency="True" IsHitTestVisible="False">
+            <Border Background="#E6000000" CornerRadius="3" Padding="5,2">
+                <TextBlock x:Name="SeekTooltipText" Foreground="White" FontSize="12"/>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

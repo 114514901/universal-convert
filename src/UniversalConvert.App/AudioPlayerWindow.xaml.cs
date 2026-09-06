@@ -257,10 +257,12 @@ namespace UniversalConvert.App
         }
 
         private bool _wasPlayingBeforeSeek;
+        private bool _seeking;
 
         // 拖拽进度条期间临时暂停（避免反复 seek 产生噪声/杂音），松手恢复原播放状态
         private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            _seeking = true;
             _wasPlayingBeforeSeek = _playing;
             if (_playing)
             {
@@ -268,16 +270,38 @@ namespace UniversalConvert.App
                 _playing = false;
                 PlayPauseButton.Content = Strings.Play;
             }
+            UpdateSeekTooltip(e);
         }
 
         private void OnProgressPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            _seeking = false;
+            SeekTooltip.IsOpen = false;
             if (_wasPlayingBeforeSeek)
             {
                 _player.Play();
                 _playing = true;
                 PlayPauseButton.Content = Strings.Pause;
             }
+        }
+
+        /// <summary>拖动进度条时在鼠标上方显示该位置时长。</summary>
+        private void OnProgressPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (_seeking) UpdateSeekTooltip(e);
+        }
+
+        private void UpdateSeekTooltip(System.Windows.Input.MouseEventArgs e)
+        {
+            if (!_player.NaturalDuration.HasTimeSpan || ProgressSlider.ActualWidth <= 0) return;
+            var duration = _player.NaturalDuration.TimeSpan;
+            var pos = e.GetPosition(ProgressSlider);
+            var ratio = Math.Max(0.0, Math.Min(1.0, pos.X / ProgressSlider.ActualWidth));
+            var seconds = ratio * ProgressSlider.Maximum / 100.0 * duration.TotalSeconds;
+            SeekTooltipText.Text = FormatTime(TimeSpan.FromSeconds(seconds));
+            SeekTooltip.HorizontalOffset = pos.X - 18;
+            SeekTooltip.VerticalOffset = pos.Y - 34;
+            SeekTooltip.IsOpen = true;
         }
 
         private void OnProgressValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -311,6 +335,14 @@ namespace UniversalConvert.App
             }
             // 记忆音量（构造期恢复也会回写相同值，无害）
             VolumeMemory.Save(VolumeSlider.Value);
+        }
+
+        /// <summary>悬停在音量条上滚动滚轮调节音量（步长 5%）。</summary>
+        private void OnVolumeMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            var delta = e.Delta > 0 ? 0.05 : -0.05;
+            VolumeSlider.Value = Math.Max(0.0, Math.Min(1.0, VolumeSlider.Value + delta));
+            e.Handled = true;
         }
 
         /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>

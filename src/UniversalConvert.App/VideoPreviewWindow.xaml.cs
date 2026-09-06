@@ -300,6 +300,7 @@ namespace UniversalConvert.App
                 _playing = false;
                 PlayPauseButton.Content = Strings.Play;
             }
+            UpdateSeekTooltip(e);
         }
 
         private void OnProgressPreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -307,6 +308,7 @@ namespace UniversalConvert.App
             _seeking = false;
             _previewRequestId++;                 // 使进行中的抽帧请求作废
             PreviewFrameImage.Visibility = Visibility.Collapsed;
+            SeekTooltip.IsOpen = false;
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
@@ -318,6 +320,31 @@ namespace UniversalConvert.App
                 PlayPauseButton.Content = Strings.Pause;
             }
             UpdateTimeText();
+        }
+
+        /// <summary>拖动进度条时在鼠标上方显示该位置时长。</summary>
+        private void OnProgressPreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (_seeking) UpdateSeekTooltip(e);
+        }
+
+        private void UpdateSeekTooltip(System.Windows.Input.MouseEventArgs e)
+        {
+            if (ProgressSlider.ActualWidth <= 0) return;
+            var pos = e.GetPosition(ProgressSlider);
+            var ratio = Math.Max(0.0, Math.Min(1.0, pos.X / ProgressSlider.ActualWidth));
+            var seconds = ratio * ProgressSlider.Maximum;
+            SeekTooltipText.Text = FormatSeekTime(seconds);
+            SeekTooltip.HorizontalOffset = pos.X - 18;
+            SeekTooltip.VerticalOffset = pos.Y - 34;
+            SeekTooltip.IsOpen = true;
+        }
+
+        private static string FormatSeekTime(double seconds)
+        {
+            if (double.IsNaN(seconds) || double.IsInfinity(seconds) || seconds < 0) seconds = 0;
+            var t = TimeSpan.FromSeconds(seconds);
+            return t.TotalHours >= 1 ? t.ToString(@"h\:mm\:ss") : t.ToString(@"mm\:ss");
         }
 
         private DateTime _lastPreviewRender;
@@ -415,6 +442,14 @@ namespace UniversalConvert.App
             {
                 VolumeText.Text = string.Format("{0:0}%", VolumeSlider.Value * 100);
             }
+        }
+
+        /// <summary>悬停在音量条上滚动滚轮调节音量（步长 5%）。</summary>
+        private void OnVolumeMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            var delta = e.Delta > 0 ? 0.05 : -0.05;
+            VolumeSlider.Value = Math.Max(0.0, Math.Min(1.0, VolumeSlider.Value + delta));
+            e.Handled = true;
         }
 
         /// <summary>滑块值（0-1 线性）→ 实际振幅（指数映射，2 次方）。</summary>

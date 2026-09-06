@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.6.0-dev.9] - 2026-09-06
+
+### 新增 / Added
+- 内置音/视频预览：音量条悬停滚动滚轮调节音量（步长 5%）
+  - Built-in audio/video preview: hover the volume slider and scroll the wheel to adjust volume (5% steps)
+- 内置音/视频预览：拖动进度条时在鼠标上方显示该位置时长
+  - Built-in audio/video preview: dragging the progress bar shows the seek time above the cursor
+
 ## [2.6.0-dev.8] - 2026-09-06
 
 ### 修复 / Fixed
