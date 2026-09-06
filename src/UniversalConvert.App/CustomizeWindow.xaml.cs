@@ -29,6 +29,7 @@ namespace UniversalConvert.App
         private readonly Dictionary<string, Func<string>> _advancedAliasGetters = new Dictionary<string, Func<string>>();
         private readonly List<string> _advancedAliasOrder = new List<string>();
         private readonly List<string> _extraTokens = new List<string>();
+        private readonly Dictionary<string, string> _argsKeyToAlias = new Dictionary<string, string>();
         private Func<string> _advancedEntryGetter;
         private Action<string> _advancedEntrySetter;
         private bool _syncingAdvanced;
@@ -214,11 +215,16 @@ namespace UniversalConvert.App
         {
             _setters[option.Key] = setter;
             _getters[option.Key] = getter;
+
+            // 当前选项是否是被「组合参数」引用的 args 选项（如滤镜参数）
+            var isArgsOfComposite = _argsKeyToAlias.ContainsKey(option.Key);
+
             if (!string.IsNullOrEmpty(option.AdvancedAlias))
             {
                 if (!string.IsNullOrEmpty(option.AdvancedAliasArgsKey))
                 {
                     // 组合参数（滤镜）：本选项（类型）+ args 选项（参数）组合成一个 FFmpeg 参数
+                    _argsKeyToAlias[option.AdvancedAliasArgsKey] = option.AdvancedAlias;
                     var argsKey = option.AdvancedAliasArgsKey;
                     var filterGetter = getter;
                     var filterSetter = setter;
@@ -246,14 +252,25 @@ namespace UniversalConvert.App
                     _advancedAliasGetters[option.AdvancedAlias] = getter;
                 }
                 _advancedAliasOrder.Add(option.AdvancedAlias);
-                if (control is ComboBox comboAlias)
-                {
-                    comboAlias.SelectionChanged += (s, e) => OnBuiltInOptionChanged();
-                }
-                else if (control is TextBox tbAlias)
-                {
-                    tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
-                }
+                AttachBuiltInChanged(control);
+            }
+            else if (isArgsOfComposite)
+            {
+                // args 选项本身无 alias，但被组合参数引用——修改参数也要触发「内置→高级参数」同步
+                AttachBuiltInChanged(control);
+            }
+        }
+
+        /// <summary>给控件挂「内置选项变化 → 反向同步到高级参数框」的事件。</summary>
+        private void AttachBuiltInChanged(FrameworkElement control)
+        {
+            if (control is ComboBox comboAlias)
+            {
+                comboAlias.SelectionChanged += (s, e) => OnBuiltInOptionChanged();
+            }
+            else if (control is TextBox tbAlias)
+            {
+                tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
             }
         }
 

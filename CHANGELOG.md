@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.5] - 2026-09-06
+
+### 修复 / Fixed
+- 滤镜「参数」输入框修改后现在也能立即同步到高级参数框（此前只有改滤镜类型才触发同步）
+  - Editing a filter's args box now also syncs to the advanced-args box immediately (previously only changing the filter type did)
+
 ## [2.7.1-dev.4] - 2026-09-06
 
 ### 修复 / Fixed
