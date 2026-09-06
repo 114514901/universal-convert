@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.6.0-dev.7] - 2026-09-05
+
+### 改进 / Improved
+- 预览启动提速：应用启动空闲时预热媒体管线（Media Foundation），内置音/视频预览首次打开不再卡顿
+  - Warm up the Media Foundation pipeline at app idle after startup, so the first built-in audio/video preview opens without a hitch
+- 图片预览大图解码改后台线程，不再阻塞界面
+  - Large-image decoding in the image preview now runs on a background thread, keeping the UI responsive
+
 ## [2.6.0-dev.6] - 2026-09-05
 
 ### 修复 / Fixed

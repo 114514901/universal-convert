@@ -91,6 +91,9 @@ namespace UniversalConvert.App
                 MainWindow = main;
                 main.Show();
 
+                // 空闲时预热媒体管线：把「第一次点预览」的冷启动成本提前到应用启动后
+                SchedulePreviewWarmup();
+
                 // 扩展更新/卸载在重启时未能应用（文件仍被占用，如资源管理器锁着右键菜单加载的插件 DLL）：
                 // 明确提示，避免用户以为没更新
                 if (ExtensionCenter.HasPendingUpdates() || ExtensionCenter.HasPendingUninstalls())
@@ -436,6 +439,37 @@ namespace UniversalConvert.App
             catch
             {
                 // 忽略资源切换失败
+            }
+        }
+
+        /// <summary>应用空闲时预热媒体管线（内置音视频预览依赖的 Windows Media Foundation）。</summary>
+        private static void SchedulePreviewWarmup()
+        {
+            try
+            {
+                Dispatcher.CurrentDispatcher.BeginInvoke(
+                    new Action(WarmupMediaFoundation),
+                    DispatcherPriority.ApplicationIdle);
+            }
+            catch
+            {
+                // 忽略预热调度失败
+            }
+        }
+
+        /// <summary>预热 MediaPlayer：首次 new + Open 会加载 mfplat.dll 与核心 MF 栈，
+        /// 把「第一次点预览」的冷启动成本提前到应用启动后的空闲期（预览窗口秒开）。</summary>
+        private static void WarmupMediaFoundation()
+        {
+            try
+            {
+                var p = new MediaPlayer();
+                try { p.Open(new Uri("file:///__uc_warmup__.wav", UriKind.Absolute)); } catch { }
+                p.Close();
+            }
+            catch
+            {
+                // 预热失败不影响正常使用（首次预览时仍会自行初始化）
             }
         }
     }

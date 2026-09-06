@@ -43,7 +43,8 @@ namespace UniversalConvert.App
         {
             StatusText.Text = Strings.PreviewLoading;
 
-            BitmapImage bitmap = TryLoadDirect(_filePath);
+            // 大图 WPF 解码较慢，放后台线程避免卡 UI（TryLoadDirect 结果已 Freeze，跨线程安全）
+            BitmapImage bitmap = await Task.Run(() => TryLoadDirect(_filePath));
             if (bitmap == null)
             {
                 bitmap = await TryLoadViaFfmpegAsync();
