@@ -297,7 +297,7 @@ namespace UniversalConvert.Plugin.FFmpeg
 
         // ---- 参数/预设构造辅助 ----
 
-        private static OptionDefinition EnumOption(string key, string label, string defaultValue, string alias = null, string argsKey = null, params OptionChoice[] choices)
+        private static OptionDefinition EnumOption(string key, string label, string defaultValue, string alias = null, params OptionChoice[] choices)
         {
             return new OptionDefinition
             {
@@ -305,6 +305,20 @@ namespace UniversalConvert.Plugin.FFmpeg
                 Label = label,
                 Type = OptionType.Enum,
                 DefaultValue = defaultValue,
+                Choices = choices.ToList(),
+                AdvancedAlias = alias
+            };
+        }
+
+        /// <summary>滤镜选项：类型 + 参数（argsKey）组合成一个 FFmpeg 参数（-af/-vf）。</summary>
+        private static OptionDefinition FilterOption(string key, string label, string alias, string argsKey, params OptionChoice[] choices)
+        {
+            return new OptionDefinition
+            {
+                Key = key,
+                Label = label,
+                Type = OptionType.Enum,
+                DefaultValue = "",
                 Choices = choices.ToList(),
                 AdvancedAlias = alias,
                 AdvancedAliasArgsKey = argsKey
@@ -393,7 +407,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("48", "48 fps"),
                         Choice("60", "60 fps"),
                         Choice("120", "120 fps")),
-                    EnumOption("videoFilter", "@ParamVideoFilter", "", "-vf", "videoFilterArgs",
+                    FilterOption("videoFilter", "@ParamVideoFilter", "-vf", "videoFilterArgs",
                         Choice("", "@Original"),
                         Choice("scale", "@FilterScale"),
                         Choice("crop", "@FilterCrop"),
@@ -458,7 +472,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
                         Choice("96000", "96000 Hz")),
-                    EnumOption("audioFilter", "@ParamAudioFilter", "", "-af", "audioFilterArgs",
+                    FilterOption("audioFilter", "@ParamAudioFilter", "-af", "audioFilterArgs",
                         Choice("", "@Original"),
                         Choice("volume", "@FilterVolume"),
                         Choice("equalizer", "@FilterEqualizer"),
