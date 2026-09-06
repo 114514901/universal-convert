@@ -270,8 +270,35 @@ namespace UniversalConvert.App
             if (item == null || string.IsNullOrEmpty(item.OutputPath)) return;
             if (!File.Exists(item.OutputPath)) return;
 
-            var window = new AudioPlayerWindow(item.OutputPath, _host) { Owner = this };
-            window.Show();
+            var path = item.OutputPath;
+
+            // 与主窗口一致：扩展（VLC 等）优先，未接管回退内置
+            if (PreviewDispatcher.CanPreviewAudio(_host, path))
+            {
+                if (!PreviewDispatcher.TryAudioPreview(_host, path))
+                {
+                    new AudioPlayerWindow(path, _host) { Owner = this }.Show();
+                }
+            }
+            else if (PreviewDispatcher.CanPreviewVideo(path))
+            {
+                if (!PreviewDispatcher.TryVideoPreview(_host, path))
+                {
+                    new VideoPreviewWindow(path) { Owner = this }.Show();
+                }
+            }
+            else if (PreviewDispatcher.CanPreviewImage(path))
+            {
+                new ImagePreviewWindow(path) { Owner = this }.Show();
+            }
+            else if (PreviewDispatcher.CanPreviewText(path))
+            {
+                new TextPreviewWindow(path) { Owner = this }.Show();
+            }
+            else
+            {
+                try { Process.Start(path); } catch { }
+            }
         }
 
         private void OnPause(object sender, RoutedEventArgs e)

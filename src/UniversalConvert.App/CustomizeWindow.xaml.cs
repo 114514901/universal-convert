@@ -216,8 +216,35 @@ namespace UniversalConvert.App
             _getters[option.Key] = getter;
             if (!string.IsNullOrEmpty(option.AdvancedAlias))
             {
-                _advancedAliases[option.AdvancedAlias] = setter;
-                _advancedAliasGetters[option.AdvancedAlias] = getter;
+                if (!string.IsNullOrEmpty(option.AdvancedAliasArgsKey))
+                {
+                    // 组合参数（滤镜）：本选项（类型）+ args 选项（参数）组合成一个 FFmpeg 参数
+                    var argsKey = option.AdvancedAliasArgsKey;
+                    var filterGetter = getter;
+                    var filterSetter = setter;
+                    var filterChoices = option.Choices;
+
+                    Func<string> argsGetter = () =>
+                    {
+                        Func<string> ag;
+                        return _getters.TryGetValue(argsKey, out ag) ? ag() : string.Empty;
+                    };
+                    Action<string> argsSetter = v =>
+                    {
+                        Action<string> aset;
+                        if (_setters.TryGetValue(argsKey, out aset)) aset(v);
+                    };
+
+                    _advancedAliasGetters[option.AdvancedAlias] = () =>
+                        CombineFilterValue(filterGetter(), argsGetter());
+                    _advancedAliases[option.AdvancedAlias] = expr =>
+                        SplitFilterValue(expr, filterChoices, filterSetter, argsSetter);
+                }
+                else
+                {
+                    _advancedAliases[option.AdvancedAlias] = setter;
+                    _advancedAliasGetters[option.AdvancedAlias] = getter;
+                }
                 _advancedAliasOrder.Add(option.AdvancedAlias);
                 if (control is ComboBox comboAlias)
                 {
@@ -228,6 +255,35 @@ namespace UniversalConvert.App
                     tbAlias.TextChanged += (s, e) => OnBuiltInOptionChanged();
                 }
             }
+        }
+
+        /// <summary>组合滤镜值：类型 + 参数 → 完整 FFmpeg 表达式（custom 透传，无参数滤镜直接返回类型）。</summary>
+        private static string CombineFilterValue(string filter, string args)
+        {
+            if (string.IsNullOrEmpty(filter)) return string.Empty;
+            if (filter == "custom") return args ?? string.Empty;
+            if (string.IsNullOrEmpty(args)) return filter;
+            return filter + "=" + args;
+        }
+
+        /// <summary>拆分滤镜表达式：完整表达式 → 类型 + 参数（按 Choices 前缀匹配，未知走 custom）。</summary>
+        private static void SplitFilterValue(string expr, IList<OptionChoice> choices, Action<string> filterSetter, Action<string> argsSetter)
+        {
+            if (string.IsNullOrEmpty(expr)) { filterSetter(string.Empty); argsSetter(string.Empty); return; }
+            foreach (var choice in choices)
+            {
+                var v = choice.Value;
+                if (string.IsNullOrEmpty(v) || v == "custom") continue;
+                if (expr == v) { filterSetter(v); argsSetter(string.Empty); return; }
+                if (expr.StartsWith(v + "=", StringComparison.Ordinal))
+                {
+                    filterSetter(v);
+                    argsSetter(expr.Substring(v.Length + 1));
+                    return;
+                }
+            }
+            filterSetter("custom");
+            argsSetter(expr);
         }
 
         private void OnOptionManuallyChanged()

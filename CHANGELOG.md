@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.4] - 2026-09-06
+
+### 修复 / Fixed
+- 音频/视频滤镜现在能同步到高级参数框（「类型 + 参数」组合成 `-af`/`-vf` 表达式，反向也支持拆分回填）
+  - Audio/video filters now sync to the advanced-args box (type + args combine into `-af`/`-vf`, and the reverse splits back into the two controls)
+- 批量转换窗口双击结果项现在走「扩展优先」预览（VLC 等），不再直接弹内置播放器
+  - Double-clicking a batch result now previews via the extension first (VLC, etc.) instead of always opening the built-in player
+
 ## [2.7.1-dev.3] - 2026-09-06
 
 ### 改进 / Improved

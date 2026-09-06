@@ -53,6 +53,12 @@ namespace UniversalConvert.Core.Plugins
         /// </summary>
         public bool IsAdvancedEntry { get; set; }
 
+        /// <summary>
+        /// 组合参数：本选项与 ArgsKey 选项的值组合成一个 FFmpeg 参数（如滤镜「类型」+"="+「参数」→ -af expr）。
+        /// 设置后，联动时用组合后的完整表达式（如 "-af volume=2.0"），而不是本选项的原始值。
+        /// </summary>
+        public string AdvancedAliasArgsKey { get; set; }
+
         public OptionDefinition()
         {
             Choices = new List<OptionChoice>();

@@ -297,7 +297,7 @@ namespace UniversalConvert.Plugin.FFmpeg
 
         // ---- 参数/预设构造辅助 ----
 
-        private static OptionDefinition EnumOption(string key, string label, string defaultValue, string alias = null, params OptionChoice[] choices)
+        private static OptionDefinition EnumOption(string key, string label, string defaultValue, string alias = null, string argsKey = null, params OptionChoice[] choices)
         {
             return new OptionDefinition
             {
@@ -306,7 +306,8 @@ namespace UniversalConvert.Plugin.FFmpeg
                 Type = OptionType.Enum,
                 DefaultValue = defaultValue,
                 Choices = choices.ToList(),
-                AdvancedAlias = alias
+                AdvancedAlias = alias,
+                AdvancedAliasArgsKey = argsKey
             };
         }
 
@@ -392,7 +393,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("48", "48 fps"),
                         Choice("60", "60 fps"),
                         Choice("120", "120 fps")),
-                    EnumOption("videoFilter", "@ParamVideoFilter", "", null,
+                    EnumOption("videoFilter", "@ParamVideoFilter", "", "-vf", "videoFilterArgs",
                         Choice("", "@Original"),
                         Choice("scale", "@FilterScale"),
                         Choice("crop", "@FilterCrop"),
@@ -457,7 +458,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
                         Choice("96000", "96000 Hz")),
-                    EnumOption("audioFilter", "@ParamAudioFilter", "", null,
+                    EnumOption("audioFilter", "@ParamAudioFilter", "", "-af", "audioFilterArgs",
                         Choice("", "@Original"),
                         Choice("volume", "@FilterVolume"),
                         Choice("equalizer", "@FilterEqualizer"),
