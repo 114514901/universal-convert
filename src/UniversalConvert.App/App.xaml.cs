@@ -229,6 +229,10 @@ namespace UniversalConvert.App
             var config = new ConfigStore().Load();
             ApplyLanguage(GetConfigValue(config, "language"));
 
+            // 报告模式不读主题设置、跟随系统；但须应用主题动态资源（AppBackgroundBrush 等），
+            // 否则系统深色下窗口背景仍是默认浅色、文字变白，白字白底看不清
+            ApplyAppTheme(null);
+
             var logsDir = string.IsNullOrEmpty(parsed.ReportDir)
                 ? Path.Combine(ConfigStore.ConfigDirectory, "logs")
                 : parsed.ReportDir;

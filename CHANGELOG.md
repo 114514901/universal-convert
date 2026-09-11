@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.6] - 2026-09-11
+
+### 修复 / Fixed
+- 看护进程拉起的崩溃/卡死报告窗口在系统深色下背景仍是默认浅色、白字看不清——报告模式现在应用「跟随系统」主题资源
+  - The crash/hang report window (launched by the watchdog) had a light background under dark system theme making white text unreadable — report mode now applies the follow-system theme resources
+
 ## [2.7.1-dev.5] - 2026-09-06
 
 ### 修复 / Fixed
