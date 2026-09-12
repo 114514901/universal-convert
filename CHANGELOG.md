@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.1] - 2026-09-12
+
+### 修复 / Fixed
+- 内置视频预览：进度条 seek 改为全程播放态（不再临时暂停），修复长按后「过去一瞬间又弹回原位继续播」的问题；同时补了诊断日志
+  - Built-in video preview: seeking now always happens in the playing state (no temporary pause), fixing the "jumps over then snaps back" behavior after a long press; diagnostic logging added
+
 ## [2.7.1-dev.9] - 2026-09-12
 
 ### 新增 / Added

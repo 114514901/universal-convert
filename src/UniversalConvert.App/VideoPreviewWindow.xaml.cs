@@ -290,17 +290,12 @@ namespace UniversalConvert.App
 
         private bool _wasPlayingBeforeSeek;
 
-        // 拖拽进度条期间临时暂停（避免反复 seek 产生噪声/杂音），松手恢复原播放状态
+        // 按下进度条：不暂停——暂停态设置的 Position 会被随后的恢复播放重置，
+        // 长按后表现为「过去一瞬间又弹回原位置继续播」。全程播放态 seek。
         private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _seeking = true;
             _wasPlayingBeforeSeek = _playing;
-            if (_playing)
-            {
-                Video.Pause();
-                _playing = false;
-                PlayPauseButton.Content = Strings.Play;
-            }
             UpdateSeekTooltip(e);
         }
 
@@ -311,20 +306,13 @@ namespace UniversalConvert.App
             PreviewFrameImage.Visibility = Visibility.Collapsed;
             SeekTooltip.IsOpen = false;
 
-            if (_wasPlayingBeforeSeek)
-            {
-                // 先恢复播放再设 Position：MediaElement 暂停态设置的 Position 会被随后的
-                // Play 重置回暂停前位置，表现为「过去一瞬间又弹回原位置继续播」
-                Video.Play();
-                _playing = true;
-                PlayPauseButton.Content = Strings.Pause;
-            }
-
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
             }
             UpdateTimeText();
+            UniversalConvert.Core.Diagnostics.Log.Info(
+                $"进度条松开: slider={ProgressSlider.Value:0.###}s, position={Video.Position.TotalSeconds:0.###}s");
         }
 
         /// <summary>拖动进度条时在鼠标上方显示该位置时长。</summary>
