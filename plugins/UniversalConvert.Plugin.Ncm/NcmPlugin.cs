@@ -33,7 +33,7 @@ namespace UniversalConvert.Plugin.Ncm
         public string Id => "com.universalconvert.ncm";
         public string Name => "NCM 解密";
         public string Description => "网易云音乐 .ncm 解密（可选转码为其它音频格式）";
-        public string Version => "1.0.0";
+        public string Version => "1.1.0";
         public string MinAppVersion => null;
         public string MaxAppVersion => null;
 
@@ -48,7 +48,8 @@ namespace UniversalConvert.Plugin.Ncm
             try
             {
                 var temp = Path.Combine(Path.GetTempPath(), "uc_prev_" + Guid.NewGuid().ToString("N"));
-                var fmt = DecryptTo(inputPath, temp, null, cancellationToken);
+                byte[] coverData;
+                var fmt = DecryptTo(inputPath, temp, null, cancellationToken, out coverData);
                 if (string.IsNullOrEmpty(fmt) || !File.Exists(temp))
                 {
                     TryDelete(temp);
@@ -56,6 +57,17 @@ namespace UniversalConvert.Plugin.Ncm
                 }
                 var final = temp + "." + fmt.TrimStart('.');
                 File.Move(temp, final);
+
+                // 有内嵌封面且目标格式支持：用 FFmpeg 封装补上封面，播放器预览时能显示
+                if (coverData != null && coverData.Length > 0 && SupportsCoverArt(fmt))
+                {
+                    var withCover = TryAttachCover(final, fmt, coverData);
+                    if (!string.IsNullOrEmpty(withCover))
+                    {
+                        TryDelete(final);
+                        return withCover;
+                    }
+                }
                 return final;
             }
             catch
@@ -124,13 +136,14 @@ namespace UniversalConvert.Plugin.Ncm
             var targetExt = NormalizeExt(request.OutputExtension);
             if (string.IsNullOrEmpty(targetExt)) targetExt = "mp3";
 
-            // 先解密到临时文件，得到原格式
+            // 先解密到临时文件，得到原格式 + 内嵌封面
             var tempPath = Path.Combine(Path.GetTempPath(), "uc_ncm_" + Guid.NewGuid().ToString("N") + ".tmp");
             string originalFormat;
+            byte[] coverData;
 
             try
             {
-                originalFormat = DecryptTo(input, tempPath, progress, ct);
+                originalFormat = DecryptTo(input, tempPath, progress, ct, out coverData);
             }
             catch
             {
@@ -139,31 +152,47 @@ namespace UniversalConvert.Plugin.Ncm
             }
 
             var outputPath = ResolveOutputPath(request, targetExt);
+            var sameFormat = string.Equals(originalFormat, targetExt, StringComparison.OrdinalIgnoreCase);
+            var wantCover = !IsOptionTrue(request.Options, "noCoverArt")
+                && coverData != null && coverData.Length > 0
+                && SupportsCoverArt(targetExt);
 
+            string coverPath = null;
             try
             {
-                if (string.Equals(originalFormat, targetExt, StringComparison.OrdinalIgnoreCase))
+                if (wantCover)
                 {
-                    // 目标就是原格式：直接拷贝
+                    coverPath = WriteTempCover(coverData);
+                }
+
+                if (sameFormat && coverPath == null)
+                {
+                    // 目标就是原格式且不带封面：直接拷贝（最快且无损）
                     progress?.Report(new ConversionProgress(ConversionStage.Finalizing, 100, "写入输出..."));
                     File.Copy(tempPath, outputPath, true);
+                    return outputPath;
                 }
-                else
+
+                // 需要转码，或需要重新封装以附加封面
+                var ffmpeg = _context?.FindTool("ffmpeg");
+                if (string.IsNullOrEmpty(ffmpeg))
                 {
-                    // 需要转码
-                    var ffmpeg = _context?.FindTool("ffmpeg");
-                    if (string.IsNullOrEmpty(ffmpeg))
+                    if (sameFormat)
                     {
-                        throw new InvalidOperationException("转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
+                        // 同格式但缺 FFmpeg：退化为直接拷贝（丢封面）
+                        progress?.Report(new ConversionProgress(ConversionStage.Finalizing, 100, "写入输出（未能附加封面）..."));
+                        File.Copy(tempPath, outputPath, true);
+                        return outputPath;
                     }
+                    throw new InvalidOperationException("转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
+                }
 
-                    progress?.Report(new ConversionProgress(ConversionStage.Running, -1, "转码中..."));
-                    var run = ProcessRunner.Run(ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options), ct);
+                progress?.Report(new ConversionProgress(ConversionStage.Running, -1, sameFormat ? "写入输出..." : "转码中..."));
+                var run = ProcessRunner.Run(ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options, coverPath, sameFormat), ct);
 
-                    if (run.ExitCode != 0)
-                    {
-                        throw new InvalidOperationException("FFmpeg 转码失败（错误码 " + run.ExitCode + "）：" + (run.StandardError ?? string.Empty));
-                    }
+                if (run.ExitCode != 0)
+                {
+                    throw new InvalidOperationException("FFmpeg 处理失败（错误码 " + run.ExitCode + "）：" + (run.StandardError ?? string.Empty));
                 }
 
                 return outputPath;
@@ -171,11 +200,13 @@ namespace UniversalConvert.Plugin.Ncm
             finally
             {
                 TryDelete(tempPath);
+                if (coverPath != null) TryDelete(coverPath);
             }
         }
 
-        private string DecryptTo(string input, string outputPath, IProgress<ConversionProgress> progress, CancellationToken ct)
+        private string DecryptTo(string input, string outputPath, IProgress<ConversionProgress> progress, CancellationToken ct, out byte[] coverData)
         {
+            coverData = null;
             progress?.Report(new ConversionProgress(ConversionStage.Starting, 0, "解析 NCM 文件..."));
 
             using (var fs = new FileStream(input, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -222,8 +253,9 @@ namespace UniversalConvert.Plugin.Ncm
                 // 3. 跳过 CRC 等无用字节
                 reader.ReadBytes(9);
 
-                // 4. 封面块（暂不写入）
-                ReadChunk(reader);
+                // 4. 封面块：提取内嵌封面图片（JPEG/PNG），供输出时附加（不再丢弃）
+                var imageChunk = ReadChunk(reader);
+                if (imageChunk != null && imageChunk.Length > 0) coverData = imageChunk;
 
                 // 5. RC4 密钥盒
                 var keyBox = BuildKeyBox(rc4Key);
@@ -275,24 +307,114 @@ namespace UniversalConvert.Plugin.Ncm
             return Path.Combine(inputDir ?? string.Empty, inputName + "." + targetExt);
         }
 
-        private static string BuildFfmpegArgs(string input, string output, IDictionary<string, string> options)
+        private static string BuildFfmpegArgs(string input, string output, IDictionary<string, string> options,
+            string coverPath, bool copyAudio)
         {
             var sb = new StringBuilder();
             sb.Append("-y -hide_banner -loglevel error -i ").Append(ProcessRunner.Quote(input));
-            sb.Append(" -vn");
 
-            string value;
-            if (options != null && options.TryGetValue("audioBitrate", out value) && !string.IsNullOrEmpty(value))
+            if (!string.IsNullOrEmpty(coverPath))
             {
-                sb.Append(" -b:a ").Append(value);
+                // 附加封面（attached pic）：JPEG 原样拷贝，其它（PNG 等）转 mjpeg 以兼容容器
+                sb.Append(" -i ").Append(ProcessRunner.Quote(coverPath));
+                sb.Append(" -map 0:a -map 1:v");
+                sb.Append(IsJpeg(coverPath) ? " -c:v copy" : " -c:v mjpeg");
+                sb.Append(" -disposition:v attached_pic");
             }
-            if (options != null && options.TryGetValue("sampleRate", out value) && !string.IsNullOrEmpty(value))
+            else
             {
-                sb.Append(" -ar ").Append(value);
+                sb.Append(" -vn");
+            }
+
+            if (copyAudio)
+            {
+                // 同格式：音频不重编码（只重新封装）
+                sb.Append(" -c:a copy");
+            }
+            else
+            {
+                string value;
+                if (options != null && options.TryGetValue("audioBitrate", out value) && !string.IsNullOrEmpty(value))
+                {
+                    sb.Append(" -b:a ").Append(value);
+                }
+                if (options != null && options.TryGetValue("sampleRate", out value) && !string.IsNullOrEmpty(value))
+                {
+                    sb.Append(" -ar ").Append(value);
+                }
             }
 
             sb.Append(' ').Append(ProcessRunner.Quote(output));
             return sb.ToString();
+        }
+
+        /// <summary>目标音频容器是否支持内嵌封面（attached pic）：mp3/m4a/flac 支持。</summary>
+        private static bool SupportsCoverArt(string ext)
+        {
+            if (string.IsNullOrEmpty(ext)) return false;
+            var e = ext.StartsWith(".") ? ext : "." + ext;
+            return e.Equals(".mp3", StringComparison.OrdinalIgnoreCase)
+                || e.Equals(".m4a", StringComparison.OrdinalIgnoreCase)
+                || e.Equals(".flac", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsOptionTrue(IDictionary<string, string> options, string key)
+        {
+            string v;
+            return options != null && options.TryGetValue(key, out v)
+                && string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsJpeg(string path)
+        {
+            return path != null && path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>把封面字节写成临时文件（按魔数决定扩展名）；失败返回 null。</summary>
+        private static string WriteTempCover(byte[] coverData)
+        {
+            if (coverData == null || coverData.Length < 4) return null;
+            try
+            {
+                var jpeg = coverData[0] == 0xFF && coverData[1] == 0xD8;
+                var path = Path.Combine(Path.GetTempPath(),
+                    "uc_ncm_cover_" + Guid.NewGuid().ToString("N") + (jpeg ? ".jpg" : ".png"));
+                File.WriteAllBytes(path, coverData);
+                return path;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>用 FFmpeg 把封面附加到音频文件（音频不重编码）。成功返回新文件路径，失败返回 null。</summary>
+        private string TryAttachCover(string audioPath, string format, byte[] coverData)
+        {
+            var ffmpeg = _context?.FindTool("ffmpeg");
+            if (string.IsNullOrEmpty(ffmpeg)) return null;
+
+            var coverPath = WriteTempCover(coverData);
+            if (string.IsNullOrEmpty(coverPath)) return null;
+
+            var outPath = audioPath + ".cov." + format.TrimStart('.');
+            try
+            {
+                var args = BuildFfmpegArgs(audioPath, outPath, null, coverPath, copyAudio: true);
+                var run = ProcessRunner.Run(ffmpeg, args, CancellationToken.None);
+                if (run.ExitCode == 0 && File.Exists(outPath)) return outPath;
+                TryDelete(outPath);
+                return null;
+            }
+            catch
+            {
+                TryDelete(outPath);
+                return null;
+            }
+            finally
+            {
+                TryDelete(coverPath);
+            }
         }
 
         private static string NormalizeExt(string extension)
@@ -383,7 +505,8 @@ namespace UniversalConvert.Plugin.Ncm
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
-                        Choice("96000", "96000 Hz"))
+                        Choice("96000", "96000 Hz")),
+                    BoolOption("noCoverArt", "不转换封面")
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -403,6 +526,17 @@ namespace UniversalConvert.Plugin.Ncm
                 Type = OptionType.Enum,
                 DefaultValue = defaultValue,
                 Choices = choices.ToList()
+            };
+        }
+
+        private static OptionDefinition BoolOption(string key, string label, bool defaultValue = false)
+        {
+            return new OptionDefinition
+            {
+                Key = key,
+                Label = label,
+                Type = OptionType.Bool,
+                DefaultValue = defaultValue ? "true" : "false"
             };
         }
 

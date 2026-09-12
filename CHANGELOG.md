@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.7] - 2026-09-12
+
+### 新增 / Added
+- **NCM 解密封面**：解密时提取内嵌封面，输出 mp3/m4a/flac 时自动附加（预览也能显示封面）；新增「不转换封面」勾选框
+  - **NCM cover art**: the embedded cover is now extracted and attached on output for mp3/m4a/flac (preview shows it too); added a "No cover art" toggle
+
 ## [2.7.1-dev.6] - 2026-09-11
 
 ### 修复 / Fixed
