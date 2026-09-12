@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.8] - 2026-09-12
+
+### 修复 / Fixed
+- 内置视频预览：进度条「长按后回弹」——松开时改为先恢复播放再 seek（暂停态设置的位置会被随后的 Play 重置回原位）
+  - Built-in video preview: fixed progress-bar "snap back after long press" — resume playback before seeking (a paused-state seek gets reset by the following Play)
+
 ## [2.7.1-dev.7] - 2026-09-12
 
 ### 新增 / Added

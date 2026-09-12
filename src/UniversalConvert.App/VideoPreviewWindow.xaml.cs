@@ -310,15 +310,19 @@ namespace UniversalConvert.App
             _previewRequestId++;                 // 使进行中的抽帧请求作废
             PreviewFrameImage.Visibility = Visibility.Collapsed;
             SeekTooltip.IsOpen = false;
-            if (Video.NaturalDuration.HasTimeSpan)
-            {
-                Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
-            }
+
             if (_wasPlayingBeforeSeek)
             {
+                // 先恢复播放再设 Position：MediaElement 暂停态设置的 Position 会被随后的
+                // Play 重置回暂停前位置，表现为「过去一瞬间又弹回原位置继续播」
                 Video.Play();
                 _playing = true;
                 PlayPauseButton.Content = Strings.Pause;
+            }
+
+            if (Video.NaturalDuration.HasTimeSpan)
+            {
+                Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
             }
             UpdateTimeText();
         }
