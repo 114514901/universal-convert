@@ -576,6 +576,18 @@
   <data name="ClearLog" xml:space="preserve">
     <value>清理日志</value>
   </data>
+  <data name="PreviewCacheLabel" xml:space="preserve">
+    <value>预览渲染缓存</value>
+  </data>
+  <data name="ClearPreviewCache" xml:space="preserve">
+    <value>清理预览缓存</value>
+  </data>
+  <data name="PreviewCacheUsageFormat" xml:space="preserve">
+    <value>当前占用 {0:0.#} MB / {1} 个文件（退出时自动清空）</value>
+  </data>
+  <data name="PreviewCacheCleared" xml:space="preserve">
+    <value>预览渲染缓存已清理</value>
+  </data>
   <data name="CrashTest" xml:space="preserve">
     <value>测试崩溃报告</value>
   </data>

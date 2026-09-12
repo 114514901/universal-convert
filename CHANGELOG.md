@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.7.1-dev.9] - 2026-09-12
+
+### 新增 / Added
+- **预览渲染缓存**：MIDI 等渲染型预览的产物会缓存，同一文件重复预览不再重新渲染。会话级缓存（启动/退出自动清空），上限 5 个文件 / 3GB，超出按最旧淘汰；设置「高级」中可查看占用并手动清理
+  - **Preview render cache**: rendered previews (e.g. MIDI synthesis) are cached so re-previewing the same file skips re-rendering. Session-scoped (cleared on start/exit), capped at 5 files / 3GB with oldest-first eviction; usage stats and a manual clear button are in Settings → Advanced
+
 ## [2.7.1-dev.8] - 2026-09-12
 
 ### 修复 / Fixed

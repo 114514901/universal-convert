@@ -57,6 +57,7 @@ namespace UniversalConvert.App
                 if (group.Any(d => d.Category == "@SettingsCategoryAdvanced"))
                 {
                     panel.Children.Add(BuildAdvancedActions());
+                    panel.Children.Add(BuildCacheActions());
                 }
 
                 // 更新类别追加手动检查更新
@@ -335,6 +336,45 @@ namespace UniversalConvert.App
             _manager.Save();
             MessageBox.Show(Strings.FormatChoicesCleared, "UniversalConvert",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>预览渲染缓存的管理区块：显示占用 + 一键清理。</summary>
+        private FrameworkElement BuildCacheActions()
+        {
+            var panel = new StackPanel { Margin = new Thickness(0, 16, 0, 0) };
+
+            var title = new TextBlock { Text = Strings.PreviewCacheLabel, FontWeight = FontWeights.SemiBold };
+            panel.Children.Add(title);
+
+            var usage = new TextBlock { Margin = new Thickness(0, 4, 0, 8) };
+            usage.SetResourceReference(TextBlock.ForegroundProperty, "SecondaryTextBrush");
+            UpdateCacheUsageText(usage);
+            panel.Children.Add(usage);
+
+            var clear = new Button
+            {
+                Content = Strings.ClearPreviewCache,
+                Padding = new Thickness(16, 6, 16, 6),
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+            clear.Click += (s, e) =>
+            {
+                PreviewRenderCache.Clear();
+                UpdateCacheUsageText(usage);
+                MessageBox.Show(Strings.PreviewCacheCleared, "UniversalConvert",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            };
+            panel.Children.Add(clear);
+
+            return panel;
+        }
+
+        private static void UpdateCacheUsageText(TextBlock target)
+        {
+            long bytes;
+            int files;
+            PreviewRenderCache.GetStats(out bytes, out files);
+            target.Text = string.Format(Strings.PreviewCacheUsageFormat, bytes / 1024.0 / 1024.0, files);
         }
 
         private void OnViewLog(object sender, RoutedEventArgs e)

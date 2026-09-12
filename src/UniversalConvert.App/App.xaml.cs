@@ -22,6 +22,13 @@ namespace UniversalConvert.App
         private SettingsManager _settingsManager;
         private EventWaitHandle _exitSignal;
 
+        /// <summary>退出时清空会话级预览渲染缓存（崩溃/强杀时会漏掉，由下次启动清理兜底）。</summary>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            PreviewRenderCache.Clear();
+            base.OnExit(e);
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -41,6 +48,9 @@ namespace UniversalConvert.App
             }
 
             CleanupStaleInstallerPackages();
+
+            // 预览渲染缓存是会话级的：启动时清空，兼作上次崩溃/强杀残留的兜底
+            PreviewRenderCache.Clear();
 
             var config = new ConfigStore().Load();
             config.InstallDirectory = AppDomain.CurrentDomain.BaseDirectory;

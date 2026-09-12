@@ -177,6 +177,10 @@ namespace UniversalConvert.App.Localization
         public static string LoadExtensionsFailed => Get("LoadExtensionsFailed");
         public static string ViewLog => Get("ViewLog");
         public static string ClearLog => Get("ClearLog");
+        public static string PreviewCacheLabel => Get("PreviewCacheLabel");
+        public static string ClearPreviewCache => Get("ClearPreviewCache");
+        public static string PreviewCacheUsageFormat => Get("PreviewCacheUsageFormat");
+        public static string PreviewCacheCleared => Get("PreviewCacheCleared");
         public static string CrashTest => Get("CrashTest");
         public static string LogCleared => Get("LogCleared");
         public static string LogViewerTitle => Get("LogViewerTitle");

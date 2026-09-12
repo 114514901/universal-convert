@@ -576,6 +576,18 @@
   <data name="ClearLog" xml:space="preserve">
     <value>Clear logs</value>
   </data>
+  <data name="PreviewCacheLabel" xml:space="preserve">
+    <value>Preview render cache</value>
+  </data>
+  <data name="ClearPreviewCache" xml:space="preserve">
+    <value>Clear preview cache</value>
+  </data>
+  <data name="PreviewCacheUsageFormat" xml:space="preserve">
+    <value>Using {0:0.#} MB in {1} file(s) — cleared automatically on exit</value>
+  </data>
+  <data name="PreviewCacheCleared" xml:space="preserve">
+    <value>Preview render cache cleared</value>
+  </data>
   <data name="CrashTest" xml:space="preserve">
     <value>Test crash reporter</value>
   </data>

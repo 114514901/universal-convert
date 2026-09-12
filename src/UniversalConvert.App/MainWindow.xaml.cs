@@ -283,7 +283,8 @@ namespace UniversalConvert.App
                     busy.Show();
                     try
                     {
-                        renderTemp = await renderProvider.RenderPreviewAsync(path, CancellationToken.None);
+                        // 走渲染缓存：同一文件重复预览不再重新渲染（如 MIDI 合成）
+                        renderTemp = await PreviewRenderCache.GetOrRenderAsync(renderProvider, path, CancellationToken.None);
                         if (!string.IsNullOrEmpty(renderTemp) && File.Exists(renderTemp))
                         {
                             // 渲染产物改名为「原文件名+新扩展名」，让播放器标题可读
