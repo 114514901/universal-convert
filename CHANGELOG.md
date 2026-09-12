@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.2] - 2026-09-12
+
+### 修复 / Fixed
+- 内置视频预览：进度条长按回弹——保留拖动时的暂停（避免 seek 噪声），改为「恢复播放后延时补一次定位」（Play 异步生效，立即设 Position 会被重置）
+  - Built-in video preview: fixed the progress-bar snap-back after a long press — the drag-time pause is kept (avoiding seek noise), and the seek is now re-applied shortly after playback resumes (Play is async, an immediate Position set gets reset)
+
 ## [2.8.0-dev.1] - 2026-09-12
 
 ### 修复 / Fixed

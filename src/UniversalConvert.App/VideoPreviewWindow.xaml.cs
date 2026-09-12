@@ -22,6 +22,8 @@ namespace UniversalConvert.App
         private readonly DispatcherTimer _clickTimer = new DispatcherTimer();
         private bool _pendingClick;
         private int _pendingSeekSeconds;
+        private DispatcherTimer _pendingSeekTimer;
+        private TimeSpan _pendingSeekTarget;
 
         public VideoPreviewWindow(string filePath)
         {
@@ -290,12 +292,17 @@ namespace UniversalConvert.App
 
         private bool _wasPlayingBeforeSeek;
 
-        // 按下进度条：不暂停——暂停态设置的 Position 会被随后的恢复播放重置，
-        // 长按后表现为「过去一瞬间又弹回原位置继续播」。全程播放态 seek。
+        // 拖动期间临时暂停（避免反复 seek 产生噪声/杂音），松手时恢复并补一次定位
         private void OnProgressPreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _seeking = true;
             _wasPlayingBeforeSeek = _playing;
+            if (_playing)
+            {
+                Video.Pause();
+                _playing = false;
+                PlayPauseButton.Content = Strings.Play;
+            }
             UpdateSeekTooltip(e);
         }
 
@@ -306,13 +313,56 @@ namespace UniversalConvert.App
             PreviewFrameImage.Visibility = Visibility.Collapsed;
             SeekTooltip.IsOpen = false;
 
-            if (Video.NaturalDuration.HasTimeSpan)
+            var target = TimeSpan.FromSeconds(ProgressSlider.Value);
+
+            if (_wasPlayingBeforeSeek)
             {
-                Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
+                // MediaElement.Play() 是异步的：这里立即设 Position 会被「恢复播放」重置回
+                // 暂停前位置（长按后「过去一瞬间又弹回原位」）。先恢复播放，稍后补一次定位。
+                Video.Play();
+                _playing = true;
+                PlayPauseButton.Content = Strings.Pause;
+                SchedulePendingSeek(target);
+                UniversalConvert.Core.Diagnostics.Log.Info(
+                    $"进度条松开: 待补 Position slider={ProgressSlider.Value:0.###}s");
+            }
+            else
+            {
+                if (Video.NaturalDuration.HasTimeSpan)
+                {
+                    Video.Position = target;
+                }
+                UniversalConvert.Core.Diagnostics.Log.Info(
+                    $"进度条松开: 暂停态直接设 Position slider={ProgressSlider.Value:0.###}s");
             }
             UpdateTimeText();
-            UniversalConvert.Core.Diagnostics.Log.Info(
-                $"进度条松开: slider={ProgressSlider.Value:0.###}s, position={Video.Position.TotalSeconds:0.###}s");
+        }
+
+        /// <summary>恢复播放后延时补一次定位：MediaElement.Play() 异步生效，立即设 Position 会被重置。</summary>
+        private void SchedulePendingSeek(TimeSpan target)
+        {
+            if (_pendingSeekTimer == null)
+            {
+                _pendingSeekTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
+                _pendingSeekTimer.Tick += (s, e) =>
+                {
+                    _pendingSeekTimer.Stop();
+                    try
+                    {
+                        Video.Position = _pendingSeekTarget;
+                        UniversalConvert.Core.Diagnostics.Log.Info(
+                            $"补 Position 完成: {_pendingSeekTarget.TotalSeconds:0.###}s");
+                    }
+                    catch
+                    {
+                        // 窗口可能已关闭
+                    }
+                };
+            }
+
+            _pendingSeekTarget = target;
+            _pendingSeekTimer.Stop();
+            _pendingSeekTimer.Start();
         }
 
         /// <summary>拖动进度条时在鼠标上方显示该位置时长。</summary>
@@ -486,6 +536,7 @@ namespace UniversalConvert.App
         private void OnClosed(object sender, EventArgs e)
         {
             _timer.Stop();
+            if (_pendingSeekTimer != null) _pendingSeekTimer.Stop();
             // 终止进行中的转码进程并清理临时文件
             try
             {
