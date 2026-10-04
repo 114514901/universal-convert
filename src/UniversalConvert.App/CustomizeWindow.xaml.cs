@@ -183,11 +183,22 @@ namespace UniversalConvert.App
                         };
                         getter2 = () =>
                         {
-                            if (typedText != null) return typedText;
-                            // 直接用 SelectedItem 的 Value（FFmpeg 格式，如 "128k"），
-                            // 避免 combo.Text 在 SelectionChanged 时仍是旧值导致错位（选 128 却回填 96）
-                            var selected = combo.SelectedItem as OptionChoice;
-                            return selected != null ? selected.Value : (combo.Text ?? string.Empty);
+                            string raw;
+                            if (typedText != null)
+                            {
+                                raw = typedText;      // 手输优先
+                            }
+                            else
+                            {
+                                // 用 SelectedItem 的 Value（FFmpeg 格式，如 "128k"），避免 combo.Text
+                                // 在 SelectionChanged 时仍是旧值导致错位（选 128 却回填 96）
+                                var selected = combo.SelectedItem as OptionChoice;
+                                raw = selected != null ? selected.Value : (combo.Text ?? string.Empty);
+                            }
+
+                            // 单位归一化：手输 "24 kbps" / "44.1 kHz" 这类可读写法要转成工具要求的
+                            // "24k" / "44100"，否则会原样漏进高级参数框（-b:a 24 kbps 是错的）
+                            return ValueUnits.Normalize(raw, option.UnitKind);
                         };
                         combo.SelectionChanged += (s, e) =>
                         {

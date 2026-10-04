@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.5] - 2026-10-04
+
+### 修复 / Fixed
+- 手输参数没做单位归一化：在「音频码率」等输入框里写可读写法（如 `24 kbps`）会**原样**进入高级参数框，得到错误的 `-b:a 24 kbps`。现在取值时按选项声明的单位类型归一化（`24 kbps` → `24k`、`44.1 kHz` → `44100`）；归一化逻辑从 FFmpeg 插件提到 Core 的 `ValueUnits`，UI 与命令行共用同一份实现
+  - Typed values are now unit-normalized: a human-readable form (e.g. `24 kbps`) used to land verbatim in the advanced-args box as the invalid `-b:a 24 kbps`. Values are now normalized per the option's declared unit kind (`24 kbps` → `24k`, `44.1 kHz` → `44100`), with the logic lifted into Core's `ValueUnits` so the UI and command line share one implementation
+
 ## [2.8.0-dev.4] - 2026-10-04
 
 ### 修复 / Fixed

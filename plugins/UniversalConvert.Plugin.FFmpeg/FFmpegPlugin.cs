@@ -130,11 +130,11 @@ namespace UniversalConvert.Plugin.FFmpeg
             if (TryGet(request.Options, "videoCodec", out value))
                 sb.Append(" -c:v ").Append(value);
             if (TryGet(request.Options, "videoBitrate", out value))
-                sb.Append(" -b:v ").Append(NormalizeBitrate(value));
+                sb.Append(" -b:v ").Append(ValueUnits.NormalizeBitrate(value));
             if (TryGet(request.Options, "audioBitrate", out value))
-                sb.Append(" -b:a ").Append(NormalizeBitrate(value));
+                sb.Append(" -b:a ").Append(ValueUnits.NormalizeBitrate(value));
             if (TryGet(request.Options, "sampleRate", out value))
-                sb.Append(" -ar ").Append(NormalizeSampleRate(value));
+                sb.Append(" -ar ").Append(ValueUnits.NormalizeSampleRate(value));
             if (TryGet(request.Options, "fps", out value))
                 sb.Append(" -r ").Append(value);
             if (TryGet(request.Options, "scale", out value))
@@ -192,33 +192,6 @@ namespace UniversalConvert.Plugin.FFmpeg
         /// 归一化码率参数：预设显示可读单位（如 "320 kbps"），用户自定义可能照抄带单位；
         /// FFmpeg 实际需要 "320k"。提取数字补 "k"；无法识别则原样返回（由 FFmpeg 报错提示）。
         /// </summary>
-        private static string NormalizeBitrate(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return value;
-            var m = System.Text.RegularExpressions.Regex.Match(value.Trim(), @"(\d+(?:\.\d+)?)");
-            if (!m.Success) return value;
-            return m.Groups[1].Value + "k";
-        }
-
-        /// <summary>
-        /// 归一化采样率参数：预设显示 "44.1 kHz"，FFmpeg 需要 Hz（44100）。
-        /// 识别 "44.1 kHz" / "44.1k" / "44100" / "48k" → 转整数 Hz；无法识别则原样返回。
-        /// </summary>
-        private static string NormalizeSampleRate(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return value;
-            var m = System.Text.RegularExpressions.Regex.Match(
-                value.Trim(), @"(\d+(?:\.\d+)?)\s*(k|khz|hz)?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            if (!m.Success) return value;
-            double num;
-            if (!double.TryParse(m.Groups[1].Value,
-                    System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture, out num)) return value;
-            var unit = (m.Groups[2].Value ?? string.Empty).ToLowerInvariant();
-            if (unit.StartsWith("k")) num *= 1000.0; // kHz → Hz
-            return ((int)Math.Round(num)).ToString();
-        }
-
         /// <summary>视频滤镜 → FFmpeg -vf 表达式。custom 直接透传 args。</summary>
         private static string BuildVideoFilter(string filter, string args)
         {
@@ -325,6 +298,22 @@ namespace UniversalConvert.Plugin.FFmpeg
             };
         }
 
+        /// <summary>码率选项：值按 kbps 归一化（"500 kbps"/"500k" → "500k"）。</summary>
+        private static OptionDefinition BitrateOption(string key, string label, string defaultValue, string alias, params OptionChoice[] choices)
+        {
+            var option = EnumOption(key, label, defaultValue, alias, choices);
+            option.UnitKind = ValueUnitKind.Bitrate;
+            return option;
+        }
+
+        /// <summary>采样率选项：值归一化为 Hz 整数（"44.1 kHz"/"44.1k" → "44100"）。</summary>
+        private static OptionDefinition SampleRateOption(string key, string label, string defaultValue, string alias, params OptionChoice[] choices)
+        {
+            var option = EnumOption(key, label, defaultValue, alias, choices);
+            option.UnitKind = ValueUnitKind.SampleRate;
+            return option;
+        }
+
         private static OptionDefinition StringOption(string key, string label, string defaultValue, string alias = null, bool advancedEntry = false)
         {
             return new OptionDefinition
@@ -390,7 +379,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("1280:720", "720p (1280×720)"),
                         Choice("854:480", "480p (854×480)"),
                         Choice("640:360", "360p (640×360)")),
-                    EnumOption("videoBitrate", "@ParamVideoBitrate", "", "-b:v",
+                    BitrateOption("videoBitrate", "@ParamVideoBitrate", "", "-b:v",
                         Choice("", "@Original"),
                         Choice("500k", "500 kbps"),
                         Choice("1000k", "1000 kbps"),
@@ -458,7 +447,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                 DisplayName = ext.TrimStart('.').ToUpperInvariant(),
                 Options = new List<OptionDefinition>
                 {
-                    EnumOption("audioBitrate", "@ParamAudioBitrate", "192k", "-b:a",
+                    BitrateOption("audioBitrate", "@ParamAudioBitrate", "192k", "-b:a",
                         Choice("", "@Original"),
                         Choice("96k", "96 kbps"),
                         Choice("128k", "128 kbps"),
@@ -466,7 +455,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
                         Choice("320k", "320 kbps")),
-                    EnumOption("sampleRate", "@ParamSampleRate", "", "-ar",
+                    SampleRateOption("sampleRate", "@ParamSampleRate", "", "-ar",
                         Choice("", "@Original"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),

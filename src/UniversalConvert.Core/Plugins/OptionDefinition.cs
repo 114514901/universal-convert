@@ -59,6 +59,12 @@ namespace UniversalConvert.Core.Plugins
         /// </summary>
         public string AdvancedAliasArgsKey { get; set; }
 
+        /// <summary>
+        /// 值的单位类型：取值时按它归一化（如 "24 kbps" → "24k"、"44.1 kHz" → "44100"），
+        /// 保证高级参数框和命令行拿到的都是工具要求的写法。
+        /// </summary>
+        public ValueUnitKind UnitKind { get; set; }
+
         public OptionDefinition()
         {
             Choices = new List<OptionChoice>();
