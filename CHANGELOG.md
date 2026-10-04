@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.4] - 2026-10-04
+
+### 修复 / Fixed
+- **同类问题系统排查**：上版只修了报告的那一处，本次把两处同类缺陷补全——
+  - 设置窗口的可编辑下拉存在与自定义窗口**完全相同**的取值错位 / 手输丢失问题（选中项刚变时按旧文本取值，可能把设置存成旧值），已按同款方案修复
+  - 输出撞输入的保护统一提取到 Core 的 `OutputPathHelper`，NCM/KGM/QMC 三个插件里三份复制粘贴的路径拼接也接入了保护
+  - **Swept the same class of bug**: the Settings window's editable dropdown had the identical stale-value / lost-typed-input defect (a just-changed selection could be saved as the previous value), now fixed the same way; the "output must not equal input" guard is unified into Core's `OutputPathHelper`, and the three duplicated path implementations in NCM/KGM/QMC now use it
+
 ## [2.8.0-dev.3] - 2026-10-04
 
 ### 修复 / Fixed

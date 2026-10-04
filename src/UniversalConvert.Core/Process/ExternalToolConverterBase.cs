@@ -136,7 +136,7 @@ namespace UniversalConvert.Core.Process
         {
             if (!string.IsNullOrEmpty(request.OutputPath))
             {
-                return AvoidSameAsInput(request.OutputPath, request.InputPath);
+                return OutputPathHelper.AvoidSameAsInput(request.OutputPath, request.InputPath);
             }
 
             var dir = Path.GetDirectoryName(request.InputPath);
@@ -145,22 +145,7 @@ namespace UniversalConvert.Core.Process
             if (string.IsNullOrEmpty(ext)) ext = ".out";
             if (!ext.StartsWith(".")) ext = "." + ext;
 
-            return AvoidSameAsInput(Path.Combine(dir ?? "", name + ext), request.InputPath);
-        }
-
-        /// <summary>
-        /// 输出与输入同名时加后缀另存。同格式转换（如 opus→opus 只改码率）默认会算出与输入
-        /// 完全相同的路径，而 FFmpeg 不能原地编辑（"Output same as Input - exiting"），必须改道。
-        /// </summary>
-        private static string AvoidSameAsInput(string outputPath, string inputPath)
-        {
-            if (string.IsNullOrEmpty(outputPath) || string.IsNullOrEmpty(inputPath)) return outputPath;
-            if (!string.Equals(outputPath, inputPath, StringComparison.OrdinalIgnoreCase)) return outputPath;
-
-            var dir = Path.GetDirectoryName(outputPath) ?? string.Empty;
-            var name = Path.GetFileNameWithoutExtension(outputPath);
-            var ext = Path.GetExtension(outputPath);
-            return Path.Combine(dir, name + "-converted" + ext);
+            return OutputPathHelper.AvoidSameAsInput(Path.Combine(dir ?? "", name + ext), request.InputPath);
         }
 
         /// <summary>子类实现：根据请求生成命令行参数。</summary>

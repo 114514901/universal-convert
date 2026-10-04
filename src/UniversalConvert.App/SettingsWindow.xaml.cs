@@ -108,18 +108,35 @@ namespace UniversalConvert.App
                     var combo = new ComboBox { Width = 220, IsEditable = true, IsTextSearchEnabled = false };
                     combo.ItemsSource = choices;
                     combo.DisplayMemberPath = "Label";
+
+                    // 手输的文本（null = 未手输）。与自定义窗口同款处理：
+                    // ① 选中项变化时 combo.Text 可能还是旧值，用 Text 反查 Label 会取到旧值（存错设置）；
+                    // ② 可编辑下拉手输后失焦，Text 可能被旧选中项覆盖，导致输入丢失。
+                    string typedText = null;
+
                     setter = v =>
                     {
+                        typedText = null;              // 程序赋值回显不算手输
                         var match = choices.FirstOrDefault(c => c.Value == v);
                         if (match != null) combo.SelectedItem = match;
                         else combo.Text = v ?? string.Empty;
                     };
                     getter = () =>
                     {
-                        var text = combo.Text ?? string.Empty;
-                        var byLabel = choices.FirstOrDefault(c => c.Label == text);
-                        return byLabel != null ? byLabel.Value : text;
+                        if (typedText != null) return typedText;
+                        var selected = combo.SelectedItem as OptionChoice;
+                        return selected != null ? selected.Value : (combo.Text ?? string.Empty);
                     };
+                    combo.SelectionChanged += (s, e) => typedText = null;
+                    System.ComponentModel.DependencyPropertyDescriptor
+                        .FromProperty(ComboBox.TextProperty, typeof(ComboBox))
+                        .AddValueChanged(combo, (s, e) =>
+                        {
+                            var text = combo.Text ?? string.Empty;
+                            var sel = combo.SelectedItem as OptionChoice;
+                            if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
+                            typedText = text;
+                        });
                     control = combo;
                     break;
 
