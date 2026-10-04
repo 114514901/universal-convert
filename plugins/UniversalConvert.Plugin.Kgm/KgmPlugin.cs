@@ -282,12 +282,12 @@ namespace UniversalConvert.Plugin.Kgm
             {
                 var dir = Path.GetDirectoryName(request.OutputPath);
                 var name = Path.GetFileNameWithoutExtension(request.OutputPath);
-                return OutputPathHelper.AvoidSameAsInput(Path.Combine(dir ?? string.Empty, name + "." + targetExt), request.InputPath);
+                return OutputPathHelper.ReserveUniqueOutputPath(Path.Combine(dir ?? string.Empty, name + "." + targetExt), request.InputPath);
             }
 
             var inputDir = Path.GetDirectoryName(request.InputPath);
             var inputName = Path.GetFileNameWithoutExtension(request.InputPath);
-            return OutputPathHelper.AvoidSameAsInput(Path.Combine(inputDir ?? string.Empty, inputName + "." + targetExt), request.InputPath);
+            return OutputPathHelper.ReserveUniqueOutputPath(Path.Combine(inputDir ?? string.Empty, inputName + "." + targetExt), request.InputPath);
         }
 
         private static string BuildFfmpegArgs(string input, string output, IDictionary<string, string> options)

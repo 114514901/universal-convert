@@ -132,8 +132,10 @@ namespace UniversalConvert.App
             {
                 // 多文件：打开批量转换窗口（含进度/暂停/取消），输出到输入目录
                 var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
+                // targetExt 约定「不带点」（构造函数统一写 "." + targetExt）。这里不能再加点，
+                // 否则会拼出 "..mp3"：标题、OutputExtension、输出文件名、格式查表键全部错位
                 var batchWindow = new BatchConvertWindow(
-                    _host, _settingsManager, files, "." + parsed.OutputExtension, workerThreads,
+                    _host, _settingsManager, files, parsed.OutputExtension, workerThreads,
                     perFileOptions: null, outputDir: null, presetName: parsed.PresetName);
                 MainWindow = batchWindow;
                 batchWindow.Show();

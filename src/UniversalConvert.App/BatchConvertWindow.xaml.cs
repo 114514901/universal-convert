@@ -16,6 +16,7 @@ using UniversalConvert.Core;
 using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
+using UniversalConvert.Core.Process;
 
 namespace UniversalConvert.App
 {
@@ -222,14 +223,9 @@ namespace UniversalConvert.App
             var name = Path.GetFileNameWithoutExtension(file);
             var candidate = Path.Combine(_outputDir, name + "." + _targetExt);
 
-            // 同格式批转（如整批 opus→opus）且输出目录就是源目录时，会算出与输入同名的路径，
-            // 而 FFmpeg 不能原地编辑（"Output same as Input - exiting"），加后缀另存
-            if (string.Equals(candidate, file, StringComparison.OrdinalIgnoreCase))
-            {
-                candidate = Path.Combine(_outputDir, name + "-converted." + _targetExt);
-            }
-
-            return candidate;
+            // 目标已存在（或与输入同名）时按 "name (1).ext" 递增并原子占位：
+            // 既不覆盖用户既有文件，也让两个 worker 不会抢到同一个输出路径
+            return OutputPathHelper.ReserveUniqueOutputPath(candidate, file);
         }
 
         private void RunOnUi(Action action)

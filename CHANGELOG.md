@@ -2,6 +2,15 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.7] - 2026-10-04
+
+### 修复 / Fixed
+- **右键多选批量转换的 `..mp3` bug**：`App.xaml.cs` 给批量窗口传了带点的扩展名（`"." + ext`），而构造函数约定「不带点」→ 标题显示 `..mp3`、输出文件名变成 `name..mp3`、格式查表键错位（Pysubs2/Potrace 等报「不支持的输出格式：..vtt」）
+  - Fixed the `..mp3` bug in right-click batch conversion: the extension was passed with a leading dot while the constructor expects it without
+- **不再静默覆盖用户既有文件**：输出目标已存在时自动改用 `name (1).ext`、`name (2).ext`…（`OutputPathHelper.ReserveUniqueOutputPath`），并用 `FileMode.CreateNew` **原子占位**——顺带解决批量转换中两个 worker 推导出同一路径、并发写坏文件却双双报成功的问题
+  - Existing files are no longer silently overwritten: a taken target moves to `name (1).ext`, reserved atomically via `FileMode.CreateNew`, which also prevents two batch workers from writing the same output path
+- **失败/取消不再留下半成品**：转换失败或取消时删除占位文件与写了一半的输出
+
 ## [2.8.0-dev.6] - 2026-10-04
 
 ### 修复 / Fixed

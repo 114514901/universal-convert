@@ -105,6 +105,7 @@ namespace UniversalConvert.Core.Process
 
             if (cancellationToken.IsCancellationRequested)
             {
+                CleanupIncompleteOutput(outputPath);
                 return ConversionResult.Failed("转换已取消", elapsed);
             }
 
@@ -113,6 +114,7 @@ namespace UniversalConvert.Core.Process
                 var detail = string.IsNullOrEmpty(runResult.StandardError)
                     ? runResult.StandardOutput
                     : runResult.StandardError;
+                CleanupIncompleteOutput(outputPath);
                 return ConversionResult.Failed(
                     $"工具 '{ToolName}' 返回错误码 {runResult.ExitCode}：{Truncate(detail)}",
                     elapsed,
@@ -136,7 +138,7 @@ namespace UniversalConvert.Core.Process
         {
             if (!string.IsNullOrEmpty(request.OutputPath))
             {
-                return OutputPathHelper.AvoidSameAsInput(request.OutputPath, request.InputPath);
+                return OutputPathHelper.ReserveUniqueOutputPath(request.OutputPath, request.InputPath);
             }
 
             var dir = Path.GetDirectoryName(request.InputPath);
@@ -145,7 +147,7 @@ namespace UniversalConvert.Core.Process
             if (string.IsNullOrEmpty(ext)) ext = ".out";
             if (!ext.StartsWith(".")) ext = "." + ext;
 
-            return OutputPathHelper.AvoidSameAsInput(Path.Combine(dir ?? "", name + ext), request.InputPath);
+            return OutputPathHelper.ReserveUniqueOutputPath(Path.Combine(dir ?? "", name + ext), request.InputPath);
         }
 
         /// <summary>子类实现：根据请求生成命令行参数。</summary>
@@ -162,5 +164,22 @@ namespace UniversalConvert.Core.Process
             const int max = 500;
             return text.Length <= max ? text : text.Substring(0, max);
         }
+        /// <summary>
+        /// 删除转换失败/取消后留下的输出文件（含 <see cref="OutputPathHelper.ReserveUniqueOutputPath"/>
+        /// 预先占位的空文件），避免用户看到以最终文件名落盘的半成品。
+        /// </summary>
+        private static void CleanupIncompleteOutput(string outputPath)
+        {
+            if (string.IsNullOrEmpty(outputPath)) return;
+            try
+            {
+                if (File.Exists(outputPath)) File.Delete(outputPath);
+            }
+            catch
+            {
+                // 进程仍占用等情况下删不掉，留给用户/下次清理
+            }
+        }
+
     }
 }
