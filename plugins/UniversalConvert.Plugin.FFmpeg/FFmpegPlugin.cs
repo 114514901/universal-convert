@@ -301,17 +301,13 @@ namespace UniversalConvert.Plugin.FFmpeg
         /// <summary>码率选项：值按 kbps 归一化（"500 kbps"/"500k" → "500k"）。</summary>
         private static OptionDefinition BitrateOption(string key, string label, string defaultValue, string alias, params OptionChoice[] choices)
         {
-            var option = EnumOption(key, label, defaultValue, alias, choices);
-            option.UnitKind = ValueUnitKind.Bitrate;
-            return option;
+            return EnumOption(key, label, defaultValue, alias, choices).AsBitrate();
         }
 
         /// <summary>采样率选项：值归一化为 Hz 整数（"44.1 kHz"/"44.1k" → "44100"）。</summary>
         private static OptionDefinition SampleRateOption(string key, string label, string defaultValue, string alias, params OptionChoice[] choices)
         {
-            var option = EnumOption(key, label, defaultValue, alias, choices);
-            option.UnitKind = ValueUnitKind.SampleRate;
-            return option;
+            return EnumOption(key, label, defaultValue, alias, choices).AsSampleRate();
         }
 
         private static OptionDefinition StringOption(string key, string label, string defaultValue, string alias = null, bool advancedEntry = false)

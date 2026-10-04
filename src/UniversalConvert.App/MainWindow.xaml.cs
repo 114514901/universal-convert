@@ -165,7 +165,7 @@ namespace UniversalConvert.App
 
             var psi = new ProcessStartInfo(installerPath)
             {
-                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp /DIR=\"" + installDir + "\"",
+                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp,contextmenu /DIR=\"" + installDir + "\"",
                 UseShellExecute = true,
                 Verb = "runas"
             };

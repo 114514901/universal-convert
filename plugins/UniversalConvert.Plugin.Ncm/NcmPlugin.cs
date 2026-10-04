@@ -499,13 +499,13 @@ namespace UniversalConvert.Plugin.Ncm
                         Choice("160k", "160 kbps"),
                         Choice("192k", "192 kbps"),
                         Choice("256k", "256 kbps"),
-                        Choice("320k", "320 kbps")),
+                        Choice("320k", "320 kbps")).AsBitrate(),
                     EnumOption("sampleRate", "采样率", "",
                         Choice("", "原始"),
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
-                        Choice("96000", "96000 Hz")),
+                        Choice("96000", "96000 Hz")).AsSampleRate(),
                     BoolOption("noCoverArt", "不转换封面")
                 },
                 Presets = new List<ConversionPreset>

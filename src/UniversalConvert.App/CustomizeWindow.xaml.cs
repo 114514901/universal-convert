@@ -23,6 +23,10 @@ namespace UniversalConvert.App
         private readonly string _inputPath;
         private readonly ConversionEntry _entry;
 
+        /// <summary>窗口关闭时要解除的 DP 监听。DependencyPropertyDescriptor.AddValueChanged 以组件为键
+        /// 强引用处理器，不解除会让窗口连同控件永不回收（反复开设置窗口会持续累积）。</summary>
+        private readonly List<Action> _dpdUnsubscribers = new List<Action>();
+
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
         private readonly Dictionary<string, Action<string>> _advancedAliases = new Dictionary<string, Action<string>>();
@@ -52,6 +56,7 @@ namespace UniversalConvert.App
 
             BuildPresetCombo();
             BuildOptionControls();
+            Closed += (s, e) => ReleaseDpdHandlers();
             if (previousOptions != null)
             {
                 ApplySavedOptions(previousOptions);
@@ -84,6 +89,16 @@ namespace UniversalConvert.App
             }
             PresetCombo.Items.Add(Strings.ManualCustom);
             PresetCombo.SelectedIndex = 0;
+        }
+
+
+        private void ReleaseDpdHandlers()
+        {
+            foreach (var unsubscribe in _dpdUnsubscribers)
+            {
+                try { unsubscribe(); } catch { }
+            }
+            _dpdUnsubscribers.Clear();
         }
 
         private void BuildOptionControls()
@@ -205,21 +220,24 @@ namespace UniversalConvert.App
                             typedText = null;              // 选中下拉项 → 清掉手输标记
                             OnOptionManuallyChanged();
                         };
-                        // 手输也要参与同步：ComboBox 没有 TextChanged 事件，用 DP 描述符监听 Text
-                        System.ComponentModel.DependencyPropertyDescriptor
-                            .FromProperty(ComboBox.TextProperty, typeof(ComboBox))
-                            .AddValueChanged(combo, (s, e) =>
-                            {
-                                if (_syncingAdvanced) return;
-                                var text = combo.Text ?? string.Empty;
-                                var sel = combo.SelectedItem as OptionChoice;
-                                // 文本与当前选中项一致 → 是「选中」引起的更新，交给 SelectionChanged
-                                if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
+                        // 手输也要参与同步：ComboBox 没有 TextChanged 事件，用 DP 描述符监听 Text。
+                        // 记录解除委托，窗口关闭时 RemoveValueChanged，否则会泄漏窗口实例。
+                        var textDpd = System.ComponentModel.DependencyPropertyDescriptor
+                            .FromProperty(ComboBox.TextProperty, typeof(ComboBox));
+                        EventHandler textDpdHandler = (s, e) =>
+                        {
+                            if (_syncingAdvanced) return;
+                            var text = combo.Text ?? string.Empty;
+                            var sel = combo.SelectedItem as OptionChoice;
+                            // 文本与当前选中项一致 → 是「选中」引起的更新，交给 SelectionChanged
+                            if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
 
-                                typedText = text;          // 记为手输
-                                OnOptionManuallyChanged();
-                                if (!string.IsNullOrEmpty(option.AdvancedAlias)) OnBuiltInOptionChanged();
-                            });
+                            typedText = text;          // 记为手输
+                            OnOptionManuallyChanged();
+                            if (!string.IsNullOrEmpty(option.AdvancedAlias)) OnBuiltInOptionChanged();
+                        };
+                        textDpd.AddValueChanged(combo, textDpdHandler);
+                        _dpdUnsubscribers.Add(() => textDpd.RemoveValueChanged(combo, textDpdHandler));
                         control = combo;
                         break;
 

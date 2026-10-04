@@ -19,6 +19,10 @@ namespace UniversalConvert.App
     public partial class SettingsWindow : Window
     {
         private readonly SettingsManager _manager;
+        /// <summary>窗口关闭时要解除的 DP 监听。DependencyPropertyDescriptor.AddValueChanged 以组件为键
+        /// 强引用处理器，不解除会让窗口连同控件永不回收（反复开设置窗口会持续累积）。</summary>
+        private readonly List<Action> _dpdUnsubscribers = new List<Action>();
+
         private readonly Dictionary<string, Func<string>> _getters = new Dictionary<string, Func<string>>();
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
         private TextBlock _updateStatusText;
@@ -37,6 +41,17 @@ namespace UniversalConvert.App
             Icon = AppIcon.Get();
 
             BuildControls();
+            Closed += (s, e) => ReleaseDpdHandlers();
+        }
+
+
+        private void ReleaseDpdHandlers()
+        {
+            foreach (var unsubscribe in _dpdUnsubscribers)
+            {
+                try { unsubscribe(); } catch { }
+            }
+            _dpdUnsubscribers.Clear();
         }
 
         private void BuildControls()
@@ -128,15 +143,18 @@ namespace UniversalConvert.App
                         return selected != null ? selected.Value : (combo.Text ?? string.Empty);
                     };
                     combo.SelectionChanged += (s, e) => typedText = null;
-                    System.ComponentModel.DependencyPropertyDescriptor
-                        .FromProperty(ComboBox.TextProperty, typeof(ComboBox))
-                        .AddValueChanged(combo, (s, e) =>
-                        {
-                            var text = combo.Text ?? string.Empty;
-                            var sel = combo.SelectedItem as OptionChoice;
-                            if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
-                            typedText = text;
-                        });
+                    // 记录解除委托，窗口关闭时 RemoveValueChanged，否则会泄漏窗口实例
+                    var textDpd = System.ComponentModel.DependencyPropertyDescriptor
+                        .FromProperty(ComboBox.TextProperty, typeof(ComboBox));
+                    EventHandler textDpdHandler = (s, e) =>
+                    {
+                        var text = combo.Text ?? string.Empty;
+                        var sel = combo.SelectedItem as OptionChoice;
+                        if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
+                        typedText = text;
+                    };
+                    textDpd.AddValueChanged(combo, textDpdHandler);
+                    _dpdUnsubscribers.Add(() => textDpd.RemoveValueChanged(combo, textDpdHandler));
                     control = combo;
                     break;
 
@@ -292,7 +310,7 @@ namespace UniversalConvert.App
 
             try
             {
-                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None);
+                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None, _updateInfo.Sha256);
 
                 _updateProgressBar.Value = 100;
                 _updateStatusText.Text = Strings.DownloadComplete;

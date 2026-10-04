@@ -2,6 +2,18 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.8] - 2026-10-04
+
+### 修复 / Fixed
+- **单位归一化覆盖全部插件**：此前只有 FFmpeg 插件声明了 `UnitKind`，NCM/KGM/QMC 的码率/采样率选项没有 → 用户在不走编辑表单的路径上手输 `320 kbps`，会原样拼进命令行导致转换失败。标注能力统一到 Core 的 `OptionDefinitionExtensions`（`.AsBitrate()` / `.AsSampleRate()`），四个插件统一使用，不再各写一份
+  - Unit normalization now covers every plugin: the annotation helpers live in Core (`OptionDefinitionExtensions`) and all four plugins use them, so `320 kbps` gets normalized even on paths that skip the edit form
+- **预设与批量路径同样归一化**：`PresetMerger.Merge` 按选项声明的单位类型归一化（右键菜单、批量转换此前完全绕过归一化）
+  - `PresetMerger.Merge` now normalizes by declared unit kind (right-click and batch paths bypassed it entirely)
+- **设置窗口不再泄漏实例**：`DependencyPropertyDescriptor.AddValueChanged` 是强引用，现在窗口关闭时配对 `RemoveValueChanged`（此前反复开关设置窗口会持续累积窗口实例）
+  - Fixed the window-instance leak: `AddValueChanged` is now paired with `RemoveValueChanged` on window close
+- **两条自动更新路径对齐**：设置界面的下载此前**不传 SHA256**（校验被跳过），安装器 `/MERGETASKS` 也少了 `contextmenu`（更新后右键菜单会丢）
+  - Aligned both auto-update paths: the Settings path omitted the SHA256 (verification skipped) and its installer args were missing `contextmenu`
+
 ## [2.8.0-dev.7] - 2026-10-04
 
 ### 修复 / Fixed

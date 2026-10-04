@@ -67,6 +67,24 @@ namespace UniversalConvert.Core.Engine
                 }
             }
 
+            // 4. 按选项声明的单位类型归一化
+            //    （右键菜单/批量转换这些不走编辑表单的路径，若只在 UI 层归一化就会漏掉，
+            //     手输的 "320 kbps" 会原样拼进命令行导致转换失败）
+            if (options != null)
+            {
+                foreach (var option in options)
+                {
+                    if (option == null || option.UnitKind == ValueUnitKind.None) continue;
+                    if (string.IsNullOrEmpty(option.Key)) continue;
+
+                    string current;
+                    if (result.TryGetValue(option.Key, out current) && !string.IsNullOrEmpty(current))
+                    {
+                        result[option.Key] = ValueUnits.Normalize(current, option.UnitKind);
+                    }
+                }
+            }
+
             return result;
         }
     }
