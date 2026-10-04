@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.9] - 2026-10-04
+
+### 修复 / Fixed
+- **「暂停中关窗」不再产生孤儿挂起进程**：`ProcessRunner` 的 `pauseSignal.Wait()` 没有超时也不响应取消——用户在暂停状态下关闭窗口时没人复位信号，`RunCore` 永不返回，被 `NtSuspendProcess` 挂起的 ffmpeg 既不会恢复也不会被杀。现在改为分片等待并检查取消令牌；两个转换窗口也补上了 `Closing` 处理（关窗即复位暂停并取消）
+  - Closing the window while paused no longer orphans a suspended process: `pauseSignal.Wait()` now waits in slices and honours cancellation, and both conversion windows cancel on close
+- **音频预览的进度条定位同样修复**：`AudioPlayerWindow` 是第三份同构实现（它的 seek 走在 `ValueChanged` 上），此前从未修过——同样存在「点轨道时实例 handler 被 Slider 类处理吞掉 → 定时器把进度条拉回」的问题，现在一并处理
+  - The audio preview window (a third, previously unfixed implementation) gets the same fix: the handler is attached with `handledEventsToo` and a 1 s silence window prevents the timer from writing the player position back right after a seek
+
 ## [2.8.0-dev.8] - 2026-10-04
 
 ### 修复 / Fixed

@@ -17,10 +17,11 @@
 
         <TextBlock x:Name="TitleText" Grid.Row="0" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
+        <!-- PreviewMouseDown 不在这里绑：点轨道时 Slider 的类处理会先标记 Handled，实例 handler 会被跳过。 -->
         <Slider x:Name="ProgressSlider" Grid.Row="1" Minimum="0" Maximum="100" Value="0"
                 IsMoveToPointEnabled="True" IsEnabled="False"
                 ValueChanged="OnProgressValueChanged"
-                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"
+                PreviewMouseUp="OnProgressPreviewMouseUp"
                 PreviewMouseMove="OnProgressPreviewMouseMove"/>
 
         <TextBlock x:Name="TimeText" Grid.Row="2" Margin="0,4,0,0" Foreground="{DynamicResource SecondaryTextBrush}"/>

@@ -135,7 +135,14 @@ namespace UniversalConvert.Core.Process
                             SuspendProcess(process);
                             try
                             {
-                                pauseSignal.Wait(); // 阻塞直到恢复（取消时 TryKill 会终止挂起的进程）
+                                // 分片等待并检查取消：pauseSignal.Wait() 无超时，一旦用户在
+                                // 「暂停中」关窗（没人 Reset 信号），这里会永久阻塞 ——
+                                // RunCore 永不返回，被挂起的进程既不会恢复也不会被杀，成为孤儿。
+                                while (pauseSignal.IsSet)
+                                {
+                                    if (cancellationToken.IsCancellationRequested) break;
+                                    pauseSignal.Wait(200);
+                                }
                             }
                             finally
                             {

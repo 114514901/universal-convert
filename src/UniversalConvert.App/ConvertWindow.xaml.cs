@@ -23,6 +23,9 @@ namespace UniversalConvert.App
         public ConvertWindow(ConversionEngine engine, ConversionRequest request)
         {
             InitializeComponent();
+
+            // 关窗即取消：否则「暂停中关窗」没有人复位暂停信号，外部进程会永久挂起
+            Closing += OnWindowClosing;
             Icon = AppIcon.Get();
             _engine = engine;
             _request = request;
@@ -168,6 +171,14 @@ namespace UniversalConvert.App
                 _pauseSignal.Reset();
                 PauseButton.Content = Strings.Pause;
             }
+        }
+
+
+        /// <summary>关窗前取消转换并复位暂停信号：暂停中直接关窗会让外部进程永久挂起成孤儿。</summary>
+        private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try { _pauseSignal.Reset(); } catch { }
+            try { _cts?.Cancel(); } catch { }
         }
 
         private void OnClose(object sender, RoutedEventArgs e)

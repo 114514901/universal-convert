@@ -41,6 +41,13 @@ namespace UniversalConvert.App
             _playbackPath = filePath;
             TitleText.Text = displayName ?? Path.GetFileName(filePath);
 
+            // 点轨道时 Slider 的类处理会先把事件标记 Handled，XAML 绑定的实例 handler 会被跳过 ——
+            // 那样 _seeking 一直为 false，OnTimerTick 会持续把进度条写回播放器位置（seek 后又被拉回）
+            ProgressSlider.AddHandler(
+                System.Windows.Input.Mouse.PreviewMouseDownEvent,
+                new System.Windows.Input.MouseButtonEventHandler(OnProgressPreviewMouseDown),
+                handledEventsToo: true);
+
             _timer.Interval = TimeSpan.FromMilliseconds(500);
             _timer.Tick += OnTimerTick;
             _timer.Start();
@@ -246,6 +253,9 @@ namespace UniversalConvert.App
             if (!_playing) return;
             if (!_player.NaturalDuration.HasTimeSpan) return;
 
+            // 刚做过定位：播放器位置是异步更新的，静默期内不要用它回写进度条（否则会把用户拖到的位置拉回去）
+            if ((DateTime.UtcNow - _lastSeekUtc).TotalMilliseconds < 1000) return;
+
             var duration = _player.NaturalDuration.TimeSpan;
             var position = _player.Position;
             if (duration.TotalSeconds <= 0) return;
@@ -258,6 +268,8 @@ namespace UniversalConvert.App
         }
 
         private bool _wasPlayingBeforeSeek;
+        /// <summary>最近一次主动定位的时间；播放器位置是异步更新的，静默期内不用它回写进度条。</summary>
+        private DateTime _lastSeekUtc = DateTime.MinValue;
         private bool _seeking;
 
         // 拖拽进度条期间临时暂停（避免反复 seek 产生噪声/杂音），松手恢复原播放状态
@@ -312,6 +324,7 @@ namespace UniversalConvert.App
 
             var duration = _player.NaturalDuration.TimeSpan;
             var target = TimeSpan.FromMilliseconds(duration.TotalMilliseconds * ProgressSlider.Value / 100.0);
+            _lastSeekUtc = DateTime.UtcNow;
             _player.Position = target;
             UpdateTimeText(target, duration);
 
