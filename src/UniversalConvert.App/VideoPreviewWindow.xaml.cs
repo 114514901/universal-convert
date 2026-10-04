@@ -24,6 +24,8 @@ namespace UniversalConvert.App
         private int _pendingSeekSeconds;
         private DispatcherTimer _pendingSeekTimer;
         private TimeSpan _pendingSeekTarget;
+        /// <summary>最近一次主动定位的时间；播放器位置是异步更新的，静默期内不用它回写进度条。</summary>
+        private DateTime _lastSeekUtc = DateTime.MinValue;
 
         public VideoPreviewWindow(string filePath)
         {
@@ -34,6 +36,15 @@ namespace UniversalConvert.App
 
             _timer.Interval = TimeSpan.FromMilliseconds(500);
             _timer.Tick += OnTimerTick;
+
+            // 点轨道时 Slider 的类处理（IsMoveToPointEnabled 的 MoveToPoint）先执行并把事件标记
+            // Handled，XAML 绑定的实例 handler 会被跳过 —— 那样 _seeking 一直为 false，
+            // OnTimerTick 就会持续把进度条写回播放器位置（长按后松手 seek 到旧位置 = 回弹）。
+            // handledEventsToo: true 保证「点在轨道上」也能收到。
+            ProgressSlider.AddHandler(
+                System.Windows.Input.Mouse.PreviewMouseDownEvent,
+                new System.Windows.Input.MouseButtonEventHandler(OnProgressPreviewMouseDown),
+                handledEventsToo: true);
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -180,6 +191,11 @@ namespace UniversalConvert.App
         private void OnTimerTick(object sender, EventArgs e)
         {
             if (_seeking || !_playing) return;
+
+            // 刚做过定位：播放器的 Position 是异步更新的，这段静默期内不要用它的值回写进度条，
+            // 否则会把用户刚拖到的位置拉回去（表现为「过去一瞬间又弹回原处」）
+            if ((DateTime.UtcNow - _lastSeekUtc).TotalMilliseconds < 1000) return;
+
             if (Video.NaturalDuration.HasTimeSpan)
             {
                 ProgressSlider.Value = Video.Position.TotalSeconds;
@@ -285,6 +301,7 @@ namespace UniversalConvert.App
             var target = Video.Position + TimeSpan.FromSeconds(seconds);
             if (target < TimeSpan.Zero) target = TimeSpan.Zero;
             if (target > Video.NaturalDuration.TimeSpan) target = Video.NaturalDuration.TimeSpan;
+            _lastSeekUtc = DateTime.UtcNow;
             Video.Position = target;
             ProgressSlider.Value = target.TotalSeconds;
             UpdateTimeText();
@@ -330,6 +347,7 @@ namespace UniversalConvert.App
             {
                 if (Video.NaturalDuration.HasTimeSpan)
                 {
+                    _lastSeekUtc = DateTime.UtcNow;
                     Video.Position = target;
                 }
                 UniversalConvert.Core.Diagnostics.Log.Info(
@@ -349,6 +367,7 @@ namespace UniversalConvert.App
                     _pendingSeekTimer.Stop();
                     try
                     {
+                        _lastSeekUtc = DateTime.UtcNow;
                         Video.Position = _pendingSeekTarget;
                         UniversalConvert.Core.Diagnostics.Log.Info(
                             $"补 Position 完成: {_pendingSeekTarget.TotalSeconds:0.###}s");
@@ -400,6 +419,7 @@ namespace UniversalConvert.App
             {
                 if (Video.NaturalDuration.HasTimeSpan)
                 {
+                    _lastSeekUtc = DateTime.UtcNow;
                     Video.Position = TimeSpan.FromSeconds(ProgressSlider.Value);
                     // 抽帧较重，150ms 节流
                     var now = DateTime.Now;

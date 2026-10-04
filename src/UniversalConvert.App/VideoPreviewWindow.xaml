@@ -28,10 +28,12 @@
             </Grid>
         </Border>
 
+        <!-- PreviewMouseDown 不在这里绑：点轨道时 Slider 的类处理会先把事件标记 Handled，
+             导致实例 handler 被跳过。改在构造函数用 AddHandler(handledEventsToo: true) 挂。 -->
         <Slider x:Name="ProgressSlider" Grid.Row="2" Minimum="0" Maximum="1" Value="0"
                 Margin="4,10,4,0" VerticalAlignment="Center" IsEnabled="False"
                 IsMoveToPointEnabled="True"
-                PreviewMouseDown="OnProgressPreviewMouseDown" PreviewMouseUp="OnProgressPreviewMouseUp"
+                PreviewMouseUp="OnProgressPreviewMouseUp"
                 PreviewMouseMove="OnProgressPreviewMouseMove"
                 ValueChanged="OnProgressChanged"/>
 

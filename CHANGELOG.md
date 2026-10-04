@@ -2,6 +2,12 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.6] - 2026-10-04
+
+### 修复 / Fixed
+- **进度条长按回弹（根因定位 + 修复）**：点击进度条**轨道**时，Slider 的类处理（`IsMoveToPointEnabled` 的 MoveToPoint）会先把事件标记 `Handled`，使得 XAML 绑定的 `PreviewMouseDown` **被跳过**——于是 `_seeking` 始终为 false，定时器持续把进度条写回播放器位置；长按期间用户拖到的位置被改回去，松手时 seek 回到原处。现在改用 `AddHandler(..., handledEventsToo: true)` 保证一定收到，并在每次定位后加 1 秒静默期，避免异步更新的播放器位置回写进度条。内置预览与 VLC 扩展同步修复
+  - **Progress-bar long-press snap-back: root cause located and fixed**: clicking the slider **track** makes Slider's class handler (MoveToPoint) mark the event `Handled` first, so the XAML-bound `PreviewMouseDown` was **skipped** — `_seeking` stayed false, the timer kept writing the player position back into the slider, undoing the drag, and the release-time seek then used that reverted value. The handler is now attached with `handledEventsToo: true`, plus a 1 s silence window after each seek. Fixed in both the built-in preview and the VLC extension
+
 ## [2.8.0-dev.5] - 2026-10-04
 
 ### 修复 / Fixed
