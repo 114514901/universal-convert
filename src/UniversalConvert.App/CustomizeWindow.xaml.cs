@@ -169,20 +169,46 @@ namespace UniversalConvert.App
                             .ToList();
                         combo.ItemsSource = choices;
                         combo.DisplayMemberPath = "Label";
+
+                        // 可编辑下拉里「手输」的文本（null = 未手输）。手输时 SelectedItem 仍是旧选项，
+                        // 不单独记下来取值就会退回旧选项（表现为下拉显示 192kbps、高级参数被重建成 -b:a 192k）
+                        string typedText = null;
+
                         setter2 = v =>
                         {
+                            typedText = null;              // 程序赋值（预设/高级参数回填）不算手输
                             var match = choices.FirstOrDefault(c => c.Value == v);
                             if (match != null) combo.SelectedItem = match;
                             else combo.Text = v ?? string.Empty;
                         };
                         getter2 = () =>
                         {
+                            if (typedText != null) return typedText;
                             // 直接用 SelectedItem 的 Value（FFmpeg 格式，如 "128k"），
                             // 避免 combo.Text 在 SelectionChanged 时仍是旧值导致错位（选 128 却回填 96）
                             var selected = combo.SelectedItem as OptionChoice;
                             return selected != null ? selected.Value : (combo.Text ?? string.Empty);
                         };
-                        combo.SelectionChanged += (s, e) => OnOptionManuallyChanged();
+                        combo.SelectionChanged += (s, e) =>
+                        {
+                            typedText = null;              // 选中下拉项 → 清掉手输标记
+                            OnOptionManuallyChanged();
+                        };
+                        // 手输也要参与同步：ComboBox 没有 TextChanged 事件，用 DP 描述符监听 Text
+                        System.ComponentModel.DependencyPropertyDescriptor
+                            .FromProperty(ComboBox.TextProperty, typeof(ComboBox))
+                            .AddValueChanged(combo, (s, e) =>
+                            {
+                                if (_syncingAdvanced) return;
+                                var text = combo.Text ?? string.Empty;
+                                var sel = combo.SelectedItem as OptionChoice;
+                                // 文本与当前选中项一致 → 是「选中」引起的更新，交给 SelectionChanged
+                                if (sel != null && string.Equals(sel.Label, text, StringComparison.Ordinal)) return;
+
+                                typedText = text;          // 记为手输
+                                OnOptionManuallyChanged();
+                                if (!string.IsNullOrEmpty(option.AdvancedAlias)) OnBuiltInOptionChanged();
+                            });
                         control = combo;
                         break;
 

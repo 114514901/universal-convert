@@ -39,3 +39,6 @@ changelog_entry.md
 
 # ---- 本地临时目录 ----
 _tmp/
+
+# ---- DSH profile (环境生成) ----
+dsh-profile-web.package.json

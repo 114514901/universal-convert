@@ -2,6 +2,14 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.8.0-dev.3] - 2026-10-04
+
+### 修复 / Fixed
+- 可编辑下拉「手输」不同步：在内置参数（如音频码率）里手动打字时既不触发同步，取值还会被上一个选中项覆盖（表现为下拉仍显示 192kbps、高级参数被重建成 `-b:a 192k`）。现在手输同样参与同步，并以输入内容作为参数值
+  - Typing into an editable built-in dropdown (e.g. audio bitrate) is no longer ignored: it now syncs and is used as the value, instead of being overridden by the previous selection (dropdown stayed at 192kbps and advanced args got rebuilt to `-b:a 192k`)
+- 同格式转换输出撞输入：opus→opus 这类只改参数的转换，输出路径与输入完全相同，FFmpeg 拒绝原地编辑（`Output same as Input - exiting`）。现在自动加 `-converted` 后缀另存（单文件与批量转换都已覆盖）
+  - Same-format conversion no longer targets the input file (FFmpeg refuses in-place editing, `Output same as Input - exiting`); such outputs get a `-converted` suffix (both single and batch conversion)
+
 ## [2.8.0-dev.2] - 2026-09-12
 
 ### 修复 / Fixed

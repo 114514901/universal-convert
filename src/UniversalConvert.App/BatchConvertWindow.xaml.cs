@@ -218,8 +218,18 @@ namespace UniversalConvert.App
         private string ResolveOutputPath(string file)
         {
             if (string.IsNullOrEmpty(_outputDir)) return null;
+
             var name = Path.GetFileNameWithoutExtension(file);
-            return Path.Combine(_outputDir, name + "." + _targetExt);
+            var candidate = Path.Combine(_outputDir, name + "." + _targetExt);
+
+            // 同格式批转（如整批 opus→opus）且输出目录就是源目录时，会算出与输入同名的路径，
+            // 而 FFmpeg 不能原地编辑（"Output same as Input - exiting"），加后缀另存
+            if (string.Equals(candidate, file, StringComparison.OrdinalIgnoreCase))
+            {
+                candidate = Path.Combine(_outputDir, name + "-converted." + _targetExt);
+            }
+
+            return candidate;
         }
 
         private void RunOnUi(Action action)
