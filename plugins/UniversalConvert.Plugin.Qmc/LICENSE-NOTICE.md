@@ -1,11 +1,14 @@
 # QMC 解密插件第三方声明
 
-本插件的解密算法移植自 [presburger/qmc-decoder](https://github.com/presburger/qmc-decoder)，
-该项目使用 **反 996 许可证（Anti 996 License Version 1.0）** 与 **MIT 许可证** 双许可。
+本插件的解密算法与密钥表（seedMap）来自 [presburger/qmc-decoder](https://github.com/presburger/qmc-decoder)，
+该项目使用 **MIT 许可证**。
 
 - 原始项目：https://github.com/presburger/qmc-decoder
 - 许可证全文：https://github.com/presburger/qmc-decoder/blob/master/LICENSE
-- 密钥表（seedMap）取自该项目的 `src/seed.hpp`。
+- MIT License, Copyright (c) 2019 Presburger
+- 密钥表（seedMap）取自该项目的 `src/seed.hpp`（数值逐字节一致）
 
-使用本插件即表示你接受上述许可证的条款（个人或遵守劳动法的实体可自由使用；
-违反劳动法的实体不得使用）。
+MIT 许可证要求保留上述版权声明与许可文本，本插件据此分发。
+
+> 说明：此前本文件误写为「Anti 996 许可证与 MIT 双许可」——经核对上游仓库，
+> 其 LICENSE 为 21 行标准 MIT 文本、未包含任何 Anti 996 条款，故予以更正。
