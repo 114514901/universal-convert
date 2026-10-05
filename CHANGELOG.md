@@ -2,6 +2,22 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.1] - 2026-10-05
+
+### 变更 / Changed
+- ⚠️ **移除 KGM（酷狗音乐）插件**：其解密算法与密钥表来自 `ghtz08/kugou-kgm-decoder`（**Anti 996 License v1.0**），
+  该许可证带有额外使用限制，与主项目的 **GPL-3.0** 不兼容（GPL 第 10 条禁止对下游附加限制）。
+  移除后 `.kgm` / `.kgma` 不再受支持；如需该格式请使用旧版本，或等待其以独立扩展形式提供
+  - **Removed the KGM (Kugou) plugin**: its algorithm and key table come from `ghtz08/kugou-kgm-decoder`, which is
+    licensed under the **Anti 996 License v1.0** — an extra-restriction license incompatible with this project's
+    **GPL-3.0** (GPL §10 forbids additional downstream restrictions)
+- **修正 QMC 插件的第三方声明**：此前声明写其上游为「Anti 996 与 MIT 双许可」，但核对上游仓库后确认
+  `presburger/qmc-decoder` **仅使用标准 MIT 许可证**（21 行文本，未含任何 Anti 996 条款）——原声明系误写，
+  既冤枉了上游、也对用户施加了不存在的限制。现更正为 MIT，并如实注明密钥表取自上游 `src/seed.hpp`
+  - Corrected the QMC plugin's third-party notice: it previously claimed its upstream was dual-licensed under
+    "Anti 996 and MIT", but `presburger/qmc-decoder` is in fact **MIT only**. The notice was wrong in both
+    directions; it now states MIT accurately and notes that the seed table comes from upstream `src/seed.hpp`
+
 ## [2.8.0-dev.9] - 2026-10-04
 
 ### 修复 / Fixed
