@@ -260,6 +260,9 @@ namespace UniversalConvert.Tests
                 }
             });
 
+            DownloadTests.RunAll();
+            PackageTests.RunAll();
+
             Console.WriteLine();
             Console.WriteLine(string.Format("合计：{0} 项，通过 {1} 项，失败 {2} 项。", _passed + _failed, _passed, _failed));
             return _failed == 0 ? 0 : 1;
@@ -277,7 +280,7 @@ namespace UniversalConvert.Tests
             };
         }
 
-        private static void Run(string name, Action test)
+        internal static void Run(string name, Action test)
         {
             try
             {
@@ -292,12 +295,12 @@ namespace UniversalConvert.Tests
             }
         }
 
-        private static void True(bool condition, string message)
+        internal static void True(bool condition, string message)
         {
             if (!condition) throw new InvalidOperationException(message);
         }
 
-        private static void Equal<T>(T expected, T actual, string message)
+        internal static void Equal<T>(T expected, T actual, string message)
         {
             if (!EqualityComparer<T>.Default.Equals(expected, actual))
             {

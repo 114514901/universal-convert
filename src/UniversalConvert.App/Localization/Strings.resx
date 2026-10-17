@@ -937,4 +937,16 @@
   <data name="CliOutputExtensionMismatch" xml:space="preserve">
     <value>错误：--output 的扩展名“{0}”与 --to 指定的“{1}”不一致。</value>
   </data>
+  <data name="OpenReleasePage" xml:space="preserve">
+    <value>打开发布页</value>
+  </data>
+  <data name="UpdateIntegrityUnavailable" xml:space="preserve">
+    <value>该版本缺少完整性摘要，只能打开发布页手动下载。</value>
+  </data>
+  <data name="UpdateLaunchFailed" xml:space="preserve">
+    <value>无法启动安装程序：{0}</value>
+  </data>
+  <data name="UpdateCancelled" xml:space="preserve">
+    <value>更新已取消。</value>
+  </data>
 </root>

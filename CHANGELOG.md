@@ -2,6 +2,42 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.3] - 2026-10-17
+
+### 修复 / Fixed
+- **分块下载未校验 206 与 Content-Range**：服务器或代理忽略 Range 并返回 200 时，原实现会把完整文件写入每个分块偏移，产生错误文件；现在校验状态码、Content-Range、分块长度与实际读取字节，异常时回退单线程
+  - **Chunked downloads did not validate 206 or Content-Range**: when a server or proxy ignored Range and returned 200, the full body was written at every chunk offset. Status code, Content-Range, chunk length, and actual bytes are now validated; failures fall back to a single-stream download
+- **缺少摘要时仍可自动安装**：更新检查现在要求资产具备 SHA256 摘要，缺少摘要时不提供自动安装地址；下载完成后校验 PE 头，主程序/设置界面改为打开发布页
+  - **Auto-install was possible without a digest**: update checks now require a SHA256 digest on the asset. Without one, no auto-install URL is offered; downloaded installers are checked for a PE header, and both UIs fall back to opening the release page
+- **HTTP 状态、重定向与 HEAD 失败处理不完整**：重定向超限、非 2xx、文本错误页、HEAD 失败等场景现在均有明确处理；HEAD 失败回退 GET 单线程，下载完成校验文件长度
+  - **Incomplete HTTP status, redirect, and HEAD failure handling**: redirect limits, non-2xx responses, text error pages, and HEAD failures are now handled explicitly; HEAD failures fall back to a single-stream GET, and the final file length is verified
+- **分块重试导致进度重复累计**：重试前回退该块已上报字节；进度按时间节流，避免大量 UI 回调
+  - **Chunk retries double-counted progress**: bytes reported by a failed attempt are rolled back before retrying; progress updates are throttled to reduce UI callbacks
+- **并发连接预算无效**：.NET Framework 默认每主机连接上限为 2；现在显式提高到 16，9 路分块预算才能真正生效
+  - **The concurrent connection budget was ineffective**: .NET Framework defaults to two connections per host. The limit is now raised to 16 so the nine-chunk budget can take effect
+- **更新下载缺少取消、超时与临时文件清理**：主界面与设置界面共用新的 UpdateInstaller；关闭窗口即取消下载，使用唯一临时文件，失败/取消时清理，UAC 取消不再被静默忽略
+  - **Update downloads lacked cancellation, timeouts, and temp-file cleanup**: the main window and settings now share UpdateInstaller; closing a window cancels the download, a unique temp file is used, failures/cancellations clean up, and UAC cancellation is no longer silent
+- **扩展安装目录使用显示名**：改为稳定且清洗后的 Id；兼容既有按显示名安装的目录，并提供 MigrateLegacyInstalls 启动迁移
+  - **Extension install directories used display names**: they now use a stable, sanitized Id. Existing display-name installs are discovered and migrated via MigrateLegacyInstalls at startup
+- **扩展安装路径与临时目录长度**：安装目录对长标识使用稳定短哈希；staging/备份目录使用短名称，避免 LibreOffice 等深层扩展超过 MAX_PATH
+  - **Extension install and temp path length**: long identifiers use a stable short hash for the install directory; staging/backup directories use short names to avoid MAX_PATH failures for deep packages such as LibreOffice
+- **扩展索引拉取可取消**：GetAvailableAsync 支持 CancellationToken，插件管理器与扩展中心在窗口关闭时取消请求，避免无超时 WebClient
+  - **Cancellable extension index fetch**: GetAvailableAsync accepts a CancellationToken, and the extension center/plugin manager cancel it on window close instead of using an unbounded WebClient
+- **扩展安装/更新非原子**：改为 staging 解压、manifest/DLL/路径/体积校验、旧目录备份、原子移动、失败回滚；pending 目录必须有完成标记才会被应用
+  - **Extension installs/updates were not atomic**: extraction now goes to staging with manifest/DLL/path/size validation, backup of the old directory, atomic move, and rollback. Pending directories are applied only when a completion marker exists
+- **扩展包完整性与错误回报**：校验索引字段、HTTPS 下载地址、包体积与 SHA256；解压/暂存失败原因通过 onError 回报，不再只显示泛化失败
+  - **Extension package integrity and error reporting**: index fields, HTTPS URLs, package size, and SHA256 are validated; extraction/staging failure reasons are returned through onError instead of a generic failure
+- **扩展更新窗口关闭后仍继续下载**：关窗即取消并阻止后续 UI/弹窗/重启提示；释放取消令牌、暂停信号与并发预算
+  - **Extension update window kept downloading after close**: closing now cancels and suppresses further UI, dialogs, and restart prompts; cancellation tokens, pause signals, and concurrency budgets are disposed
+- **扩展兼容性拦截与文档不一致**：扩展中心现在会在 minAppVersion 不满足时禁止安装
+  - **Compatibility gating differed from the documentation**: the extension center now blocks installs when minAppVersion is not satisfied
+- **CI 下载 FFmpeg 未固定版本或校验**：固定到 autobuild 版本并在解压前校验 SHA256
+  - **CI downloaded FFmpeg without a pinned version or checksum**: the build now pins an autobuild release and verifies SHA256 before extraction
+
+### 测试 / Tests
+- 回归测试由 24 项增加到 36 项，新增本地 HTTP 服务覆盖：忽略 Range 回退、正确 206 分块、分块重试进度、HEAD 405 回退、错误 SHA256、重定向循环、安装包 PE 头校验；新增扩展包结构、路径越界、损坏清单与长标识目录名测试
+  - Regression tests increased from 24 to 36, adding a local HTTP server covering range fallback, correct 206 chunking, retry progress, HEAD 405 fallback, wrong SHA256, redirect loops, and installer PE-header validation, plus extension-package structure, path traversal, corrupt-manifest, and long-id directory-name tests
+
 ## [2.9.0-dev.2] - 2026-10-17
 
 ### 新增 / Added

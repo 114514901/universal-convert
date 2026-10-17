@@ -9,8 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <ProjectReference Include="..\..\src\UniversalConvert.Core\UniversalConvert.Core.csproj" />
     <ProjectReference Include="..\..\src\UniversalConvert.Cli\UniversalConvert.Cli.csproj" />
+    <ProjectReference Include="..\..\src\UniversalConvert.App\UniversalConvert.App.csproj" />
   </ItemGroup>
 
 </Project>

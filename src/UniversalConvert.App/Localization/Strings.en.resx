@@ -937,4 +937,16 @@
   <data name="CliOutputExtensionMismatch" xml:space="preserve">
     <value>Error: the --output extension “{0}” does not match the --to extension “{1}”.</value>
   </data>
+  <data name="OpenReleasePage" xml:space="preserve">
+    <value>Open release page</value>
+  </data>
+  <data name="UpdateIntegrityUnavailable" xml:space="preserve">
+    <value>This release lacks an integrity digest; open the release page to download it manually.</value>
+  </data>
+  <data name="UpdateLaunchFailed" xml:space="preserve">
+    <value>Failed to launch the installer: {0}</value>
+  </data>
+  <data name="UpdateCancelled" xml:space="preserve">
+    <value>Update cancelled.</value>
+  </data>
 </root>

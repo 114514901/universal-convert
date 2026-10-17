@@ -97,6 +97,10 @@ namespace UniversalConvert.App
             var uninstallsApplied = ExtensionCenter.ApplyPendingUninstalls();
             Log.Info($"启动：暂存扩展卸载应用结果 = {uninstallsApplied}");
 
+            // 旧版按显示名安装的扩展目录迁移为稳定 Id 目录；须在插件加载前执行
+            var migrated = ExtensionCenter.MigrateLegacyInstalls();
+            Log.Info($"启动：扩展目录迁移结果 = {migrated}");
+
             _host = new CoreHost(config, config.ResolvePluginsDirectory(), msg => Log.Debug(msg), IsDarkTheme);
             _settingsManager = new SettingsManager(config, _host.Plugins);
 

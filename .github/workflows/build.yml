@@ -42,9 +42,14 @@ jobs:
           $ErrorActionPreference = "Stop"
           $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
           $dir = Join-Path $env:RUNNER_TEMP "ffmpeg"
-          # 用显式 latest 标签（releases/download/latest/...）；releases/latest/download/... 的重定向
-          # 可能解析到 autobuild 的哈希资产导致 404，故用显式标签 URL 保证稳定。
-          Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile $zip
+          # 固定到可复现的 autobuild 版本，并校验 SHA256；升级 FFmpeg 时需同步更新以下三项。
+          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-16-13-04/ffmpeg-N-127579-g5cb9fcd211-win64-gpl.zip"
+          $ffmpegSha256 = "b7c94a054ae4c1cce0e11ae18979d932e6f129ba6f5253b328227b31f1bf2bbf"
+          Invoke-WebRequest -Uri $ffmpegUrl -OutFile $zip
+          $actualSha256 = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLowerInvariant()
+          if ($actualSha256 -ne $ffmpegSha256) {
+              throw "FFmpeg 下载包 SHA256 校验失败：期望 $ffmpegSha256，实际 $actualSha256"
+          }
           New-Item -ItemType Directory -Force $dir | Out-Null
           tar -xf $zip -C $dir
           $bin = (Get-ChildItem -Path $dir -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1).DirectoryName

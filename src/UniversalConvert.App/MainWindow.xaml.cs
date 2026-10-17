@@ -29,6 +29,8 @@ namespace UniversalConvert.App
         private readonly ObservableCollection<FileRow> _files = new ObservableCollection<FileRow>();
         private ConversionEntry[] _commonTargets = new ConversionEntry[0];
         private UpdateInfo _updateInfo;
+        private CancellationTokenSource _updateCts;
+        private bool _updateClosed;
 
         public MainWindow(CoreHost host, SettingsManager settingsManager, string[] initialFiles = null)
         {
@@ -36,6 +38,7 @@ namespace UniversalConvert.App
             Icon = AppIcon.Get();
             _host = host;
             _settingsManager = settingsManager;
+            Closed += OnWindowClosed;
 
             FileList.ItemsSource = _files;
             OutputDirText.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -66,12 +69,39 @@ namespace UniversalConvert.App
 
         private async Task CheckUpdateAsync()
         {
-            _updateInfo = await UpdateChecker.CheckAsync(_settingsManager.Get("updateChannel"));
+            var result = await UpdateChecker.CheckWithResultAsync(
+                _settingsManager.Get("updateChannel"), CancellationToken.None);
+            if (result.Failed)
+            {
+                Log.Warn("检查更新失败: " + result.ErrorMessage);
+                return;
+            }
+
+            _updateInfo = result.Update;
             if (_updateInfo != null)
             {
-                UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, _updateInfo.Version);
-                UpdateBanner.Visibility = Visibility.Visible;
+                ApplyUpdateInfo(_updateInfo);
             }
+        }
+
+        private void ApplyUpdateInfo(UpdateInfo info)
+        {
+            UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, info.Version);
+            UpdateButton.Content = info.CanAutoInstall
+                ? Strings.DownloadUpdate
+                : Strings.Get("OpenReleasePage");
+            UpdateButton.ToolTip = info.CanAutoInstall
+                ? null
+                : Strings.Get("UpdateIntegrityUnavailable");
+            UpdateButton.IsEnabled = true;
+            ViewNotesButton.IsEnabled = true;
+            UpdateBanner.Visibility = Visibility.Visible;
+        }
+
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            _updateClosed = true;
+            try { _updateCts?.Cancel(); } catch { }
         }
 
         private void OnOpenPlugins(object sender, RoutedEventArgs e)
@@ -96,8 +126,7 @@ namespace UniversalConvert.App
             if (found != null && IsNewerThan(found.Version, _updateInfo?.Version))
             {
                 _updateInfo = found;
-                UpdateBannerText.Text = string.Format(Strings.UpdateAvailable, found.Version);
-                UpdateBanner.Visibility = Visibility.Visible;
+                ApplyUpdateInfo(found);
             }
         }
 
@@ -118,58 +147,80 @@ namespace UniversalConvert.App
 
         private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
         {
-            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.DownloadUrl)) return;
+            if (_updateInfo == null) return;
+
+            if (!_updateInfo.CanAutoInstall)
+            {
+                try
+                {
+                    UpdateInstaller.OpenReleasePage(_updateInfo);
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatusText.Visibility = Visibility.Visible;
+                    UpdateStatusText.Text = string.Format(
+                        Strings.Get("UpdateLaunchFailed"), ex.Message);
+                }
+                return;
+            }
 
             UpdateButton.IsEnabled = false;
             ViewNotesButton.IsEnabled = false;
             UpdateProgressBar.Visibility = Visibility.Visible;
             UpdateStatusText.Visibility = Visibility.Visible;
 
-            var dest = Path.Combine(
-                Path.GetTempPath(),
-                "UniversalConvert-Setup-" + _updateInfo.Version.TrimStart('v', 'V') + ".exe");
-
+            _updateCts = new CancellationTokenSource();
             var progress = new Progress<double>(p =>
             {
+                if (_updateClosed) return;
                 UpdateProgressBar.Value = p;
                 UpdateStatusText.Text = string.Format(Strings.Downloading, (int)p);
             });
 
+            string installer = null;
             try
             {
-                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None, _updateInfo.Sha256);
+                installer = await UpdateInstaller.DownloadAsync(_updateInfo, progress, _updateCts.Token);
+                if (_updateClosed)
+                {
+                    UpdateInstaller.DeleteDownloadedFile(installer);
+                    installer = null;
+                    return;
+                }
 
                 UpdateProgressBar.Value = 100;
                 UpdateStatusText.Text = Strings.DownloadComplete;
-                try
+                UpdateInstaller.Launch(installer);
+            }
+            catch (OperationCanceledException)
+            {
+                if (installer != null) UpdateInstaller.DeleteDownloadedFile(installer);
+                if (!_updateClosed)
                 {
-                    LaunchInstallerSilent(dest);
-                }
-                catch
-                {
-                    // 启动安装程序失败
+                    UpdateStatusText.Text = Strings.Get("UpdateCancelled");
                 }
             }
             catch (Exception ex)
             {
-                UpdateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
-                UpdateButton.IsEnabled = true;
-                ViewNotesButton.IsEnabled = true;
+                if (installer != null) UpdateInstaller.DeleteDownloadedFile(installer);
+                if (!_updateClosed)
+                {
+                    UpdateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
+                }
             }
-        }
-
-        private void LaunchInstallerSilent(string installerPath)
-        {
-            var installDir = (_host.Config.InstallDirectory ?? AppDomain.CurrentDomain.BaseDirectory)
-                .TrimEnd('\\');
-
-            var psi = new ProcessStartInfo(installerPath)
+            finally
             {
-                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp,contextmenu /DIR=\"" + installDir + "\"",
-                UseShellExecute = true,
-                Verb = "runas"
-            };
-            Process.Start(psi);
+                if (!_updateClosed)
+                {
+                    UpdateButton.IsEnabled = true;
+                    ViewNotesButton.IsEnabled = true;
+                }
+                if (_updateCts != null)
+                {
+                    _updateCts.Dispose();
+                    _updateCts = null;
+                }
+            }
         }
 
         private void OnAddFiles(object sender, RoutedEventArgs e)

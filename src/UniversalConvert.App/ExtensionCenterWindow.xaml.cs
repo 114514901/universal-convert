@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using UniversalConvert.App.Localization;
 using UniversalConvert.Core;
@@ -10,11 +11,15 @@ namespace UniversalConvert.App
     public partial class ExtensionCenterWindow : Window
     {
         private readonly List<ExtensionInfo> _extensions = new List<ExtensionInfo>();
+        private CancellationTokenSource _refreshCts;
+        private bool _refreshing;
+        private bool _closed;
 
         public ExtensionCenterWindow()
         {
             InitializeComponent();
             Icon = AppIcon.Get();
+            Closed += OnWindowClosed;
         }
 
         private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -29,15 +34,19 @@ namespace UniversalConvert.App
 
         private async System.Threading.Tasks.Task RefreshAsync()
         {
+            if (_closed || _refreshing) return;
+            _refreshing = true;
+            _refreshCts = new CancellationTokenSource();
             StatusText.Text = Strings.LoadingExtensions;
             DescText.Text = string.Empty;
 
             try
             {
                 _extensions.Clear();
-                var available = await ExtensionCenter.GetAvailableAsync();
-                _extensions.AddRange(available);
+                var available = await ExtensionCenter.GetAvailableAsync(_refreshCts.Token);
+                if (_closed) return;
 
+                _extensions.AddRange(available);
                 var rows = _extensions.Select(BuildRow).ToList();
                 ExtensionList.ItemsSource = rows;
 
@@ -45,10 +54,32 @@ namespace UniversalConvert.App
                 DescText.Text = selected?.Info?.Description ?? string.Empty;
                 StatusText.Text = string.Empty;
             }
+            catch (OperationCanceledException)
+            {
+                // 窗口关闭导致取消，不更新界面
+            }
             catch (Exception ex)
             {
-                StatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                if (!_closed)
+                {
+                    StatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                }
             }
+            finally
+            {
+                _refreshing = false;
+                if (_refreshCts != null)
+                {
+                    _refreshCts.Dispose();
+                    _refreshCts = null;
+                }
+            }
+        }
+
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            _closed = true;
+            try { _refreshCts?.Cancel(); } catch { }
         }
 
         private ExtensionRow BuildRow(ExtensionInfo info)
@@ -125,6 +156,12 @@ namespace UniversalConvert.App
         /// <summary>该扩展当前可安装（未安装）或可更新（有新版本）。</summary>
         private static bool CanInstallOrUpdate(ExtensionRow row)
         {
+            if (PluginManager.CheckCompatibility(row.Info.MinAppVersion, row.Info.MaxAppVersion)
+                == PluginCompatibility.AppTooOld)
+            {
+                return false;
+            }
+
             var installed = ExtensionCenter.GetInstalledVersion(row.Info);
             if (installed == null) return true;
             var newer = SemVersion.Parse(row.Info.Version)?.CompareTo(SemVersion.Parse(installed)) > 0;
@@ -144,7 +181,9 @@ namespace UniversalConvert.App
 
             var window = new ExtensionUpdateWindow(title, rows.Select(r => r.Info)) { Owner = this };
             window.ShowDialog();
-            StatusText.Text = window.Summary;
+            StatusText.Text = string.IsNullOrEmpty(window.Summary)
+                ? Strings.ExtensionCancelled
+                : window.Summary;
             await RefreshAsync();
         }
 

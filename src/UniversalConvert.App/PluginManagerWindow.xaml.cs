@@ -16,13 +16,22 @@ namespace UniversalConvert.App
     {
         private readonly CoreHost _host;
         private readonly List<PluginRow> _rows = new List<PluginRow>();
+        private CancellationTokenSource _checkCts;
+        private bool _checkClosed;
 
         public PluginManagerWindow(CoreHost host)
         {
             InitializeComponent();
             _host = host;
             Icon = AppIcon.Get();
+            Closed += OnWindowClosed;
             Populate();
+        }
+
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            _checkClosed = true;
+            try { _checkCts?.Cancel(); } catch { }
         }
 
         private void Populate()
@@ -144,11 +153,14 @@ namespace UniversalConvert.App
 
         private async void OnCheckUpdates(object sender, RoutedEventArgs e)
         {
+            if (_checkCts != null) return;
             UpdateStatusText.Text = Strings.CheckingExtensionUpdates;
             CheckUpdatesButton.IsEnabled = false;
+            _checkCts = new CancellationTokenSource();
             try
             {
-                var available = await ExtensionCenter.GetAvailableAsync();
+                var available = await ExtensionCenter.GetAvailableAsync(_checkCts.Token);
+                if (_checkClosed) return;
                 var byId = available.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
                 // 只检查用户扩展（内置插件不在扩展仓库）；并行比对
@@ -174,7 +186,9 @@ namespace UniversalConvert.App
                             .Select(r => byId[r.Id]).ToList();
                         var window = new ExtensionUpdateWindow(Strings.ExtensionUpdatingTitle, targets) { Owner = this };
                         window.ShowDialog();
-                        UpdateStatusText.Text = window.Summary;
+                        UpdateStatusText.Text = string.IsNullOrEmpty(window.Summary)
+                            ? Strings.ExtensionCancelled
+                            : window.Summary;
                     }
                     else
                     {
@@ -187,25 +201,39 @@ namespace UniversalConvert.App
                     UpdateStatusText.Text = Strings.NoExtensionUpdates;
                 }
             }
+            catch (OperationCanceledException)
+            {
+                // 窗口关闭导致取消，不更新界面
+            }
             catch (Exception ex)
             {
-                UpdateStatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                if (!_checkClosed)
+                {
+                    UpdateStatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                }
             }
             finally
             {
-                CheckUpdatesButton.IsEnabled = true;
+                if (!_checkClosed) CheckUpdatesButton.IsEnabled = true;
+                if (_checkCts != null)
+                {
+                    _checkCts.Dispose();
+                    _checkCts = null;
+                }
             }
         }
 
         private async void OnCheckUpdateSingle(object sender, RoutedEventArgs e)
         {
             var row = PluginList.SelectedItem as PluginRow;
-            if (row == null || !row.IsUserPlugin) return;
+            if (row == null || !row.IsUserPlugin || _checkCts != null) return;
 
             UpdateStatusText.Text = Strings.CheckingExtensionUpdates;
+            _checkCts = new CancellationTokenSource();
             try
             {
-                var available = await ExtensionCenter.GetAvailableAsync();
+                var available = await ExtensionCenter.GetAvailableAsync(_checkCts.Token);
+                if (_checkClosed) return;
                 var byId = available.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
                 if (!CheckUpdateForRow(row, byId))
@@ -230,12 +258,29 @@ namespace UniversalConvert.App
                 UpdateStatusText.Text = string.Empty;
                 var window = new ExtensionUpdateWindow(Strings.ExtensionUpdatingTitle, new[] { ext }) { Owner = this };
                 window.ShowDialog();
-                UpdateStatusText.Text = window.Summary;
+                UpdateStatusText.Text = string.IsNullOrEmpty(window.Summary)
+                    ? Strings.ExtensionCancelled
+                    : window.Summary;
                 RefreshList();
+            }
+            catch (OperationCanceledException)
+            {
+                // 窗口关闭导致取消，不更新界面
             }
             catch (Exception ex)
             {
-                UpdateStatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                if (!_checkClosed)
+                {
+                    UpdateStatusText.Text = string.Format(Strings.LoadExtensionsFailed, ex.Message);
+                }
+            }
+            finally
+            {
+                if (_checkCts != null)
+                {
+                    _checkCts.Dispose();
+                    _checkCts = null;
+                }
             }
         }
 
@@ -243,6 +288,13 @@ namespace UniversalConvert.App
         {
             ExtensionInfo ext;
             if (!byId.TryGetValue(row.Id, out ext)) return false;
+
+            if (PluginManager.CheckCompatibility(ext.MinAppVersion, ext.MaxAppVersion)
+                == PluginCompatibility.AppTooOld)
+            {
+                row.UpdateText = null;
+                return false;
+            }
 
             var installed = SemVersion.Parse(row.Version);
             var latest = SemVersion.Parse(ext.Version);

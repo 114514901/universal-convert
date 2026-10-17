@@ -27,9 +27,12 @@ namespace UniversalConvert.App
         private readonly Dictionary<string, Action<string>> _setters = new Dictionary<string, Action<string>>();
         private TextBlock _updateStatusText;
         private UpdateInfo _updateInfo;
+        private Button _checkButton;
         private Button _viewNotesButton;
         private Button _downloadButton;
         private ProgressBar _updateProgressBar;
+        private CancellationTokenSource _updateCts;
+        private bool _updateClosed;
 
         /// <summary>本次打开期间手动检查发现的最新版本（供主窗口在关闭后同步更新横幅）。</summary>
         public UpdateInfo LatestFound { get; private set; }
@@ -41,7 +44,7 @@ namespace UniversalConvert.App
             Icon = AppIcon.Get();
 
             BuildControls();
-            Closed += (s, e) => ReleaseDpdHandlers();
+            Closed += OnWindowClosed;
         }
 
 
@@ -237,8 +240,8 @@ namespace UniversalConvert.App
         {
             var panel = new StackPanel { Margin = new Thickness(0, 12, 0, 0) };
 
-            var checkButton = new Button { Content = Strings.CheckUpdate, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left };
-            checkButton.Click += OnCheckUpdate;
+            _checkButton = new Button { Content = Strings.CheckUpdate, Padding = new Thickness(16, 6, 16, 6), HorizontalAlignment = HorizontalAlignment.Left };
+            _checkButton.Click += OnCheckUpdate;
 
             _updateStatusText = new TextBlock { Margin = new Thickness(0, 8, 0, 0), TextWrapping = TextWrapping.Wrap, Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray) };
 
@@ -252,7 +255,7 @@ namespace UniversalConvert.App
 
             _updateProgressBar = new ProgressBar { Height = 6, Margin = new Thickness(0, 8, 0, 0), Minimum = 0, Maximum = 100, Visibility = Visibility.Collapsed };
 
-            panel.Children.Add(checkButton);
+            panel.Children.Add(_checkButton);
             panel.Children.Add(_updateStatusText);
             panel.Children.Add(actionRow);
             panel.Children.Add(_updateProgressBar);
@@ -261,28 +264,76 @@ namespace UniversalConvert.App
 
         private async void OnCheckUpdate(object sender, RoutedEventArgs e)
         {
+            _checkButton.IsEnabled = false;
             _updateStatusText.Text = Strings.CheckingUpdate;
             _viewNotesButton.Visibility = Visibility.Collapsed;
             _downloadButton.Visibility = Visibility.Collapsed;
             _updateProgressBar.Visibility = Visibility.Collapsed;
 
-            var info = await UpdateChecker.CheckAsync(_manager.Get("updateChannel"));
-            if (info != null)
+            _updateCts = new CancellationTokenSource();
+            try
             {
-                _updateInfo = info;
-                LatestFound = info;
-                _updateStatusText.Text = string.Format(Strings.UpdateAvailable, info.Version);
-                _viewNotesButton.Visibility = Visibility.Visible;
-                if (!string.IsNullOrEmpty(info.DownloadUrl))
+                var result = await UpdateChecker.CheckWithResultAsync(
+                    _manager.Get("updateChannel"), _updateCts.Token);
+                if (_updateClosed) return;
+
+                if (result.Failed)
                 {
-                    _downloadButton.Visibility = Visibility.Visible;
+                    _updateInfo = null;
+                    LatestFound = null;
+                    _updateStatusText.Text = result.ErrorMessage;
+                    return;
+                }
+
+                var info = result.Update;
+                if (info != null)
+                {
+                    _updateInfo = info;
+                    LatestFound = info;
+                    _updateStatusText.Text = string.Format(Strings.UpdateAvailable, info.Version);
+                    _viewNotesButton.Visibility = Visibility.Visible;
+                    ApplyUpdateButton(info);
+                }
+                else
+                {
+                    _updateInfo = null;
+                    LatestFound = null;
+                    _updateStatusText.Text = Strings.UpToDate;
                 }
             }
-            else
+            catch (OperationCanceledException)
             {
-                _updateInfo = null;
-                _updateStatusText.Text = Strings.UpToDate;
+                // 窗口关闭导致取消，不更新 UI
             }
+            catch (Exception ex)
+            {
+                if (!_updateClosed)
+                {
+                    _updateInfo = null;
+                    _updateStatusText.Text = "检查更新失败：" + ex.Message;
+                }
+            }
+            finally
+            {
+                if (!_updateClosed) _checkButton.IsEnabled = true;
+                if (_updateCts != null)
+                {
+                    _updateCts.Dispose();
+                    _updateCts = null;
+                }
+            }
+        }
+
+        private void ApplyUpdateButton(UpdateInfo info)
+        {
+            _downloadButton.Content = info.CanAutoInstall
+                ? Strings.DownloadUpdate
+                : Strings.Get("OpenReleasePage");
+            _downloadButton.ToolTip = info.CanAutoInstall
+                ? null
+                : Strings.Get("UpdateIntegrityUnavailable");
+            _downloadButton.IsEnabled = true;
+            _downloadButton.Visibility = Visibility.Visible;
         }
 
         private void OnViewReleaseNotes(object sender, RoutedEventArgs e)
@@ -294,48 +345,82 @@ namespace UniversalConvert.App
 
         private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
         {
-            if (_updateInfo == null || string.IsNullOrEmpty(_updateInfo.DownloadUrl)) return;
+            if (_updateInfo == null) return;
+
+            if (!_updateInfo.CanAutoInstall)
+            {
+                try
+                {
+                    UpdateInstaller.OpenReleasePage(_updateInfo);
+                }
+                catch (Exception ex)
+                {
+                    _updateStatusText.Text = string.Format(
+                        Strings.Get("UpdateLaunchFailed"), ex.Message);
+                }
+                return;
+            }
 
             _downloadButton.IsEnabled = false;
             _viewNotesButton.IsEnabled = false;
             _updateProgressBar.Visibility = Visibility.Visible;
 
-            var dest = Path.Combine(Path.GetTempPath(), "UniversalConvert-Setup-" + _updateInfo.Version.TrimStart('v', 'V') + ".exe");
-
+            _updateCts = new CancellationTokenSource();
             var progress = new Progress<double>(p =>
             {
+                if (_updateClosed) return;
                 _updateProgressBar.Value = p;
                 _updateStatusText.Text = string.Format(Strings.Downloading, (int)p);
             });
 
+            string installer = null;
             try
             {
-                await UpdateChecker.DownloadAsync(_updateInfo.DownloadUrl, dest, progress, CancellationToken.None, _updateInfo.Sha256);
+                installer = await UpdateInstaller.DownloadAsync(_updateInfo, progress, _updateCts.Token);
+                if (_updateClosed)
+                {
+                    UpdateInstaller.DeleteDownloadedFile(installer);
+                    installer = null;
+                    return;
+                }
 
                 _updateProgressBar.Value = 100;
                 _updateStatusText.Text = Strings.DownloadComplete;
-                try { LaunchInstallerSilent(dest); } catch { /* 启动安装程序失败 */ }
+                UpdateInstaller.Launch(installer);
+            }
+            catch (OperationCanceledException)
+            {
+                if (installer != null) UpdateInstaller.DeleteDownloadedFile(installer);
+                if (!_updateClosed) _updateStatusText.Text = Strings.Get("UpdateCancelled");
             }
             catch (Exception ex)
             {
-                _updateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
-                _downloadButton.IsEnabled = true;
-                _viewNotesButton.IsEnabled = true;
+                if (installer != null) UpdateInstaller.DeleteDownloadedFile(installer);
+                if (!_updateClosed)
+                {
+                    _updateStatusText.Text = string.Format(Strings.DownloadFailed, ex.Message);
+                }
+            }
+            finally
+            {
+                if (!_updateClosed)
+                {
+                    _downloadButton.IsEnabled = true;
+                    _viewNotesButton.IsEnabled = true;
+                }
+                if (_updateCts != null)
+                {
+                    _updateCts.Dispose();
+                    _updateCts = null;
+                }
             }
         }
 
-        private void LaunchInstallerSilent(string installerPath)
+        private void OnWindowClosed(object sender, EventArgs e)
         {
-            var installDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
-            var psi = new System.Diagnostics.ProcessStartInfo(installerPath)
-            {
-                // 自动更新必须保持右键菜单：/MERGETASKS 额外勾选 contextmenu 强制注册，
-                // 避免受安装器任务「记忆状态」（用户曾在手动安装中取消过勾选）影响而静默丢失右键菜单
-                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp,contextmenu /DIR=\"" + installDir + "\"",
-                UseShellExecute = true,
-                Verb = "runas"
-            };
-            System.Diagnostics.Process.Start(psi);
+            _updateClosed = true;
+            try { _updateCts?.Cancel(); } catch { }
+            ReleaseDpdHandlers();
         }
 
         private FrameworkElement BuildAdvancedActions()
