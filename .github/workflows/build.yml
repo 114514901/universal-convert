@@ -29,6 +29,12 @@ jobs:
       - name: Build
         run: msbuild UniversalConvert.sln /p:Configuration=Release /restore /m /p:Version=${{ env.VERSION }}
 
+      - name: Run CLI tests
+        shell: pwsh
+        run: |
+          & "tests\UniversalConvert.Tests\bin\Release\net48\UniversalConvert.Tests.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       # 构建时拉取 ffmpeg 并打入安装包（GPL 版以支持默认 libx264；对外分发需遵守 GPL）
       - name: Download FFmpeg
         shell: pwsh
@@ -60,6 +66,7 @@ jobs:
           Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\UniversalConvert.ContextMenu.dll" "dist\" -Force
           Copy-Item "src\UniversalConvert.ContextMenu\bin\Release\net48\SharpShell.dll" "dist\" -Force
           Copy-Item "src\UniversalConvert.Installer\bin\Release\net48\UniversalConvert.Installer.exe" "dist\" -Force
+          Copy-Item "src\UniversalConvert.Cli\bin\Release\net48\UniversalConvert.Cli.exe" "dist\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.FFmpeg\bin\Release\net48\UniversalConvert.Plugin.FFmpeg.dll" "dist\plugins\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.Ncm\bin\Release\net48\UniversalConvert.Plugin.Ncm.dll" "dist\plugins\" -Force
           Copy-Item "plugins\UniversalConvert.Plugin.Qmc\bin\Release\net48\UniversalConvert.Plugin.Qmc.dll" "dist\plugins\" -Force

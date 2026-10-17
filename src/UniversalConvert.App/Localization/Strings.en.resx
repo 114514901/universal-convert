@@ -870,4 +870,71 @@
   <data name="ParamSize" xml:space="preserve">
     <value>Size</value>
   </data>
+  <data name="CliUsage" xml:space="preserve">
+    <value>UniversalConvert command line usage&#10;&#10;UniversalConvert.App.exe --convert &lt;files...&gt; --to &lt;extension&gt; [--preset &lt;name&gt;] [--plugin &lt;plugin id&gt;] [--output &lt;file&gt; | --output-dir &lt;directory&gt;]&#10;UniversalConvert.App.exe --customize &lt;file&gt; --to &lt;extension&gt; [--plugin &lt;plugin id&gt;]&#10;UniversalConvert.App.exe --open &lt;files...&gt;&#10;UniversalConvert.App.exe --help&#10;UniversalConvert.App.exe --version&#10;&#10;Notes:&#10;1. --convert opens the graphical conversion window. Use UniversalConvert.Cli.exe for automation.&#10;2. Option names are case-insensitive; both --name value and --name=value are accepted.&#10;3. Use -- to separate options from file paths.&#10;4. --output applies only to single-file conversion; use --output-dir for multiple files.</value>
+  </data>
+
+  <data name="CliNoInput" xml:space="preserve">
+    <value>Error: no input files were specified.</value>
+  </data>
+
+  <data name="CliCustomizeNoInput" xml:space="preserve">
+    <value>Error: no input file was specified for customization.</value>
+  </data>
+
+  <data name="CliInputNotFound" xml:space="preserve">
+    <value>Error: input file not found: {0}</value>
+  </data>
+
+  <data name="CliMissingTargetFormat" xml:space="preserve">
+    <value>Error: no target format was specified. Use --to &lt;extension&gt;.</value>
+  </data>
+
+  <data name="CliOutputConflict" xml:space="preserve">
+    <value>Error: --output and --output-dir cannot be used together.</value>
+  </data>
+
+  <data name="CliOutputOnlySingle" xml:space="preserve">
+    <value>Error: --output applies only to single-file conversion; use --output-dir for batch conversion.</value>
+  </data>
+
+  <data name="CliOutputDirCreateFailed" xml:space="preserve">
+    <value>Error: cannot create output directory “{0}”: {1}</value>
+  </data>
+
+  <data name="CliUnsupportedFormat" xml:space="preserve">
+    <value>Error: cannot convert “{0}” to “{1}”.</value>
+  </data>
+
+  <data name="CliPluginNotFound" xml:space="preserve">
+    <value>Error: plugin “{0}” is not among the candidates. Candidates: {1}</value>
+  </data>
+
+  <data name="CliPluginAmbiguous" xml:space="preserve">
+    <value>Error: multiple candidate plugins are registered for this conversion. Use --plugin to specify one: {0}</value>
+  </data>
+
+  <data name="CliPluginUnavailable" xml:space="preserve">
+    <value>Error: the tool required by plugin “{0}” is unavailable.</value>
+  </data>
+
+  <data name="CliPresetNotFound" xml:space="preserve">
+    <value>Error: preset “{0}” was not found. Available presets: {1}</value>
+  </data>
+
+  <data name="CliMissingOptionValue" xml:space="preserve">
+    <value>Error: option “{0}” is missing its value.</value>
+  </data>
+
+  <data name="CliUnknownOption" xml:space="preserve">
+    <value>Error: unknown option “{0}”.</value>
+  </data>
+
+  <data name="CliVersionFormat" xml:space="preserve">
+    <value>UniversalConvert {0}</value>
+  </data>
+
+  <data name="CliOutputExtensionMismatch" xml:space="preserve">
+    <value>Error: the --output extension “{0}” does not match the --to extension “{1}”.</value>
+  </data>
 </root>

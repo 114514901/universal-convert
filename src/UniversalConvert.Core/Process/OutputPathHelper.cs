@@ -44,6 +44,21 @@ namespace UniversalConvert.Core.Process
         /// <returns>成功占位的路径；目录不可写等情况下回退为原始路径，由调用方报错。</returns>
         public static string ReserveUniqueOutputPath(string desiredPath, string inputPath)
         {
+            bool reserved;
+            return ReserveUniqueOutputPath(desiredPath, inputPath, out reserved);
+        }
+
+        /// <summary>
+        /// 为输出「预订」一个不冲突的路径，并通过 <paramref name="reserved"/> 报告是否成功创建了占位文件。
+        /// 调用方只有在 reserved 为 true 时才负责在失败/取消时删除占位文件；
+        /// 目录不可写等情况下返回原始路径且 reserved 为 false。
+        /// </summary>
+        public static string ReserveUniqueOutputPath(
+            string desiredPath,
+            string inputPath,
+            out bool reserved)
+        {
+            reserved = false;
             if (string.IsNullOrEmpty(desiredPath)) return desiredPath;
 
             var dir = Path.GetDirectoryName(desiredPath) ?? string.Empty;
@@ -69,6 +84,7 @@ namespace UniversalConvert.Core.Process
                     using (new FileStream(candidate, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                     {
                     }
+                    reserved = true;
                     return candidate;
                 }
                 catch (IOException)

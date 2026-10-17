@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -13,6 +15,7 @@ using UniversalConvert.Core.Config;
 using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Engine;
 using UniversalConvert.Core.Models;
+using UniversalConvert.Core.Plugins;
 
 namespace UniversalConvert.App
 {
@@ -39,8 +42,29 @@ namespace UniversalConvert.App
             // 尽早挂 UI 线程崩溃捕获，保证后续初始化异常也能被报告
             DispatcherUnhandledException += OnDispatcherUnhandledException;
 
-            // 看护进程拉起的「卡死报告」模式：只显示报告窗口，不走完整启动流程
             var parsed = CommandLineContract.Parse(e.Args);
+
+            // 帮助、版本与语法错误不进入完整启动流程
+            if (parsed.IsHelp)
+            {
+                ShowCommandLineHelp();
+                Shutdown(ExitCodes.Success);
+                return;
+            }
+            if (parsed.IsVersion)
+            {
+                ShowVersion();
+                Shutdown(ExitCodes.Success);
+                return;
+            }
+            if (parsed.UnknownOptions.Count > 0 || parsed.MissingOptionValues.Count > 0)
+            {
+                ShowCommandLineError(BuildParseError(parsed));
+                Shutdown(ExitCodes.UsageError);
+                return;
+            }
+
+            // 看护进程拉起的「卡死报告」模式：只显示报告窗口，不走完整启动流程
             if (parsed.IsReportMode)
             {
                 RunReportMode(parsed);
@@ -84,124 +108,462 @@ namespace UniversalConvert.App
 
             StartHeartbeatAndWatchdog();
 
-            // convert 模式：输入可以是 --convert 后的单个文件（InputPath）或多文件批量（ExtraFiles）
-            var hasConvertInput = !string.IsNullOrEmpty(parsed.InputPath)
-                || (parsed.ExtraFiles != null && parsed.ExtraFiles.Length > 0);
-            if (parsed.IsConvertMode && hasConvertInput)
+            if (parsed.IsConvertMode)
             {
-                RunHeadlessConversion(parsed);
+                RunConversion(parsed);
             }
-            else if (parsed.IsCustomizeMode && !string.IsNullOrEmpty(parsed.InputPath))
+            else if (parsed.IsCustomizeMode)
             {
                 RunCustomize(parsed);
             }
+            else if (parsed.IsOpenMode)
+            {
+                RunOpenMode(parsed);
+            }
             else
             {
-                var main = new MainWindow(_host, _settingsManager, parsed.ExtraFiles);
-                MainWindow = main;
-                main.Show();
-
-                // 空闲时预热媒体管线：把「第一次点预览」的冷启动成本提前到应用启动后
-                SchedulePreviewWarmup();
-
-                // 扩展更新/卸载在重启时未能应用（文件仍被占用，如资源管理器锁着右键菜单加载的插件 DLL）：
-                // 明确提示，避免用户以为没更新
-                if (ExtensionCenter.HasPendingUpdates() || ExtensionCenter.HasPendingUninstalls())
-                {
-                    MessageBox.Show(Strings.PendingChangesNotApplied,
-                        "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                ShowMainWindow(parsed.ExtraFiles);
             }
         }
 
-        private void RunHeadlessConversion(CommandLineContract.ParsedArguments parsed)
+        private void RunConversion(CommandLineContract.ParsedArguments parsed)
         {
-            // convert 模式的输入文件：--convert 后的全部裸参数（支持右键多选批量）
-            var files = parsed.ExtraFiles != null && parsed.ExtraFiles.Length > 0
-                ? parsed.ExtraFiles
-                : (string.IsNullOrEmpty(parsed.InputPath) ? new string[0] : new[] { parsed.InputPath });
-
+            var files = parsed.ExtraFiles ?? new string[0];
             if (files.Length == 0)
             {
-                MessageBox.Show(Strings.InputFileMissing, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
-                Shutdown(1);
+                ShowCommandLineError(Strings.Get("CliNoInput"));
+                Shutdown(ExitCodes.UsageError);
                 return;
             }
 
-            if (files.Length > 1)
+            var missing = files.Where(f => !File.Exists(f)).ToList();
+            if (missing.Count > 0)
             {
-                // 多文件：打开批量转换窗口（含进度/暂停/取消），输出到输入目录
-                var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
-                // targetExt 约定「不带点」（构造函数统一写 "." + targetExt）。这里不能再加点，
-                // 否则会拼出 "..mp3"：标题、OutputExtension、输出文件名、格式查表键全部错位
-                var batchWindow = new BatchConvertWindow(
-                    _host, _settingsManager, files, parsed.OutputExtension, workerThreads,
-                    perFileOptions: null, outputDir: null, presetName: parsed.PresetName);
-                MainWindow = batchWindow;
-                batchWindow.Show();
+                ShowInputNotFound(missing);
+                Shutdown(ExitCodes.InputNotFound);
                 return;
             }
 
-            var inputPath = files[0];
-            if (!File.Exists(inputPath))
+            if (string.IsNullOrEmpty(parsed.OutputExtension))
             {
-                MessageBox.Show(Strings.InputFileMissing + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
-                Shutdown(1);
+                ShowCommandLineError(Strings.Get("CliMissingTargetFormat"));
+                Shutdown(ExitCodes.UsageError);
                 return;
             }
 
-            var inputExt = Path.GetExtension(inputPath);
-            var entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, parsed.OutputExtension);
-            if (entry == null)
+            if (files.Length > 1 && !string.IsNullOrEmpty(parsed.OutputPath))
             {
-                MessageBox.Show(
-                    string.Format(Strings.UnsupportedConversion, inputExt, parsed.OutputExtension),
-                    "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Shutdown(1);
+                ShowCommandLineError(Strings.Get("CliOutputOnlySingle"));
+                Shutdown(ExitCodes.UsageError);
                 return;
             }
 
-            var options = PresetMerger.Merge(entry.Options, entry.Presets, parsed.PresetName, null);
-
-            var request = new ConversionRequest
+            if (!string.IsNullOrEmpty(parsed.OutputPath) && !string.IsNullOrEmpty(parsed.OutputDir))
             {
-                PluginId = entry.PluginId,
-                InputPath = inputPath,
-                OutputPath = parsed.OutputPath,
-                InputExtension = inputExt,
-                OutputExtension = "." + parsed.OutputExtension,
-                Options = options
-            };
+                ShowCommandLineError(Strings.Get("CliOutputConflict"));
+                Shutdown(ExitCodes.UsageError);
+                return;
+            }
 
-            var window = new ConvertWindow(_host.Engine, request);
-            MainWindow = window;
-            window.Show();
+            if (!string.IsNullOrEmpty(parsed.OutputDir))
+            {
+                try
+                {
+                    Directory.CreateDirectory(parsed.OutputDir);
+                }
+                catch (Exception ex)
+                {
+                    ShowCommandLineError(string.Format(
+                        Strings.Get("CliOutputDirCreateFailed"),
+                        parsed.OutputDir,
+                        ex.Message));
+                    Shutdown(ExitCodes.UsageError);
+                    return;
+                }
+            }
+
+            if (files.Length == 1)
+            {
+                var inputPath = files[0];
+                var inputExt = Path.GetExtension(inputPath);
+                var selection = FormatSelector.Resolve(
+                    _host,
+                    inputExt,
+                    parsed.OutputExtension,
+                    parsed.PluginId,
+                    _settingsManager.Get(FormatSelector.GetChoiceKey(inputExt, parsed.OutputExtension)));
+
+                if (selection.PreferredNotFound || selection.IsEmpty)
+                {
+                    ShowResolutionError(inputPath, inputExt, parsed);
+                    Shutdown(ExitCodes.UnsupportedFormat);
+                    return;
+                }
+
+                var entry = FormatResolver.Resolve(
+                    _host, _settingsManager, inputExt, parsed.OutputExtension, parsed.PluginId);
+                if (entry == null)
+                {
+                    ShowResolutionError(inputPath, inputExt, parsed);
+                    Shutdown(ExitCodes.UnsupportedFormat);
+                    return;
+                }
+
+                if (!entry.IsAvailable)
+                {
+                    ShowCommandLineError(string.Format(Strings.Get("CliPluginUnavailable"), entry.PluginName));
+                    Shutdown(ExitCodes.ToolUnavailable);
+                    return;
+                }
+
+                if (!ValidatePreset(entry, parsed.PresetName))
+                {
+                    Shutdown(ExitCodes.UsageError);
+                    return;
+                }
+
+                var outputPath = parsed.OutputPath;
+                if (string.IsNullOrEmpty(outputPath) && !string.IsNullOrEmpty(parsed.OutputDir))
+                {
+                    outputPath = Path.Combine(
+                        parsed.OutputDir,
+                        Path.GetFileNameWithoutExtension(inputPath) + "." + parsed.OutputExtension);
+                }
+
+                if (!string.IsNullOrEmpty(outputPath))
+                {
+                    var outputExtension = Path.GetExtension(outputPath).TrimStart('.').ToLowerInvariant();
+                    if (!string.Equals(outputExtension, parsed.OutputExtension, StringComparison.Ordinal))
+                    {
+                        ShowCommandLineError(string.Format(
+                            Strings.Get("CliOutputExtensionMismatch"),
+                            string.IsNullOrEmpty(outputExtension) ? "（无）" : "." + outputExtension,
+                            "." + parsed.OutputExtension));
+                        Shutdown(ExitCodes.UsageError);
+                        return;
+                    }
+
+                    try
+                    {
+                        outputPath = Path.GetFullPath(outputPath);
+                        var outputDirectory = Path.GetDirectoryName(outputPath);
+                        if (!string.IsNullOrEmpty(outputDirectory))
+                        {
+                            Directory.CreateDirectory(outputDirectory);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowCommandLineError(string.Format(
+                            Strings.Get("CliOutputDirCreateFailed"),
+                            outputPath,
+                            ex.Message));
+                        Shutdown(ExitCodes.UsageError);
+                        return;
+                    }
+                }
+
+                var options = PresetMerger.Merge(entry.Options, entry.Presets, parsed.PresetName, null);
+                var request = new ConversionRequest
+                {
+                    PluginId = entry.PluginId,
+                    InputPath = inputPath,
+                    OutputPath = outputPath,
+                    InputExtension = inputExt,
+                    OutputExtension = "." + parsed.OutputExtension,
+                    Options = options
+                };
+
+                var window = new ConvertWindow(_host.Engine, request);
+                MainWindow = window;
+                window.Show();
+                return;
+            }
+
+            var problems = new List<string>();
+            var problemCode = int.MaxValue;
+            foreach (var file in files)
+            {
+                var inputExt = Path.GetExtension(file);
+                var remembered = _settingsManager.Get(FormatSelector.GetChoiceKey(inputExt, parsed.OutputExtension));
+                var selection = FormatSelector.Resolve(
+                    _host, inputExt, parsed.OutputExtension, parsed.PluginId, remembered);
+
+                if (selection.PreferredNotFound)
+                {
+                    problems.Add(string.Format(
+                        Strings.Get("CliPluginNotFound"),
+                        parsed.PluginId,
+                        selection.DescribeCandidates()));
+                    problemCode = Math.Min(problemCode, ExitCodes.UnsupportedFormat);
+                    continue;
+                }
+                if (selection.IsEmpty)
+                {
+                    problems.Add(string.Format(
+                        Strings.Get("CliUnsupportedFormat"), file, parsed.OutputExtension));
+                    problemCode = Math.Min(problemCode, ExitCodes.UnsupportedFormat);
+                    continue;
+                }
+                if (selection.Selected == null)
+                {
+                    // 多个候选：批量窗口会按既有流程询问用户
+                    continue;
+                }
+                if (!selection.Selected.IsAvailable)
+                {
+                    problems.Add(string.Format(
+                        Strings.Get("CliPluginUnavailable"), selection.Selected.PluginName));
+                    problemCode = Math.Min(problemCode, ExitCodes.ToolUnavailable);
+                    continue;
+                }
+                if (!string.IsNullOrEmpty(parsed.PresetName)
+                    && !PresetExists(selection.Selected, parsed.PresetName))
+                {
+                    problems.Add(string.Format(
+                        Strings.Get("CliPresetNotFound"),
+                        parsed.PresetName,
+                        DescribePresets(selection.Selected)));
+                    problemCode = Math.Min(problemCode, ExitCodes.UsageError);
+                }
+            }
+
+            if (problems.Count > 0)
+            {
+                ShowCommandLineErrors(problems);
+                Shutdown(problemCode == int.MaxValue ? ExitCodes.UnsupportedFormat : problemCode);
+                return;
+            }
+
+            var workerThreads = ResolveWorkerThreads(_settingsManager.Get("workerThreads"));
+            var batchWindow = new BatchConvertWindow(
+                _host, _settingsManager, files, parsed.OutputExtension, workerThreads,
+                perFileOptions: null, outputDir: parsed.OutputDir, presetName: parsed.PresetName,
+                preferredPluginId: parsed.PluginId);
+            MainWindow = batchWindow;
+            batchWindow.Show();
         }
 
         private void RunCustomize(CommandLineContract.ParsedArguments parsed)
         {
             var inputPath = parsed.InputPath;
+            if (string.IsNullOrEmpty(inputPath))
+            {
+                ShowCommandLineError(Strings.Get("CliCustomizeNoInput"));
+                Shutdown(ExitCodes.UsageError);
+                return;
+            }
+
             if (!File.Exists(inputPath))
             {
-                MessageBox.Show(Strings.InputFileMissing + inputPath, "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Error);
-                Shutdown(1);
+                ShowInputNotFound(new[] { inputPath });
+                Shutdown(ExitCodes.InputNotFound);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(parsed.OutputExtension))
+            {
+                ShowCommandLineError(Strings.Get("CliMissingTargetFormat"));
+                Shutdown(ExitCodes.UsageError);
                 return;
             }
 
             var inputExt = Path.GetExtension(inputPath);
-            var entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, parsed.OutputExtension);
+            var selection = FormatSelector.Resolve(
+                _host,
+                inputExt,
+                parsed.OutputExtension,
+                parsed.PluginId,
+                _settingsManager.Get(FormatSelector.GetChoiceKey(inputExt, parsed.OutputExtension)));
+
+            if (selection.PreferredNotFound || selection.IsEmpty)
+            {
+                ShowResolutionError(inputPath, inputExt, parsed);
+                Shutdown(ExitCodes.UnsupportedFormat);
+                return;
+            }
+
+            var entry = FormatResolver.Resolve(
+                _host, _settingsManager, inputExt, parsed.OutputExtension, parsed.PluginId);
             if (entry == null)
             {
-                MessageBox.Show(
-                    string.Format(Strings.UnsupportedConversion, inputExt, parsed.OutputExtension),
-                    "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Shutdown(1);
+                ShowResolutionError(inputPath, inputExt, parsed);
+                Shutdown(ExitCodes.UnsupportedFormat);
+                return;
+            }
+
+            if (!entry.IsAvailable)
+            {
+                ShowCommandLineError(string.Format(Strings.Get("CliPluginUnavailable"), entry.PluginName));
+                Shutdown(ExitCodes.ToolUnavailable);
                 return;
             }
 
             var window = new CustomizeWindow(_host.Engine, inputPath, entry);
             MainWindow = window;
             window.Show();
+        }
+
+        private void RunOpenMode(CommandLineContract.ParsedArguments parsed)
+        {
+            var files = parsed.ExtraFiles ?? new string[0];
+            var missing = files.Where(f => !File.Exists(f)).ToList();
+            if (missing.Count > 0)
+            {
+                ShowInputNotFound(missing);
+                Shutdown(ExitCodes.InputNotFound);
+                return;
+            }
+            ShowMainWindow(files);
+        }
+
+        private void ShowMainWindow(string[] files)
+        {
+            var main = new MainWindow(_host, _settingsManager, files ?? new string[0]);
+            MainWindow = main;
+            main.Show();
+
+            // 空闲时预热媒体管线：把「第一次点预览」的冷启动成本提前到应用启动后
+            SchedulePreviewWarmup();
+
+            // 扩展更新/卸载在重启时未能应用（文件仍被占用，如资源管理器锁着右键菜单加载的插件 DLL）：
+            // 明确提示，避免用户以为没有更新
+            if (ExtensionCenter.HasPendingUpdates() || ExtensionCenter.HasPendingUninstalls())
+            {
+                MessageBox.Show(Strings.PendingChangesNotApplied,
+                    "UniversalConvert", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void ShowCommandLineHelp()
+        {
+            MessageBox.Show(
+                Strings.Get("CliUsage"),
+                "UniversalConvert",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private void ShowVersion()
+        {
+            MessageBox.Show(
+                string.Format(Strings.Get("CliVersionFormat"), AppVersion.Current?.ToString() ?? string.Empty),
+                "UniversalConvert",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private static string BuildParseError(CommandLineContract.ParsedArguments parsed)
+        {
+            var parts = new List<string>();
+            if (parsed.MissingOptionValues.Count > 0)
+            {
+                parts.Add(string.Format(
+                    Strings.Get("CliMissingOptionValue"),
+                    string.Join("、", parsed.MissingOptionValues)));
+            }
+            if (parsed.UnknownOptions.Count > 0)
+            {
+                parts.Add(string.Format(
+                    Strings.Get("CliUnknownOption"),
+                    string.Join("、", parsed.UnknownOptions)));
+            }
+            return string.Join(Environment.NewLine, parts);
+        }
+
+        private void ShowResolutionError(
+            string inputPath,
+            string inputExt,
+            CommandLineContract.ParsedArguments parsed)
+        {
+            var remembered = _settingsManager.Get(FormatSelector.GetChoiceKey(inputExt, parsed.OutputExtension));
+            var selection = FormatSelector.Resolve(
+                _host, inputExt, parsed.OutputExtension, parsed.PluginId, remembered);
+
+            string message;
+            if (selection.PreferredNotFound)
+            {
+                message = string.Format(
+                    Strings.Get("CliPluginNotFound"),
+                    parsed.PluginId,
+                    selection.DescribeCandidates());
+            }
+            else if (selection.IsEmpty)
+            {
+                message = string.Format(
+                    Strings.Get("CliUnsupportedFormat"),
+                    inputPath,
+                    parsed.OutputExtension);
+            }
+            else if (selection.IsAmbiguous)
+            {
+                message = string.Format(
+                    Strings.Get("CliPluginAmbiguous"),
+                    selection.DescribeCandidates());
+            }
+            else
+            {
+                message = string.Format(
+                    Strings.Get("CliUnsupportedFormat"),
+                    inputPath,
+                    parsed.OutputExtension);
+            }
+            ShowCommandLineError(message);
+        }
+
+        private static void ShowInputNotFound(IEnumerable<string> files)
+        {
+            ShowCommandLineError(string.Join(
+                Environment.NewLine,
+                files.Select(f => string.Format(Strings.Get("CliInputNotFound"), f))));
+        }
+
+        private static void ShowCommandLineErrors(IEnumerable<string> messages)
+        {
+            ShowCommandLineError(string.Join(Environment.NewLine, messages));
+        }
+
+        private static void ShowCommandLineError(string message)
+        {
+            MessageBox.Show(
+                message,
+                "UniversalConvert",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+
+        private static bool ValidatePreset(ConversionEntry entry, string presetName)
+        {
+            if (string.IsNullOrEmpty(presetName) || PresetExists(entry, presetName)) return true;
+            ShowCommandLineError(string.Format(
+                Strings.Get("CliPresetNotFound"),
+                presetName,
+                DescribePresets(entry)));
+            return false;
+        }
+
+        private static bool PresetExists(ConversionEntry entry, string presetName)
+        {
+            if (entry == null || entry.Presets == null || string.IsNullOrEmpty(presetName)) return false;
+            return entry.Presets.Any(p => p != null && p.Name == presetName);
+        }
+
+        private static string DescribePresets(ConversionEntry entry)
+        {
+            if (entry == null || entry.Presets == null || entry.Presets.Count == 0) return "（无）";
+            return string.Join("、", entry.Presets
+                .Where(p => p != null && !string.IsNullOrEmpty(p.Name))
+                .Select(p => p.Name)
+                .ToArray());
+        }
+
+        private static class ExitCodes
+        {
+            public const int Success = 0;
+            public const int UsageError = 2;
+            public const int UnsupportedFormat = 3;
+            public const int InputNotFound = 4;
+            public const int ToolUnavailable = 5;
         }
 
         private static void ApplyLanguage(string language)

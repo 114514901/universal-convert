@@ -2,6 +2,36 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.2] - 2026-10-17
+
+### 新增 / Added
+- **独立命令行工具 `UniversalConvert.Cli.exe`**：提供 `convert`、`formats`、`plugins` 三个子命令，不创建窗口，通过标准输出、标准错误与退出码报告结果。支持 `--to`、`--preset`、`--plugin`、`--option`、`--output`、`--output-dir`、`--file-list`、`--force`、`--dry-run`、`--jobs`、`--stop-on-error`、`--progress`、`--json`、`--quiet`、`--verbose`，并支持 Ctrl+C 取消
+  - **Standalone command-line tool**: `convert`, `formats`, and `plugins` subcommands; runs without windows and reports results through stdout, stderr, and explicit exit codes. Supports `--to`, `--preset`, `--plugin`, `--option`, `--output`, `--output-dir`, `--file-list`, `--force`, `--dry-run`, `--jobs`, `--stop-on-error`, `--progress`, `--json`, `--quiet`, `--verbose`, and Ctrl+C cancellation
+- **机器可读输出**：`convert --json` 输出行分隔 JSON（NDJSON）事件；`formats/plugins --json` 输出 JSON 数组
+  - **Machine-readable output**: `convert --json` emits newline-delimited JSON events; `formats/plugins --json` emit JSON arrays
+- **命令行文档**：新增 `docs/命令行使用指南.md`，覆盖选项、退出码、输出规则、JSON 事件与故障排查
+  - **CLI documentation**: added `docs/命令行使用指南.md` covering options, exit codes, output rules, JSON events, and troubleshooting
+- **回归测试**：新增 `tests/UniversalConvert.Tests`（24 项），覆盖主程序契约、CLI 参数解析、格式选择、单位归一化与输出路径；CI 在构建后执行
+  - **Regression tests**: added `tests/UniversalConvert.Tests` (24 cases) covering the launcher contract, CLI parsing, format selection, unit normalization, and output paths; CI runs them after the build
+
+### 修复 / Fixed
+- **`--convert` 输入文件不存在时静默打开主界面**：命令行解析不再按文件存在性丢弃参数；启动流程先校验输入、目标格式与输出参数，失败时给出明确提示并返回非零退出码
+  - **`--convert` silently opened the main window when an input file was missing**: parsing no longer drops arguments based on file existence; startup now validates inputs, target format, and output arguments, then reports the problem and returns a non-zero exit code
+- **`--open` 未生效**：主程序显式处理 `--open`；右键菜单的「使用 UniversalConvert 打开」改用 `BuildOpenCommand`
+  - **`--open` had no effect**: the launcher now handles it explicitly, and the context menu uses `BuildOpenCommand`
+- **`--output-dir` 与 `--plugin` 未接入主程序**：主程序现已解析并应用这两个参数；批量转换窗口支持指定插件
+  - **`--output-dir` and `--plugin` were not wired into the launcher**: both are now parsed and applied, and the batch window accepts a preferred plugin
+- **解决方案残留 `EndProject`**：移除 KGM 插件时遗留的重复结束标记已清理
+  - **Stray `EndProject` in the solution file**: the duplicate token left by the KGM removal has been removed
+
+### 变更 / Changed
+- **格式方向解析统一**：新增 Core 的 `FormatSelector`；主程序的 `FormatResolver` 与命令行共用候选、记忆与显式插件选择逻辑
+  - **Unified format-direction resolution**: added Core `FormatSelector`; the launcher's `FormatResolver` and the CLI share candidate, remembered, and explicit plugin selection
+- **严格参数校验**：选项名不区分大小写；支持 `--name=value` 与 `--` 终止符；未知选项与缺少参数值不再静默忽略
+  - **Strict argument validation**: option names are case-insensitive; `--name=value` and the `--` terminator are supported; unknown options and missing values are no longer ignored silently
+- **提示文案正式化**：新增帮助、错误与使用说明统一使用书面语
+  - **Formalized user-facing copy**: new help, error, and usage text uses formal wording consistently
+
 ## [2.9.0-dev.1] - 2026-10-05
 
 ### 变更 / Changed

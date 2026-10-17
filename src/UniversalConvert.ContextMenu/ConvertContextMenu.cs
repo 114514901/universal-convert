@@ -239,7 +239,7 @@ namespace UniversalConvert.ContextMenu
             var appExe = Path.Combine(BaseDirectory, "UniversalConvert.App.exe");
             if (!File.Exists(appExe)) return;
 
-            var args = string.Join(" ", files.Select(f => "\"" + f + "\""));
+            var args = CommandLineContract.BuildOpenCommand(files);
             Process.Start(appExe, args);
         }
 

@@ -870,4 +870,71 @@
   <data name="ParamSize" xml:space="preserve">
     <value>尺寸</value>
   </data>
+  <data name="CliUsage" xml:space="preserve">
+    <value>UniversalConvert 命令行用法&#10;&#10;UniversalConvert.App.exe --convert &lt;文件...&gt; --to &lt;扩展名&gt; [--preset &lt;名称&gt;] [--plugin &lt;插件 Id&gt;] [--output &lt;文件&gt; | --output-dir &lt;目录&gt;]&#10;UniversalConvert.App.exe --customize &lt;文件&gt; --to &lt;扩展名&gt; [--plugin &lt;插件 Id&gt;]&#10;UniversalConvert.App.exe --open &lt;文件...&gt;&#10;UniversalConvert.App.exe --help&#10;UniversalConvert.App.exe --version&#10;&#10;说明：&#10;1. --convert 打开图形化转换窗口；自动化脚本请使用 UniversalConvert.Cli.exe。&#10;2. 选项名不区分大小写；支持 --name value 与 --name=value 两种写法。&#10;3. 使用 -- 分隔选项与文件路径。&#10;4. --output 仅适用于单文件；多文件请使用 --output-dir。</value>
+  </data>
+
+  <data name="CliNoInput" xml:space="preserve">
+    <value>错误：未指定任何输入文件。</value>
+  </data>
+
+  <data name="CliCustomizeNoInput" xml:space="preserve">
+    <value>错误：未指定要编辑的输入文件。</value>
+  </data>
+
+  <data name="CliInputNotFound" xml:space="preserve">
+    <value>错误：输入文件不存在：{0}</value>
+  </data>
+
+  <data name="CliMissingTargetFormat" xml:space="preserve">
+    <value>错误：未指定目标格式。请使用 --to &lt;扩展名&gt;。</value>
+  </data>
+
+  <data name="CliOutputConflict" xml:space="preserve">
+    <value>错误：--output 与 --output-dir 不能同时使用。</value>
+  </data>
+
+  <data name="CliOutputOnlySingle" xml:space="preserve">
+    <value>错误：--output 仅适用于单文件转换；批量转换请使用 --output-dir。</value>
+  </data>
+
+  <data name="CliOutputDirCreateFailed" xml:space="preserve">
+    <value>错误：无法创建输出目录“{0}”：{1}</value>
+  </data>
+
+  <data name="CliUnsupportedFormat" xml:space="preserve">
+    <value>错误：无法将“{0}”转换为“{1}”。</value>
+  </data>
+
+  <data name="CliPluginNotFound" xml:space="preserve">
+    <value>错误：插件“{0}”不在候选列表中。候选插件：{1}</value>
+  </data>
+
+  <data name="CliPluginAmbiguous" xml:space="preserve">
+    <value>错误：转换方向存在多个候选插件，请使用 --plugin 指定：{0}</value>
+  </data>
+
+  <data name="CliPluginUnavailable" xml:space="preserve">
+    <value>错误：插件“{0}”所需的工具不可用。</value>
+  </data>
+
+  <data name="CliPresetNotFound" xml:space="preserve">
+    <value>错误：未找到预设“{0}”。可用预设：{1}</value>
+  </data>
+
+  <data name="CliMissingOptionValue" xml:space="preserve">
+    <value>错误：选项“{0}”缺少参数值。</value>
+  </data>
+
+  <data name="CliUnknownOption" xml:space="preserve">
+    <value>错误：未知选项“{0}”。</value>
+  </data>
+
+  <data name="CliVersionFormat" xml:space="preserve">
+    <value>UniversalConvert {0}</value>
+  </data>
+
+  <data name="CliOutputExtensionMismatch" xml:space="preserve">
+    <value>错误：--output 的扩展名“{0}”与 --to 指定的“{1}”不一致。</value>
+  </data>
 </root>

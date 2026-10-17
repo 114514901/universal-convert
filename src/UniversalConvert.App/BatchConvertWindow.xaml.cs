@@ -29,6 +29,7 @@ namespace UniversalConvert.App
         private readonly int _workerThreads;
         private readonly string _outputDir;
         private readonly string _presetName;
+        private readonly string _preferredPluginId;
         private readonly ObservableCollection<BatchItem> _items = new ObservableCollection<BatchItem>();
         private readonly List<string> _outputPaths = new List<string>();
         private readonly StringBuilder _errorLog = new StringBuilder();
@@ -45,7 +46,8 @@ namespace UniversalConvert.App
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         public BatchConvertWindow(CoreHost host, SettingsManager settingsManager, string[] files, string targetExt, int workerThreads,
-            IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null, string presetName = null)
+            IDictionary<string, IDictionary<string, string>> perFileOptions = null, string outputDir = null, string presetName = null,
+            string preferredPluginId = null)
         {
             InitializeComponent();
 
@@ -59,6 +61,7 @@ namespace UniversalConvert.App
             _workerThreads = Math.Max(1, workerThreads);
             _outputDir = outputDir;
             _presetName = presetName;
+            _preferredPluginId = preferredPluginId;
             _dispatcher = Dispatcher.CurrentDispatcher;
 
             TitleText.Text = Strings.BatchTitle + "  →  ." + targetExt;
@@ -130,6 +133,23 @@ namespace UniversalConvert.App
             if (entry == null)
             {
                 RunOnUi(() => item.Status = Strings.StatusSkipped);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_presetName) && !PresetExists(entry, _presetName))
+            {
+                var message = string.Format(
+                    Strings.Get("CliPresetNotFound"),
+                    _presetName,
+                    DescribePresets(entry));
+                Interlocked.Increment(ref _failedCount);
+                RunOnUi(() => item.Status = Strings.StatusFailed + ": " + message);
+                lock (_errorLog)
+                {
+                    _errorLog.AppendLine("[" + Path.GetFileName(file) + "] " + message);
+                    _errorLog.AppendLine();
+                }
+                RunOnUi(UpdateOverallProgress);
                 return;
             }
 
@@ -205,6 +225,21 @@ namespace UniversalConvert.App
             }
         }
 
+        private static bool PresetExists(ConversionEntry entry, string presetName)
+        {
+            if (entry == null || entry.Presets == null || string.IsNullOrEmpty(presetName)) return false;
+            return entry.Presets.Any(p => p != null && p.Name == presetName);
+        }
+
+        private static string DescribePresets(ConversionEntry entry)
+        {
+            if (entry == null || entry.Presets == null || entry.Presets.Count == 0) return "（无）";
+            return string.Join("、", entry.Presets
+                .Where(p => p != null && !string.IsNullOrEmpty(p.Name))
+                .Select(p => p.Name)
+                .ToArray());
+        }
+
         /// <summary>解析该文件应使用的转换条目（同一方向多插件注册时由 FormatResolver 决定），带缓存避免批量中重复询问。</summary>
         private ConversionEntry ResolveEntry(string inputExt)
         {
@@ -212,7 +247,7 @@ namespace UniversalConvert.App
             ConversionEntry entry;
             if (!_entryCache.TryGetValue(key, out entry))
             {
-                entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, _targetExt);
+                entry = FormatResolver.Resolve(_host, _settingsManager, inputExt, _targetExt, _preferredPluginId);
                 _entryCache[key] = entry;
             }
             return entry;

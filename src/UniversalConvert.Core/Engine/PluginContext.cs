@@ -7,7 +7,8 @@ using UniversalConvert.Core.Plugins;
 namespace UniversalConvert.Core.Engine
 {
     /// <summary>
-    /// IPluginContext 默认实现。工具定位优先级：配置文件 > 安装目录 > 系统 PATH。
+    /// IPluginContext 默认实现。工具定位优先级：配置文件 > 安装目录。
+    /// 出于安全考虑，不读取系统 PATH。
     /// </summary>
     public sealed class PluginContext : IPluginContext
     {

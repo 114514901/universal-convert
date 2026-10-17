@@ -7,6 +7,7 @@
 ;          UniversalConvert.Core.dll
 ;          UniversalConvert.ContextMenu.dll
 ;          UniversalConvert.Installer.exe
+;          UniversalConvert.Cli.exe
 ;          SharpShell.dll
 ;          Newtonsoft.Json.dll
 ;          plugins\UniversalConvert.Plugin.FFmpeg.dll
