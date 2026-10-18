@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using UniversalConvert.Core.Config;
 using UniversalConvert.Core.Diagnostics;
 using UniversalConvert.Core.Plugins;
+using UniversalConvert.Core.Process;
 
 namespace UniversalConvert.App
 {
@@ -411,6 +412,8 @@ namespace UniversalConvert.App
 
                     try
                     {
+                        // 迁移前尝试关闭 explorer 等进程对旧目录的文件句柄，避免目录被占用
+                        FileUnlocker.Unlock(new[] { dir }, FileUnlockPolicy.Safe);
                         Directory.Move(dir, target);
                         Log.Info("已迁移扩展目录：“" + name + "” -> “" + id + "”。");
                     }
@@ -885,6 +888,22 @@ namespace UniversalConvert.App
             var pluginsRoot = ConfigStore.UserPluginsDirectory;
             var target = Path.Combine(pluginsRoot, directoryName);
 
+            if (Directory.Exists(target))
+            {
+                // 先尝试关闭 explorer/本产品进程内命中目标文件的句柄；不结束进程。
+                // 已映射为镜像的 DLL 仍可能受 Windows 映像段限制，失败时保留暂存内容。
+                var unlock = FileUnlocker.Unlock(new[] { target }, FileUnlockPolicy.Safe);
+                if (unlock.HandlesClosed > 0)
+                {
+                    Log.Info("已关闭占用扩展目录的文件句柄 " + unlock.HandlesClosed
+                        + " 个：" + string.Join("、", unlock.Processes.ToArray()));
+                }
+                if (unlock.RemainingProcesses.Count > 0)
+                {
+                    Log.Warn("扩展目录仍有占用进程：" + string.Join("、", unlock.RemainingProcesses.ToArray()));
+                }
+            }
+
             if (Directory.Exists(target) && ContainsLockedBinary(target))
             {
                 Log.Warn("目标目录仍被占用，本次不应用暂存更新：" + target);
@@ -1028,6 +1047,7 @@ namespace UniversalConvert.App
             {
                 try
                 {
+                    FileUnlocker.Unlock(new[] { target }, FileUnlockPolicy.Safe);
                     if (Directory.Exists(target))
                     {
                         if (TryDeleteInstalledDirectory(target)) return true;

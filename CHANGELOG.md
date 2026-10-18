@@ -2,6 +2,22 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.5] - 2026-10-18
+
+### 修复 / Fixed
+- **更新文件被占用**：新增句柄级文件解锁（Restart Manager 定位占用进程 + `DuplicateHandle(..., DUPLICATE_CLOSE_SOURCE)`），默认只处理 explorer 与本产品进程，不结束进程；扩展暂存应用、暂存卸载、旧目录迁移前自动尝试解除，主程序更新启动安装器前也会先解除资源管理器等进程的句柄
+  - **Files were locked during updates**: added handle-level unlocking (Restart Manager locates lockers, then `DuplicateHandle(..., DUPLICATE_CLOSE_SOURCE)`) for explorer and this product's processes without terminating them. It runs before pending extension apply/uninstall and legacy directory migration, and before launching the main-program updater
+- **安装器跳过文件导致版本混用**：安装器强制关闭仍占用待更新文件的进程（`/FORCECLOSEAPPLICATIONS`），并在预安装阶段关闭 App/CLI；更新器启动安装器时也传入该参数
+  - **Installer skipped files and mixed versions**: the installer now force-closes processes still holding files to be replaced (`/FORCECLOSEAPPLICATIONS`) and closes App/CLI during preparation; the updater passes the same flag
+- **CLI 与 Core 版本不一致时只报 MissingMethodException**：CLI 启动时校验自身与 `UniversalConvert.Core.dll` 的 InformationalVersion，不一致时给出正式修复提示；`--version` 同时输出 CLI 与 Core 版本
+  - **A CLI/Core mismatch surfaced only as MissingMethodException**: the CLI now checks its own and `UniversalConvert.Core.dll` informational versions at startup and gives a formal repair message; `--version` prints both versions
+- **文件解锁说明**：新增 `docs/文件占用与更新说明.md`，并在命令行指南补充安装时不要跳过文件与手动核对版本的步骤
+  - **Unlock documentation**: added `docs/文件占用与更新说明.md` and CLI guide steps for not skipping files and verifying versions manually
+
+### 测试 / Tests
+- 回归测试由 43 项增加到 45 项，新增子进程独占句柄的 Restart Manager 识别与句柄关闭测试，以及 CLI/Core 版本一致性测试
+  - Regression tests increased from 43 to 45, adding a child-process exclusive-handle test for Restart Manager discovery and handle closing, and a CLI/Core version consistency test
+
 ## [2.9.0-dev.4] - 2026-10-18
 
 ### 修复 / Fixed

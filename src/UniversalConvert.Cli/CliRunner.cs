@@ -56,6 +56,9 @@ namespace UniversalConvert.Cli
             if (_options.Command == CliCommand.Version)
             {
                 Console.Out.WriteLine(string.Format(CliText.VersionFormat, GetVersion()));
+                Console.Out.WriteLine(string.Format(
+                    CliText.CoreVersionFormat,
+                    CliCompatibility.GetCoreVersion() ?? CliText.UnknownVersion));
                 return CliExitCode.Success;
             }
             if (_options.Errors.Count > 0)

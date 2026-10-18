@@ -20,6 +20,18 @@ namespace UniversalConvert.Cli
             try
             {
                 options = CliOptions.Parse(args);
+                if (options.Errors.Count == 0
+                    && options.Command != CliCommand.Help
+                    && options.Command != CliCommand.Version)
+                {
+                    var compatibility = CliCompatibility.Check();
+                    if (!string.IsNullOrEmpty(compatibility))
+                    {
+                        Console.Error.WriteLine(compatibility);
+                        return CliExitCode.InternalError;
+                    }
+                }
+
                 var runner = new CliRunner(options);
                 var code = runner.Run();
                 Environment.ExitCode = code;
@@ -29,6 +41,11 @@ namespace UniversalConvert.Cli
             {
                 Console.Error.WriteLine(CliText.Cancelled);
                 return CliExitCode.Cancelled;
+            }
+            catch (MissingMethodException)
+            {
+                Console.Error.WriteLine(CliText.ComponentMismatchUnknown);
+                return CliExitCode.InternalError;
             }
             catch (Exception ex)
             {

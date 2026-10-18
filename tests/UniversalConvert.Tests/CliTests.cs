@@ -15,6 +15,7 @@ namespace UniversalConvert.Tests
             Program.Run("CLI：--skip 与冲突策略", SkipAndConflict);
             Program.Run("CLI：formats 的 --plugin 过滤参数", FormatsPlugin);
             Program.Run("CLI：--version 实际输出", VersionOutput);
+            Program.Run("CLI：Core 版本一致", CoreVersionConsistent);
             Program.Run("CLI：JSON 保留中文原文", JsonKeepsChinese);
             Program.Run("CLI：JSON progress 按时间节流", JsonProgressThrottle);
             Program.Run("CLI：summary 包含总字节与平均速度", SummaryMetrics);
@@ -59,7 +60,15 @@ namespace UniversalConvert.Tests
                 Program.Equal(0, code, "--version 应返回成功");
             });
             Program.True(text.Contains("UniversalConvert CLI"), "应输出版本行");
+            Program.True(text.Contains("UniversalConvert Core"), "应输出 Core 版本行");
             Program.True(text.Trim().Length > 0, "版本输出不能为空");
+        }
+
+        private static void CoreVersionConsistent()
+        {
+            var error = CliCompatibility.Check();
+            Program.True(string.IsNullOrEmpty(error), error ?? "CLI 与 Core 版本应一致");
+            Program.True(!string.IsNullOrEmpty(CliCompatibility.GetCoreVersion()), "应能读取 Core 版本");
         }
 
         private static void JsonKeepsChinese()

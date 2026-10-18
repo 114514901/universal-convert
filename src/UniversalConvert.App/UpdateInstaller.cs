@@ -4,6 +4,8 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using UniversalConvert.Core.Diagnostics;
+using UniversalConvert.Core.Process;
 
 namespace UniversalConvert.App
 {
@@ -58,9 +60,25 @@ namespace UniversalConvert.App
             UpdateChecker.VerifyInstallerFile(installerPath);
 
             var installDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+            try
+            {
+                // 先按句柄关闭 explorer 等进程对本产品文件的占用；当前进程自身持有的句柄
+                // 由安装器在退出应用后处理，不能在本进程内替换已加载的程序集。
+                var unlock = FileUnlocker.Unlock(new[] { installDirectory }, FileUnlockPolicy.Safe);
+                if (unlock.HandlesClosed > 0)
+                {
+                    Log.Info("启动更新前已关闭文件句柄 " + unlock.HandlesClosed
+                        + " 个：" + string.Join("、", unlock.Processes.ToArray()));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("启动更新前解除文件占用失败：" + ex.Message);
+            }
+
             var startInfo = new ProcessStartInfo(installerPath)
             {
-                Arguments = "/SILENT /NORESTART /MERGETASKS=runapp,contextmenu /DIR=\"" + installDirectory + "\"",
+                Arguments = "/SILENT /NORESTART /FORCECLOSEAPPLICATIONS /MERGETASKS=runapp,contextmenu /DIR=\"" + installDirectory + "\"",
                 UseShellExecute = true,
                 Verb = "runas"
             };

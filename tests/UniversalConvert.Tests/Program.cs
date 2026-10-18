@@ -16,8 +16,19 @@ namespace UniversalConvert.Tests
         private static int _passed;
         private static int _failed;
 
-        private static int Main()
+        private static int Main(string[] args)
         {
+            if (args != null && args.Length == 2 && args[0] == "--hold-lock")
+            {
+                using (var stream = new FileStream(args[1], FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    Console.Out.WriteLine("locked");
+                    Console.Out.Flush();
+                    System.Threading.Thread.Sleep(30000);
+                }
+                return 0;
+            }
+
             Console.OutputEncoding = new UTF8Encoding(false);
             Console.WriteLine("UniversalConvert 命令行回归测试");
             Console.WriteLine();
@@ -263,6 +274,7 @@ namespace UniversalConvert.Tests
             DownloadTests.RunAll();
             PackageTests.RunAll();
             CliTests.RunAll();
+            FileUnlockerTests.RunAll();
 
             Console.WriteLine();
             Console.WriteLine(string.Format("合计：{0} 项，通过 {1} 项，失败 {2} 项。", _passed + _failed, _passed, _failed));

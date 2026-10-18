@@ -46,7 +46,7 @@ ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=admin
 ; 弹「需要关闭的程序」提示（如正在运行的 UniversalConvert），但排除 explorer——explorer 由 [Code] 的杀/重启流程处理
 CloseApplications=yes
-CloseApplicationsFilter=explorer.exe
+CloseApplicationsFilter=explorer.exe,UniversalConvert.App.exe,UniversalConvert.Cli.exe
 RestartApplications=no
 
 [Languages]
@@ -123,6 +123,8 @@ begin
   // 先优雅关闭（发 WM_CLOSE），再强制结束残留进程，避免 exe/dll 被占用导致安装不完整
   Exec('taskkill.exe', '/im UniversalConvert.App.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Exec('taskkill.exe', '/f /im UniversalConvert.App.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/im UniversalConvert.Cli.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/f /im UniversalConvert.Cli.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
 procedure KillKnownLockers();

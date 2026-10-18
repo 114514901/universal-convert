@@ -42,6 +42,11 @@ namespace UniversalConvert.Cli
         public const string OutputExists = "错误：输出文件已存在，且无法预留输出路径：{0}。请使用 --force 覆盖，或指定其他输出路径。";
         public const string OutputReserveFailed = "错误：无法预留输出路径：{0}：{1}。请使用 --force 覆盖，或指定其他输出路径。";
         public const string InternalError = "错误：执行过程中发生异常：{0}";
+        public const string ComponentMismatch = "错误：UniversalConvert.Core.dll 的版本（{0}）与控制台程序（{1}）不一致。安装可能未完整替换文件；请关闭正在运行的程序后重新运行完整安装包。";
+        public const string ComponentMismatchUnknown = "错误：命令行程序与 UniversalConvert.Core.dll 版本不匹配。请关闭正在运行的程序后重新运行完整安装包。";
+        public const string ComponentLoadFailed = "错误：无法加载 UniversalConvert.Core.dll：{0}。请重新安装完整安装包。";
+        public const string UnknownVersion = "未知";
+        public const string CoreVersionFormat = "UniversalConvert Core {0}";
         public const string ExecutionException = "执行转换时发生异常：{0}";
         public const string PreparationFailed = "无法准备输出文件：{0}";
         public const string LoadErrors = "插件加载过程中出现错误：{0}";
