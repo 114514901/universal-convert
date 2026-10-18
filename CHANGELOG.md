@@ -2,6 +2,18 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.6] - 2026-10-18
+
+### 新增 / Added
+- **独立更新器 `UniversalConvert.Updater.exe`**：存在暂存扩展更新/卸载时，主程序不再自己覆盖已加载的插件目录，而是启动更新器并退出；更新器等待主进程结束后应用暂存内容、重新启动主程序。更新器不加载任何插件，只接受 `--parent`、`--app`、`--apply-extensions`、`--installer` 等本产品参数
+  - **Standalone updater `UniversalConvert.Updater.exe`**: when pending extension updates/uninstalls exist, the app now launches the updater and exits instead of replacing loaded plugin DLLs itself. The updater waits for the parent, applies pending changes, and restarts the app. It loads no plugins and accepts only product-specific arguments such as `--parent`, `--app`, `--apply-extensions`, and `--installer`
+- **更新器随安装包分发**：CI 将更新器复制到 `dist`，安装包使用现有 `dist\*.exe` 规则安装；主程序缺失更新器时仍退回到原有“下次启动应用”路径
+  - **Updater ships with the installer**: CI copies it into `dist`, and the installer's existing `dist\*.exe` rule installs it. If the updater is missing, the app falls back to applying pending changes on next startup
+
+### 测试 / Tests
+- 回归测试由 45 项增加到 48 项，新增更新器参数解析、互斥校验与非法参数测试
+  - Regression tests increased from 45 to 48, adding updater argument parsing, mutual-exclusion, and invalid-argument tests
+
 ## [2.9.0-dev.5] - 2026-10-18
 
 ### 修复 / Fixed

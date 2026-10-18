@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\src\UniversalConvert.Core\UniversalConvert.Core.csproj" />
     <ProjectReference Include="..\..\src\UniversalConvert.Cli\UniversalConvert.Cli.csproj" />
     <ProjectReference Include="..\..\src\UniversalConvert.App\UniversalConvert.App.csproj" />
+    <ProjectReference Include="..\..\src\UniversalConvert.Updater\UniversalConvert.Updater.csproj" />
   </ItemGroup>
 
 </Project>
