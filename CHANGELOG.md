@@ -2,6 +2,26 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.4] - 2026-10-18
+
+### 修复 / Fixed
+- **输出冲突策略不明确**：帮助与文档现在显式说明三种策略——默认 `rename`（追加序号）、`--force`（覆盖）、`--skip`（跳过）；`--force` 与 `--skip` 互斥，批量 summary 统计 skipped
+  - **Output conflict policy was unclear**: help and docs now describe three explicit policies: default `rename` (append a sequence number), `--force` (overwrite), and `--skip` (skip). The last two are mutually exclusive, and the batch summary reports skipped files
+- **JSON 中文被转义为 Unicode**：命令行 JSON 改用 Newtonsoft.Json 的默认字符串转义，中文路径与消息保持原文，不再输出 \uXXXX；控制字符仍按 JSON 规范转义
+  - **Chinese text was escaped in JSON**: CLI JSON now uses Newtonsoft.Json's default string escaping, keeping Chinese paths and messages readable instead of emitting \uXXXX; control characters are still escaped per JSON
+- **JSON progress 事件过密**：同一文件的进度事件限制为最多每 100 ms 一次，且百分比至少变化 1 个百分点；完成事件始终报告
+  - **JSON progress events were too dense**: progress for a file is limited to at most one event per 100 ms and at least a one-percentage-point change; the completion event is always reported
+- **formats 输出按输入格式重复展开**：无 `--input` 时改为按插件汇总（能力条目、输入/输出格式数量）；`--input` 展开明细，新增 `--plugin` 过滤；文本明细超过 200 行时给出截断提示，JSON 默认输出聚合数组
+  - **formats expanded every input format**: without `--input` it now summarizes by plugin (capability entries, input/output counts); `--input` expands details, and `--plugin` filters. Text details beyond 200 lines emit a truncation notice; JSON defaults to the aggregated array
+- **summary 缺少体积与速度**：summary 与文本汇总新增总输出字节数和平均速度；success 事件新增单文件 bytes 字段
+  - **Summary lacked size and speed**: the summary (JSON and text) now includes total output bytes and average speed; the success event includes a per-file bytes field
+- **版本输出自查**：补充并验证 `--version` 输出；`plugins --version` 同样返回版本
+  - **Version output self-check**: verified `--version` output; `plugins --version` also returns the version
+
+### 测试 / Tests
+- 回归测试由 36 项增加到 43 项，新增 CLI 冲突策略、formats 过滤参数、JSON 中文、progress 节流、summary 体积与速度、精确占位及版本输出测试
+  - Regression tests increased from 36 to 43, adding CLI conflict policies, formats filtering, JSON Chinese text, progress throttling, summary size/speed, exact reservation, and version output
+
 ## [2.9.0-dev.3] - 2026-10-17
 
 ### 修复 / Fixed

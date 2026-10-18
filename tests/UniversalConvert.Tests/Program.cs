@@ -262,6 +262,7 @@ namespace UniversalConvert.Tests
 
             DownloadTests.RunAll();
             PackageTests.RunAll();
+            CliTests.RunAll();
 
             Console.WriteLine();
             Console.WriteLine(string.Format("合计：{0} 项，通过 {1} 项，失败 {2} 项。", _passed + _failed, _passed, _failed));

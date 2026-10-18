@@ -37,6 +37,7 @@ namespace UniversalConvert.Cli
         private int _succeeded;
         private int _failed;
         private int _skipped;
+        private long _outputBytes;
         private DateTime _startedAt;
 
         public CliRunner(CliOptions options)
@@ -178,19 +179,31 @@ namespace UniversalConvert.Cli
 
             if (_options.DryRun)
             {
+                var skipped = 0;
                 foreach (var job in jobs)
                 {
+                    var targetExists = File.Exists(job.DesiredPath);
+                    var sameAsInput = string.Equals(
+                        job.DesiredPath, job.InputPath, StringComparison.OrdinalIgnoreCase);
+
+                    if (_options.Skip && (targetExists || sameAsInput))
+                    {
+                        skipped++;
+                        _output.Plan(
+                            job.InputPath, job.DesiredPath, job.Entry.PluginName, job.PresetName,
+                            false, true, false, sameAsInput ? CliText.SkipReasonSameAsInput : CliText.SkipReasonExists);
+                        continue;
+                    }
+
                     var planPath = _options.Force
                         ? job.DesiredPath
                         : FindAvailablePath(job.DesiredPath, job.InputPath);
+                    var renamed = !string.Equals(planPath, job.DesiredPath, StringComparison.OrdinalIgnoreCase);
                     _output.Plan(
-                        job.InputPath,
-                        planPath,
-                        job.Entry.PluginName,
-                        job.PresetName,
-                        _options.Force && File.Exists(job.DesiredPath));
+                        job.InputPath, planPath, job.Entry.PluginName, job.PresetName,
+                        _options.Force && targetExists, false, renamed, null);
                 }
-                _output.PlanSummary(jobs.Count);
+                _output.PlanSummary(jobs.Count, skipped);
                 return CliExitCode.Success;
             }
 
@@ -388,6 +401,47 @@ namespace UniversalConvert.Cli
                     }
                 }
 
+                if (_options.Skip)
+                {
+                    if (string.Equals(job.DesiredPath, job.InputPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        job.Skipped = true;
+                        job.SkipReason = CliText.SkipReasonSameAsInput;
+                        continue;
+                    }
+                    if (File.Exists(job.DesiredPath))
+                    {
+                        job.Skipped = true;
+                        job.SkipReason = CliText.SkipReasonExists;
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (!OutputPathHelper.TryReserveExactPath(job.DesiredPath))
+                        {
+                            job.Skipped = true;
+                            job.SkipReason = CliText.SkipReasonExists;
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        problems.Add(new CliProblem(
+                            CliExitCode.UsageError,
+                            string.Format(CliText.OutputReserveFailed, job.DesiredPath, ex.Message)));
+                        return false;
+                    }
+
+                    job.FinalPath = job.DesiredPath;
+                    job.PlaceholderReserved = true;
+                    lock (_fileStateSync)
+                    {
+                        _placeholders.Add(job.FinalPath);
+                    }
+                    continue;
+                }
+
                 if (_options.Force)
                 {
                     job.FinalPath = job.DesiredPath;
@@ -425,6 +479,7 @@ namespace UniversalConvert.Cli
             _succeeded = 0;
             _failed = 0;
             _skipped = 0;
+            _outputBytes = 0;
             _stopRequested = false;
 
             ConsoleCancelEventHandler handler = delegate(object sender, ConsoleCancelEventArgs args)
@@ -449,7 +504,7 @@ namespace UniversalConvert.Cli
             }
 
             var seconds = (DateTime.UtcNow - _startedAt).TotalSeconds;
-            _output.Summary(jobs.Count, _succeeded, _failed, _skipped, seconds);
+            _output.Summary(jobs.Count, _succeeded, _failed, _skipped, seconds, _outputBytes);
 
             if (cancelled)
             {
@@ -473,6 +528,12 @@ namespace UniversalConvert.Cli
             {
                 foreach (var job in jobs)
                 {
+                    if (job.Skipped)
+                    {
+                        _skipped++;
+                        _output.FileSkipped(job.InputPath, job.SkipReason);
+                        continue;
+                    }
                     if (!CanStart())
                     {
                         _skipped++;
@@ -494,6 +555,12 @@ namespace UniversalConvert.Cli
                     await semaphore.WaitAsync().ConfigureAwait(false);
                     try
                     {
+                        if (current.Skipped)
+                        {
+                            Interlocked.Increment(ref _skipped);
+                            _output.FileSkipped(current.InputPath, current.SkipReason);
+                            return;
+                        }
                         if (!CanStart())
                         {
                             Interlocked.Increment(ref _skipped);
@@ -594,8 +661,10 @@ namespace UniversalConvert.Cli
                     FinalizeOutput(tempPath, result.OutputPath, job.FinalPath);
                     RemoveTemp(tempPath);
                     RemovePlaceholder(job.FinalPath);
+                    var outputBytes = GetFileLength(job.FinalPath);
+                    Interlocked.Add(ref _outputBytes, outputBytes);
                     Interlocked.Increment(ref _succeeded);
-                    _output.FileSuccess(job.InputPath, job.FinalPath, result.Duration.TotalSeconds);
+                    _output.FileSuccess(job.InputPath, job.FinalPath, result.Duration.TotalSeconds, outputBytes);
                 }
                 catch (Exception ex)
                 {
@@ -879,15 +948,108 @@ namespace UniversalConvert.Cli
         private int RunFormats()
         {
             var filter = NormalizeExtension(_options.InputExtension);
-            var entries = _host.Registry.Entries
-                .Where(e => string.IsNullOrEmpty(filter)
-                    || string.Equals(e.InputExtension, filter, StringComparison.OrdinalIgnoreCase))
+            var pluginFilter = (_options.PluginId ?? string.Empty).Trim();
+            var registryEntries = _host.Registry.Entries.ToList();
+
+            if (!string.IsNullOrEmpty(pluginFilter))
+            {
+                var filtered = registryEntries
+                    .Where(e => string.Equals(e.PluginId, pluginFilter, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(e.PluginName, pluginFilter, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (filtered.Count == 0)
+                {
+                    _output.Error(string.Format(
+                        CliText.FormatsPluginNotFound,
+                        pluginFilter,
+                        DescribePluginCandidates(registryEntries)));
+                    return CliExitCode.UsageError;
+                }
+                registryEntries = filtered;
+            }
+
+            // 无 --input 时按插件汇总，避免每个输入扩展名重复展开全部目标格式
+            if (string.IsNullOrEmpty(filter))
+            {
+                return WriteFormatSummary(registryEntries);
+            }
+
+            var entries = registryEntries
+                .Where(e => string.Equals(e.InputExtension, filter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            return WriteFormatDetails(entries);
+        }
+
+        private int WriteFormatSummary(IList<ConversionEntry> entries)
+        {
+            var groups = entries
+                .GroupBy(e => e.PluginId ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            if (groups.Count == 0)
+            {
+                if (_options.Json) WriteJsonArray(new JArray());
+                else _output.Info(CliText.NoFormats);
+                return CliExitCode.Success;
+            }
+
+            if (_options.Json)
+            {
+                var array = new JArray();
+                foreach (var group in groups)
+                {
+                    var item = new JObject();
+                    item["plugin"] = group.First().PluginName;
+                    item["pluginId"] = group.Key;
+                    item["capabilities"] = group.Count();
+                    item["inputCount"] = group
+                        .Select(e => e.InputExtension)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count();
+                    item["outputCount"] = group
+                        .Select(e => e.OutputExtension)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count();
+                    item["available"] = group.All(e => e.IsAvailable);
+                    array.Add(item);
+                }
+                WriteJsonArray(array);
+                return CliExitCode.Success;
+            }
+
+            foreach (var group in groups)
+            {
+                Console.Out.WriteLine(string.Format(
+                    CultureInfo.CurrentCulture,
+                    CliText.FormatsSummaryLine,
+                    group.First().PluginName,
+                    group.Key,
+                    group.Count(),
+                    group.Select(e => e.InputExtension).Distinct(StringComparer.OrdinalIgnoreCase).Count(),
+                    group.Select(e => e.OutputExtension).Distinct(StringComparer.OrdinalIgnoreCase).Count()));
+            }
+            Console.Out.WriteLine(string.Format(
+                CultureInfo.CurrentCulture,
+                CliText.FormatsSummaryHint,
+                groups.Count,
+                entries.Count));
+            return CliExitCode.Success;
+        }
+
+        private int WriteFormatDetails(IList<ConversionEntry> entries)
+        {
             var groups = entries
                 .GroupBy(e => e.InputExtension, StringComparer.OrdinalIgnoreCase)
                 .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
+
+            if (groups.Count == 0)
+            {
+                if (_options.Json) WriteJsonArray(new JArray());
+                else _output.Info(CliText.NoFormats);
+                return CliExitCode.Success;
+            }
 
             if (_options.Json)
             {
@@ -918,26 +1080,64 @@ namespace UniversalConvert.Cli
                 return CliExitCode.Success;
             }
 
-            if (groups.Count == 0)
-            {
-                _output.Info(CliText.NoFormats);
-                return CliExitCode.Success;
-            }
-
+            const int maxDetailLines = 200;
+            var totalLines = 0;
             foreach (var group in groups)
             {
+                totalLines++;
+                totalLines += CountDistinctOutputs(group);
+            }
+
+            var written = 0;
+            var truncated = totalLines > maxDetailLines;
+            foreach (var group in groups)
+            {
+                if (written >= maxDetailLines) break;
                 Console.Out.WriteLine("." + group.Key + "：");
+                written++;
                 var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var entry in group)
                 {
+                    if (written >= maxDetailLines) break;
                     var key = entry.OutputExtension + "|" + entry.PluginId;
                     if (!seen.Add(key)) continue;
                     var line = "  ." + entry.OutputExtension + "  " + entry.PluginName + "（" + entry.PluginId + "）";
                     if (!entry.IsAvailable) line += "（工具不可用）";
                     Console.Out.WriteLine(line);
+                    written++;
                 }
             }
+
+            if (truncated)
+            {
+                Console.Out.WriteLine(string.Format(
+                    CultureInfo.CurrentCulture,
+                    CliText.FormatsTruncated,
+                    totalLines,
+                    maxDetailLines));
+            }
             return CliExitCode.Success;
+        }
+
+        private static int CountDistinctOutputs(IEnumerable<ConversionEntry> entries)
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var entry in entries)
+            {
+                seen.Add(entry.OutputExtension + "|" + entry.PluginId);
+            }
+            return seen.Count;
+        }
+
+        private static string DescribePluginCandidates(IEnumerable<ConversionEntry> entries)
+        {
+            var ids = entries
+                .Select(e => e.PluginId)
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            return ids.Length == 0 ? "（无）" : string.Join("、", ids);
         }
 
         private int RunPlugins()
@@ -986,7 +1186,8 @@ namespace UniversalConvert.Cli
         {
             var json = JsonConvert.SerializeObject(array, Formatting.Indented, new JsonSerializerSettings
             {
-                StringEscapeHandling = StringEscapeHandling.EscapeNonAscii
+                // 保留中文原文，避免路径与消息被序列化器转为 Unicode 转义
+                StringEscapeHandling = StringEscapeHandling.Default
             });
             Console.Out.WriteLine(json);
         }
@@ -1095,6 +1296,20 @@ namespace UniversalConvert.Cli
             return trimmed;
         }
 
+        private static long GetFileLength(string path)
+        {
+            try
+            {
+                return !string.IsNullOrEmpty(path) && File.Exists(path)
+                    ? new FileInfo(path).Length
+                    : 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         private static string Truncate(string value, int length)
         {
             if (string.IsNullOrEmpty(value)) return value;
@@ -1139,6 +1354,8 @@ namespace UniversalConvert.Cli
             public IDictionary<string, string> Options { get; set; }
             public int Index { get; set; }
             public bool PlaceholderReserved { get; set; }
+            public bool Skipped { get; set; }
+            public string SkipReason { get; set; }
         }
 
         private sealed class CliProblem

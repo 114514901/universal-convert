@@ -49,6 +49,27 @@ namespace UniversalConvert.Core.Process
         }
 
         /// <summary>
+        /// 仅尝试占位原始路径，不追加序号：路径已存在或无法原子占位时返回 false。
+        /// 适用于“目标已存在则跳过”的显式策略；目录不可写等异常仍向上抛出。
+        /// </summary>
+        public static bool TryReserveExactPath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            try
+            {
+                using (new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                }
+                return true;
+            }
+            catch (IOException)
+            {
+                // 文件已存在或被占用：按未占位处理，由调用方决定跳过或报错
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 为输出「预订」一个不冲突的路径，并通过 <paramref name="reserved"/> 报告是否成功创建了占位文件。
         /// 调用方只有在 reserved 为 true 时才负责在失败/取消时删除占位文件；
         /// 目录不可写等情况下返回原始路径且 reserved 为 false。

@@ -56,6 +56,7 @@ namespace UniversalConvert.Cli
         public string InputExtension { get; private set; }
 
         public bool Force { get; private set; }
+        public bool Skip { get; private set; }
         public bool DryRun { get; private set; }
         public bool Json { get; private set; }
         public bool Quiet { get; private set; }
@@ -189,6 +190,10 @@ namespace UniversalConvert.Cli
                         RejectInlineValue(arg, name, inline);
                         Force = true;
                         break;
+                    case "--skip":
+                        RejectInlineValue(arg, name, inline);
+                        Skip = true;
+                        break;
                     case "--dry-run":
                         RejectInlineValue(arg, name, inline);
                         DryRun = true;
@@ -226,6 +231,10 @@ namespace UniversalConvert.Cli
             {
                 Errors.Add(CliText.JsonQuietConflict);
             }
+            if (Force && Skip)
+            {
+                Errors.Add(CliText.ForceSkipConflict);
+            }
             if (!string.IsNullOrEmpty(Output) && !string.IsNullOrEmpty(OutputDir))
             {
                 Errors.Add(CliText.OutputConflict);
@@ -251,6 +260,9 @@ namespace UniversalConvert.Cli
                 {
                     case "--input":
                         InputExtension = TakeValue(args, ref i, name, inline);
+                        break;
+                    case "--plugin":
+                        PluginId = TakeValue(args, ref i, name, inline);
                         break;
                     case "--json":
                         RejectInlineValue(arg, name, inline);
