@@ -59,6 +59,7 @@ namespace UniversalConvert.Core.Process
         private const int ObjectNameInformation = 1;
         private const int ObjectTypeInformation = 2;
         private const int SystemExtendedHandleInformation = 64;
+        private const uint FileTypeDisk = 0x0001;
 
         private static readonly string[] SafeProcessNames =
         {
@@ -167,6 +168,10 @@ namespace UniversalConvert.Core.Process
                         {
                             var type = QueryObjectName(duplicated, ObjectTypeInformation);
                             if (!string.Equals(type, "File", StringComparison.OrdinalIgnoreCase)) continue;
+
+                            // 管道、控制台等对象同样属于 File 类型；查询其名称可能阻塞，
+                            // 因此只处理磁盘文件（DLL/EXE/普通文件）。
+                            if (GetFileType(duplicated) != FileTypeDisk) continue;
 
                             var name = QueryObjectName(duplicated, ObjectNameInformation);
                             if (string.IsNullOrEmpty(name)) continue;
@@ -547,5 +552,8 @@ namespace UniversalConvert.Core.Process
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int QueryDosDevice(string lpDeviceName, StringBuilder lpTargetPath, int ucchMax);
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetFileType(IntPtr hFile);
     }
 }
