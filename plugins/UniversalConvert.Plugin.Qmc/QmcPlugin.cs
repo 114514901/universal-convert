@@ -144,10 +144,13 @@ namespace UniversalConvert.Plugin.Qmc
             }
 
             var outputPath = ResolveOutputPath(request, targetExt);
+            var sameFormat = string.Equals(originalFormat, targetExt, StringComparison.OrdinalIgnoreCase);
+            var metadataMode = MetadataPolicy.Resolve(request.Options);
+            var stripMetadata = MetadataPolicy.ShouldStripTags(metadataMode);
 
             try
             {
-                if (string.Equals(originalFormat, targetExt, StringComparison.OrdinalIgnoreCase))
+                if (sameFormat && !stripMetadata)
                 {
                     progress?.Report(new ConversionProgress(ConversionStage.Finalizing, 100, "写入输出..."));
                     File.Copy(tempPath, outputPath, true);
@@ -157,11 +160,15 @@ namespace UniversalConvert.Plugin.Qmc
                     var ffmpeg = _context?.FindTool("ffmpeg");
                     if (string.IsNullOrEmpty(ffmpeg))
                     {
-                        throw new InvalidOperationException("转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
+                        throw new InvalidOperationException(
+                            stripMetadata
+                                ? "清除元数据需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。"
+                                : "转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
                     }
 
-                    progress?.Report(new ConversionProgress(ConversionStage.Running, -1, "转码中..."));
-                    var run = ProcessRunner.Run(ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options), ct);
+                    progress?.Report(new ConversionProgress(ConversionStage.Running, -1, sameFormat ? "写入输出..." : "转码中..."));
+                    var run = ProcessRunner.Run(
+                        ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options, sameFormat, metadataMode), ct);
 
                     if (run.ExitCode != 0)
                     {
@@ -269,11 +276,23 @@ namespace UniversalConvert.Plugin.Qmc
             return OutputPathHelper.ReserveUniqueOutputPath(Path.Combine(inputDir ?? string.Empty, inputName + "." + targetExt), request.InputPath);
         }
 
-        private static string BuildFfmpegArgs(string input, string output, IDictionary<string, string> options)
+        private static string BuildFfmpegArgs(
+            string input, string output, IDictionary<string, string> options,
+            bool copyAudio, MetadataMode metadataMode)
         {
             var sb = new StringBuilder();
             sb.Append("-y -hide_banner -loglevel error -i ").Append(ProcessRunner.Quote(input));
             sb.Append(" -vn");
+
+            if (copyAudio)
+            {
+                sb.Append(" -c:a copy");
+            }
+
+            if (MetadataPolicy.ShouldStripTags(metadataMode))
+            {
+                sb.Append(" -map_metadata -1");
+            }
 
             string value;
             if (options != null && options.TryGetValue("audioBitrate", out value) && !string.IsNullOrEmpty(value))
@@ -342,7 +361,11 @@ namespace UniversalConvert.Plugin.Qmc
                         Choice("44100", "44100 Hz"),
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
-                        Choice("96000", "96000 Hz")).AsSampleRate()
+                        Choice("96000", "96000 Hz")).AsSampleRate(),
+                    EnumOption("metadataMode", "@ParamMetadataMode", MetadataPolicy.KeepValue,
+                        Choice(MetadataPolicy.KeepValue, "@MetadataKeep"),
+                        Choice(MetadataPolicy.TagsValue, "@MetadataTags"),
+                        Choice(MetadataPolicy.AllValue, "@MetadataAll"))
                 },
                 Presets = new List<ConversionPreset>
                 {

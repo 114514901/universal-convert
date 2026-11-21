@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\src\UniversalConvert.Cli\UniversalConvert.Cli.csproj" />
     <ProjectReference Include="..\..\src\UniversalConvert.App\UniversalConvert.App.csproj" />
     <ProjectReference Include="..\..\src\UniversalConvert.Updater\UniversalConvert.Updater.csproj" />
+    <ProjectReference Include="..\..\plugins\UniversalConvert.Plugin.FFmpeg\UniversalConvert.Plugin.FFmpeg.csproj" />
   </ItemGroup>
 
 </Project>

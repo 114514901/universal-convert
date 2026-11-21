@@ -42,6 +42,9 @@ namespace UniversalConvert.Core.Plugins
         /// <summary>Enum 型时的候选项。</summary>
         public IList<OptionChoice> Choices { get; set; }
 
+        /// <summary>是否隐藏于动态表单（保留给旧配置兼容或内部联动使用）。</summary>
+        public bool Hidden { get; set; }
+
         /// <summary>
         /// 高级参数别名：本选项对应的 FFmpeg 命令行参数名（如 "-crf" / "-b:a"）。
         /// 用于「高级参数」输入框联动：用户写 "-crf 18" 时回填到本选项。

@@ -108,6 +108,8 @@ namespace UniversalConvert.App
 
             foreach (var option in _entry.Options)
             {
+                if (option == null || option.Hidden) continue;
+
                 // 勾选框统一收集到最下方 WrapPanel（每排多个，放不下换行）
                 if (option.Type == OptionType.Bool)
                 {

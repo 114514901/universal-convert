@@ -818,6 +818,18 @@
   <data name="CodecCopy" xml:space="preserve">
     <value>Copy (no re-encode)</value>
   </data>
+  <data name="ParamMetadataMode" xml:space="preserve">
+    <value>Metadata</value>
+  </data>
+  <data name="MetadataKeep" xml:space="preserve">
+    <value>Keep (default)</value>
+  </data>
+  <data name="MetadataTags" xml:space="preserve">
+    <value>Strip tags, keep cover</value>
+  </data>
+  <data name="MetadataAll" xml:space="preserve">
+    <value>Strip tags and cover</value>
+  </data>
   <data name="ParamNoCoverArt" xml:space="preserve">
     <value>No cover art</value>
   </data>

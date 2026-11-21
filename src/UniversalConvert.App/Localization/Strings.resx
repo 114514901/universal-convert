@@ -818,6 +818,18 @@
   <data name="CodecCopy" xml:space="preserve">
     <value>复制流（不重编码）</value>
   </data>
+  <data name="ParamMetadataMode" xml:space="preserve">
+    <value>元数据清除</value>
+  </data>
+  <data name="MetadataKeep" xml:space="preserve">
+    <value>保留（默认）</value>
+  </data>
+  <data name="MetadataTags" xml:space="preserve">
+    <value>清除标签，保留封面</value>
+  </data>
+  <data name="MetadataAll" xml:space="preserve">
+    <value>清除标签与封面</value>
+  </data>
   <data name="ParamNoCoverArt" xml:space="preserve">
     <value>不转换封面</value>
   </data>

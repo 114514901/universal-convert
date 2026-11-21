@@ -93,6 +93,9 @@ namespace UniversalConvert.Plugin.FFmpeg
 
             var outExt = request.OutputExtension ?? string.Empty;
             if (!outExt.StartsWith(".")) outExt = "." + outExt;
+            var metadataMode = MetadataPolicy.Resolve(request.Options);
+            var dropCover = MetadataPolicy.ShouldDropCover(metadataMode)
+                || MetadataPolicy.HasLegacyNoCoverArt(request.Options);
 
             if (ImageOutputs.Contains(outExt))
             {
@@ -108,7 +111,7 @@ namespace UniversalConvert.Plugin.FFmpeg
                 // 音频输出：目标容器支持封面（attached pic）时保留封面（mjpeg 原样 copy），
                 // 否则丢弃视频流（封面会被当成普通视频流转码进不支持的容器导致失败，如 mp3→m4a）。
                 // 用户勾选「不转换封面」时强制丢弃视频流/封面。
-                if (TryGetBool(request.Options, "noCoverArt"))
+                if (dropCover)
                 {
                     sb.Append(" -vn");
                 }
@@ -124,6 +127,13 @@ namespace UniversalConvert.Plugin.FFmpeg
             else
             {
                 sb.Append(" -map 0");
+            }
+
+            // 清除文本标签（含厂商 TXXX 等），不影响已映射的封面流。
+            // all 级别额外通过 -vn 丢弃封面，见上方 audio 分支。
+            if (MetadataPolicy.ShouldStripTags(metadataMode))
+            {
+                sb.Append(" -map_metadata -1");
             }
 
             string value;
@@ -334,6 +344,14 @@ namespace UniversalConvert.Plugin.FFmpeg
             };
         }
 
+        /// <summary>兼容旧配置的隐藏布尔项；新界面统一使用 metadataMode。</summary>
+        private static OptionDefinition HiddenBoolOption(string key, string label)
+        {
+            var option = BoolOption(key, label);
+            option.Hidden = true;
+            return option;
+        }
+
         private static OptionChoice Choice(string value, string label)
         {
             return new OptionChoice { Value = value, Label = label };
@@ -479,7 +497,11 @@ namespace UniversalConvert.Plugin.FFmpeg
                         Choice("flac", "FLAC"),
                         Choice("pcm_s16le", "WAV (pcm_s16le)"),
                         Choice("wmav2", "WMA (wmav2)")),
-                    BoolOption("noCoverArt", "@ParamNoCoverArt"),
+                    EnumOption("metadataMode", "@ParamMetadataMode", MetadataPolicy.KeepValue, null,
+                        Choice(MetadataPolicy.KeepValue, "@MetadataKeep"),
+                        Choice(MetadataPolicy.TagsValue, "@MetadataTags"),
+                        Choice(MetadataPolicy.AllValue, "@MetadataAll")),
+                    HiddenBoolOption("noCoverArt", "@ParamNoCoverArt"),
                     StringOption("extraArgs", "@ParamExtraArgs", "", null, true)
                 },
                 Presets = new List<ConversionPreset>

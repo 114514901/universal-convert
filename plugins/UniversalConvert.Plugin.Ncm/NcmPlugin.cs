@@ -153,7 +153,10 @@ namespace UniversalConvert.Plugin.Ncm
 
             var outputPath = ResolveOutputPath(request, targetExt);
             var sameFormat = string.Equals(originalFormat, targetExt, StringComparison.OrdinalIgnoreCase);
-            var wantCover = !IsOptionTrue(request.Options, "noCoverArt")
+            var metadataMode = MetadataPolicy.Resolve(request.Options);
+            var stripMetadata = MetadataPolicy.ShouldStripTags(metadataMode);
+            var wantCover = !MetadataPolicy.ShouldDropCover(metadataMode)
+                && !MetadataPolicy.HasLegacyNoCoverArt(request.Options)
                 && coverData != null && coverData.Length > 0
                 && SupportsCoverArt(targetExt);
 
@@ -165,9 +168,9 @@ namespace UniversalConvert.Plugin.Ncm
                     coverPath = WriteTempCover(coverData);
                 }
 
-                if (sameFormat && coverPath == null)
+                if (sameFormat && coverPath == null && !stripMetadata)
                 {
-                    // 目标就是原格式且不带封面：直接拷贝（最快且无损）
+                    // 目标就是原格式、不带封面且无需清除元数据：直接拷贝（最快且无损）
                     progress?.Report(new ConversionProgress(ConversionStage.Finalizing, 100, "写入输出..."));
                     File.Copy(tempPath, outputPath, true);
                     return outputPath;
@@ -177,18 +180,22 @@ namespace UniversalConvert.Plugin.Ncm
                 var ffmpeg = _context?.FindTool("ffmpeg");
                 if (string.IsNullOrEmpty(ffmpeg))
                 {
-                    if (sameFormat)
+                    if (sameFormat && !stripMetadata)
                     {
-                        // 同格式但缺 FFmpeg：退化为直接拷贝（丢封面）
+                        // 同格式且无需清理元数据但缺 FFmpeg：退化为直接拷贝（丢封面）
                         progress?.Report(new ConversionProgress(ConversionStage.Finalizing, 100, "写入输出（未能附加封面）..."));
                         File.Copy(tempPath, outputPath, true);
                         return outputPath;
                     }
-                    throw new InvalidOperationException("转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
+                    throw new InvalidOperationException(
+                        stripMetadata
+                            ? "清除元数据需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。"
+                            : "转码需要 FFmpeg，但未找到。请安装 FFmpeg 或将其放入 tools 目录。");
                 }
 
                 progress?.Report(new ConversionProgress(ConversionStage.Running, -1, sameFormat ? "写入输出..." : "转码中..."));
-                var run = ProcessRunner.Run(ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options, coverPath, sameFormat), ct);
+                var run = ProcessRunner.Run(
+                    ffmpeg, BuildFfmpegArgs(tempPath, outputPath, request.Options, coverPath, sameFormat, metadataMode), ct);
 
                 if (run.ExitCode != 0)
                 {
@@ -308,7 +315,7 @@ namespace UniversalConvert.Plugin.Ncm
         }
 
         private static string BuildFfmpegArgs(string input, string output, IDictionary<string, string> options,
-            string coverPath, bool copyAudio)
+            string coverPath, bool copyAudio, MetadataMode metadataMode)
         {
             var sb = new StringBuilder();
             sb.Append("-y -hide_banner -loglevel error -i ").Append(ProcessRunner.Quote(input));
@@ -324,6 +331,12 @@ namespace UniversalConvert.Plugin.Ncm
             else
             {
                 sb.Append(" -vn");
+            }
+
+            if (metadataMode == MetadataMode.Tags || metadataMode == MetadataMode.All)
+            {
+                // 清除全局标签（含厂商 TXXX）；封面流已在上方按级别决定是否映射。
+                sb.Append(" -map_metadata -1");
             }
 
             if (copyAudio)
@@ -400,7 +413,7 @@ namespace UniversalConvert.Plugin.Ncm
             var outPath = audioPath + ".cov." + format.TrimStart('.');
             try
             {
-                var args = BuildFfmpegArgs(audioPath, outPath, null, coverPath, copyAudio: true);
+                var args = BuildFfmpegArgs(audioPath, outPath, null, coverPath, copyAudio: true, MetadataMode.Keep);
                 var run = ProcessRunner.Run(ffmpeg, args, CancellationToken.None);
                 if (run.ExitCode == 0 && File.Exists(outPath)) return outPath;
                 TryDelete(outPath);
@@ -506,7 +519,11 @@ namespace UniversalConvert.Plugin.Ncm
                         Choice("48000", "48000 Hz"),
                         Choice("88200", "88200 Hz"),
                         Choice("96000", "96000 Hz")).AsSampleRate(),
-                    BoolOption("noCoverArt", "不转换封面")
+                    EnumOption("metadataMode", "@ParamMetadataMode", MetadataPolicy.KeepValue,
+                        Choice(MetadataPolicy.KeepValue, "@MetadataKeep"),
+                        Choice(MetadataPolicy.TagsValue, "@MetadataTags"),
+                        Choice(MetadataPolicy.AllValue, "@MetadataAll")),
+                    HiddenBoolOption("noCoverArt", "@ParamNoCoverArt")
                 },
                 Presets = new List<ConversionPreset>
                 {
@@ -527,6 +544,13 @@ namespace UniversalConvert.Plugin.Ncm
                 DefaultValue = defaultValue,
                 Choices = choices.ToList()
             };
+        }
+
+        private static OptionDefinition HiddenBoolOption(string key, string label)
+        {
+            var option = BoolOption(key, label);
+            option.Hidden = true;
+            return option;
         }
 
         private static OptionDefinition BoolOption(string key, string label, bool defaultValue = false)

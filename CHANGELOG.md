@@ -2,6 +2,20 @@
 
 本项目遵循 [语义化版本 SemVer](https://semver.org/lang/zh-CN/)。所有值得注意的变更记录于此。
 
+## [2.9.0-dev.7] - 2026-11-21
+
+### 新增 / Added
+- **音频元数据清除级别**：FFmpeg、NCM 解密、QMC 解密的音频输出新增 `metadataMode`：`keep` 保留（默认）、`tags` 清除文本标签但保留封面、`all` 清除标签与封面；参数同时出现在 GUI 动态选项和命令行 `--option metadataMode=...`
+  - **Audio metadata removal levels**: FFmpeg, NCM, and QMC audio outputs now expose `metadataMode`: `keep` (default), `tags` (strip text tags, keep cover), and `all` (strip tags and cover). The option appears in the GUI form and CLI `--option metadataMode=...`
+- **封面保护**：`tags` 级别只清除全局文本标签（含厂商 TXXX 等），保留 attached picture；`all` 才丢弃封面。旧版 `noCoverArt` 保留为隐藏兼容项，语义仍是“只丢弃封面”
+  - **Cover protection**: `tags` removes global text tags (including vendor TXXX fields) while keeping attached pictures; only `all` drops the cover. Legacy `noCoverArt` remains as a hidden compatibility option with its original “drop cover only” meaning
+- **NCM/QMC 同格式路径**：清除元数据时不再走直接文件复制，改为 FFmpeg 重新封装（音频流不重编码），确保同格式输出也能清除标签
+  - **NCM/QMC same-format path**: when metadata removal is requested, the plugins no longer copy the decrypted file directly; they remux with FFmpeg (audio stream copy) so same-format output is cleaned too
+
+### 测试 / Tests
+- 回归测试由 48 项增加到 53 项，新增元数据级别解析、旧 `noCoverArt` 兼容与 FFmpeg 参数映射测试；本地实测 `keep` 保留标签/封面、`tags` 清标签留封面、`all` 清标签丢封面
+  - Regression tests increased from 48 to 53, adding metadata mode parsing, legacy `noCoverArt` compatibility, and FFmpeg argument mapping tests. Local end-to-end checks confirmed `keep` preserves tags and cover, `tags` strips tags and keeps the cover, and `all` strips both
+
 ## [2.9.0-dev.6] - 2026-10-18
 
 ### 新增 / Added
