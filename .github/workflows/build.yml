@@ -43,8 +43,8 @@ jobs:
           $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
           $dir = Join-Path $env:RUNNER_TEMP "ffmpeg"
           # 固定到可复现的 autobuild 版本，并校验 SHA256；升级 FFmpeg 时需同步更新以下三项。
-          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-16-13-04/ffmpeg-N-127579-g5cb9fcd211-win64-gpl.zip"
-          $ffmpegSha256 = "b7c94a054ae4c1cce0e11ae18979d932e6f129ba6f5253b328227b31f1bf2bbf"
+          $ffmpegUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-11-20-12-40/ffmpeg-N-129150-g7ddf7bc8a4-win64-gpl.zip"
+          $ffmpegSha256 = "03d33066832e7149a8577bed73713c5d5344aed14199063e521b798cf1b60076"
           Invoke-WebRequest -Uri $ffmpegUrl -OutFile $zip
           $actualSha256 = (Get-FileHash -Algorithm SHA256 -Path $zip).Hash.ToLowerInvariant()
           if ($actualSha256 -ne $ffmpegSha256) {
